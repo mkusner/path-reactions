@@ -1,0 +1,38 @@
+\begin{wrapfigure}{R}{0.5\textwidth}
+\begin{minipage}{0.5\textwidth}
+\begin{algorithm}[H]
+  \caption{Mapping to valid paths.}
+  {\bf Input:}~~Predicted path $\hat{\Pc} = [\hat{a}_0, \hat{a}_1, \ldots, \hat{a}_{T-1}]$\\
+  {\bf Input:}~~Molecule $\Mc_0$, remove flag $\texttt{F}_\textrm{remove} \!=\!1$
+  
+  \begin{algorithmic}[1]
+  	\STATE Sample initial atom $\hat{a}_0 \sim p(a_0 \mid \Mc_0)$.
+    \STATE $\hat{\Pc} = [\hat{a}_0]$%\ab^*_0]$
+  	%\FORALL{atoms $\ab$ in molecule $\Mc_1$}
+    %	\STATE 
+    	%\STATE $i^* = \arg\min_{i \in \{1,\ldots,n\}} 
+    %\ENDFOR
+    \FORALL{$t$ from $1$ to $T-1$}
+    	%\STATE Select predicted path $\hat{pb}_t$
+    	\IF{$\texttt{F}_\textrm{remove} = 1$}
+    		\STATE Sample atom $a \sim p(a_t \mid \hat{a}_{0:t-1}, \Mc_0)$% (or null action $\mathbf{0}$ if $t \neq T-1$) to $\hat{\ab}_t$, such that the bond $(\ab^*_{t-1}, \ab^*_{t})$ \emph{exists} in $\Mc_t$.
+            \IF{$a$ is not `null'}
+            	\STATE $\texttt{F}_\textrm{remove} = 0$
+            \ENDIF
+            \STATE Set $\Mc_t$ to molecule $\Mc_{t-1}$ but with bond $(\hat{a}_{t-1}, a)$ removed.
+        \ELSE
+        	\STATE Sample atom $a \sim p(a_t \mid \hat{a}_{0:t-1}, \Mc_0)$
+            \IF{$a$ is not `null'}
+            	\STATE $\texttt{F}_\textrm{remove} = 1$
+            \ENDIF
+            \STATE Set $\Mc_t$ to molecule $\Mc_{t-1}$ but with bond $(\hat{a}_{t-1}, a)$ added.
+   		\ENDIF
+        \STATE Set $\hat{a}_t = a$
+        \STATE $\hat{\Pc} = [\hat{\Pc}, \hat{a}_t]$
+    \ENDFOR
+  \end{algorithmic}
+  {\bf Output:}~~Valid path~$\hat{\Pc}$
+  \label{algo:valid_path}
+\end{algorithm}
+\end{minipage}
+\end{wrapfigure}

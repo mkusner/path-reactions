@@ -1,0 +1,62 @@
+
+\section{Model}
+In this section we describe the structure of our model, that can, given an initial set of reactant molecules $\moleculeSet_0$, and a set of reagent molecules $\moleculeSet_r$, produce a path of electron movements: $\electronPath = (a_0, a_1, \ldots, a_{T})$. This path of electron movements via a known deterministic function, yields a sequence of sets of intermediate and final products $\Mc_1, \Mc_2, \ldots, \Mc_T$. 
+
+We propose to learn a parameterized distribution over electron movements: $p_\theta( \electronPath \mid \moleculeSet_0, \moleculeSet_r)$. We begin by describing the generative process (i.e., the forward pass) of $p_\theta$ and then describe how to train it.
+
+% Because we do not know the true path $\Pc$, we can only receive a learning signal from the final predicted product molecules $\hat{\Mc}_T$ (compared to the true final molecules $\Mc_T$. This final predicted product is a deterministic (known) function $f$ of the initial molecules $\Mc_0$ and predicted actions $\hat{\Pc}$ (from $g$), as such $f(\Mc_0, \hat{\Pc}) = \hat{\Mc}_2, \ldots, \hat{\Mc}_T$.
+
+% Ideally, we would like to learn the parameters of $g$, called $\theta$, to minimize the difference between the predicted final molecules $\hat{\Mc}_T$ and $\Mc_T$ (i.e., via some loss function $\ell$). However, we cannot resort to gradient-based techniques to learn $g$ because the inputs and outputs of $g$ are discrete objects, and the function $f$ producing $\hat{\Mc}_T$ is also discrete so the gradient $\frac{\partial \ell(\hat{\Mc}_T,\Mc_T)}{\partial \theta}$ does not exist. To solve this, we propose two types of models for this problem.
+
+
+
+
+
+\subsection{Generative process}
+We factorize the distribution as follows:
+\begin{align}
+p_\theta(\electronPath \mid \moleculeSet_0) = p_\theta(s_{0}' \mid \moleculeSet_0) p_\theta(a_{0} \mid \moleculeSet_0) \prod_{t=1}^{T} \left( p_\theta(a_{t} \mid a_{t-1}, \Mc_{t-1} ) p_\theta(s_{0}' \mid \moleculeSet_0) \right) \nonumber
+\end{align}
+Note that we could not have factorized the above distribution via a Markov assumption as each individual path step $a_t$ depends not only on the previous path step $a_{t-1}$ and the previous molecule set $\Mc_{t-1}$, but also on the molecule set before this $\Mc_{t-2}$. This is because, as electron paths alternately break and form bonds we need to know whether the previous path step broke or removed bonds. As such, for generality, we condition the current path choice on all previous path choices.
+
+As described in the previous section, if the three reaction assumptions above hold, then there are two types of electron movements that alternate: 1. movement that \emph{removes an existing bond}, and 2. movement that \emph{adds a new bond}. We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and alternately adding and removing bonds. %Figure~\ref{fig:example}(a) shows a reaction that starts from a bond between two different atoms and Figure~\ref{fig:example}(b) shows one starting from a bond between an atom and itself (i.e., an electron lone-pair). 
+
+We parameterize remove-bond, add-bond, and start-atom steps in a similar way. Specifically, the functional form of a remove-bond step is described by the following equations:
+\begin{align}
+\Hb_{\Ac} \;&= f_{\Ac}(\Mc_t) \label{eq:rem_atom} \\
+%\Hb_{\Bc} \;&= f_{\Bc}(\Mc_t, \Hb_{\Ac}) \label{eq:rem_bond} \\
+p(a_t \mid a_{0:t-1}, \Mc_0) \;&= \mbox{softmax}(f_{\textrm{remove}}(\Hb_{\Ac}), a_{t-1}). \label{eq:rem_prob}  % HERERERE: think about if we allow bonds to go backwards (we could say it is very unlikely!)
+\end{align}
+Recall that $\Mc_t$ is a deterministic function of $\Mc_0$ and $a_{0:t-1}$.
+Function $f_{\Ac}$ in eq.~\eqref{eq:rem_atom} takes a molecular graph and outputs a set of $d$-dimensional atom features $\Hb_{\Ac} \subseteq \mathcal{R}^{d \times |\Ac|}$ for each atom. In general $f_{\Ac}$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural}.
+%In eq.~\eqref{eq:rem_bond}, $f_{\Bc}$ maps atom features $\Hb_{\Ac}$ to bond features $\Hb_{\Bc} \subseteq \mathcal{R}^{r \times (|\Ac|+1)|\Ac|/2}$, which could be as simple as a weighted-inner product or more flexible model such as a deep network. 
+In eq.~\eqref{eq:rem_prob}, $f_{\textrm{remove}}$ followed by a $\mbox{softmax}$ function maps atom features $\Hb_{\Ac}$ to probabilities (which include a `null' stop action probability). The previous action $a_{t-1}$ (if it exists) is used to mask the resulting probabilities as follows:
+\begin{align}
+p(a \mid a_{0:t-1}, \Mc_0) \propto 
+\begin{cases}
+\mbox{softmax}(f_{\textrm{remove}}(\Hb_{\Ac})) & \mbox{if bond } (a_{t-1},a) \mbox{ exists in } \Mc_t \\
+0 & \mbox{otherwise}. \nonumber
+\end{cases}
+\end{align}
+For an add-bond step, we again use eq.~\eqref{eq:rem_atom} to obtain atom features $\Hb_{\Ac}$ and use a different function $f_{\textrm{add}}$ to produce add bond probabilities as follows: $p(a_t \mid a_{0:t-1}, \Mc_0) = \mbox{softmax}(f_{\textrm{add}}(\Hb_{\Ac}), a_{t-1})$
+% \begin{align}
+% \Hb_{\Ac} \;&= f_{\Ac}(\Mc_t) \label{eq:add_atom}  \\
+% p(a_t \mid a_{0:t-1}, \Mc_0) \;&= \mbox{softmax}(f_{\textrm{add}}(\Hb_{\Ac}, a_{t-1})). \label{eq:add_prob}
+% \end{align}
+%The primary difference here is instead of a distribution over existing bonds, the distribution in eq.~\eqref{eq:add_prob} is over all possible atoms $\Ac$ (and a `null' action), as a bond may possibly form between any two atoms. 
+Again we use the previous action $a_{t-1}$ to mask probabilities (here we only mask out the probability of adding a self-bond to the current atom).
+
+Finally, in order to select the starting atom of a path we propose to model the initial probability as follows: $p(a_{0} \mid \Mc_0) = \mbox{softmax}(f_{\textrm{start}}(\Hb_{\Ac}))$.
+
+\subsection{Training}
+We can learn the parameters of $f_{\Ac},f_{\textrm{remove}},f_{\textrm{add}},f_{\textrm{start}}$, by minimizing the negative log-likelihood of the true path:
+\begin{align}
+\min_{f_{\Ac},f_{\textrm{remove}},f_{\textrm{add}},f_{\textrm{start}}} - \log p(a_0 \mid \Mc_0) - \sum_{t=1}^{T-1} \log p(a_t^* \mid a_{0:t-1}^*, \Mc_0) \nonumber
+\end{align}
+where $a_t^*,a_{0:t-1}^*$ are the true electron actions and the loss above describes the log probability given by the model to these true actions.
+
+\subsection{Sampling}
+Once trained we can sample chemically-valid paths via Algorithm~\ref{algo:valid_path}. 
+
+
+\input{tex/algorithm.tex}
