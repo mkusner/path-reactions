@@ -1,8 +1,8 @@
 
 \section{Model}
-In this section we describe the structure of our model, that can, given an initial set of reactant molecules $\moleculeSet_0$, and a set of reagent molecules $\moleculeSet_r$, produce a path of electron movements: $\electronPath = (a_0, a_1, \ldots, a_{T})$. This path of electron movements via a known deterministic function, yields a sequence of sets of intermediate and final products $\Mc_1, \Mc_2, \ldots, \Mc_T$. 
+In this section we describe the structure of our model, that can, given an initial set of reactant molecules $\moleculeSet_0$, and a set of reagent molecules $\moleculeSet_r$, produce a path of electron movements: $\electronPath_{0:T} = (a_0, a_1, \ldots, a_{T})$. This path of electron movements via a known deterministic function, yields a sequence of sets of intermediate and final products. We denote the sets of molecules create by an action sequence $\electronPath_{0:t} = (a_0, a_1 \ldots, a_{t})$ as $\moleculeSet_{\electronPath_{0:t}}$. 
 
-We propose to learn a parameterized distribution over electron movements: $p_\theta( \electronPath \mid \moleculeSet_0, \moleculeSet_r)$. We begin by describing the generative process (i.e., the forward pass) of $p_\theta$ and then describe how to train it.
+We propose to learn a parameterized distribution over electron movements: $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$. We begin by describing the generative process (i.e., the forward pass) of $p_\theta$ and then describe how to train it.
 
 % Because we do not know the true path $\Pc$, we can only receive a learning signal from the final predicted product molecules $\hat{\Mc}_T$ (compared to the true final molecules $\Mc_T$. This final predicted product is a deterministic (known) function $f$ of the initial molecules $\Mc_0$ and predicted actions $\hat{\Pc}$ (from $g$), as such $f(\Mc_0, \hat{\Pc}) = \hat{\Mc}_2, \ldots, \hat{\Mc}_T$.
 
@@ -13,31 +13,65 @@ We propose to learn a parameterized distribution over electron movements: $p_\th
 
 
 \subsection{Generative process}
-We factorize the distribution as follows:
-\begin{align}
-p_\theta(\electronPath \mid \moleculeSet_0) = p_\theta(s_{0}' \mid \moleculeSet_0) p_\theta(a_{0} \mid \moleculeSet_0) \prod_{t=1}^{T} \left( p_\theta(a_{t} \mid a_{t-1}, \Mc_{t-1} ) p_\theta(s_{0}' \mid \moleculeSet_0) \right) \nonumber
-\end{align}
-Note that we could not have factorized the above distribution via a Markov assumption as each individual path step $a_t$ depends not only on the previous path step $a_{t-1}$ and the previous molecule set $\Mc_{t-1}$, but also on the molecule set before this $\Mc_{t-2}$. This is because, as electron paths alternately break and form bonds we need to know whether the previous path step broke or removed bonds. As such, for generality, we condition the current path choice on all previous path choices.
+The distribution over electron paths can be factorized as follows:
+%\begin{align}
+%p_\theta(\electronPath \mid \moleculeSet_0) = p_\theta(s_{0}' \mid \moleculeSet_0) p_\theta(a_{0} \mid \moleculeSet_0) \prod_{t=1}^{T-1} \left( p_\theta(a_{t} \mid a_{t-1}, \Mc_{t-1} ) p_\theta(s_{0}' \mid \moleculeSet_0) \right) p_\theta(a_{T} \mid a_{T}, \Mc_{T-1} ) p_\theta(s_{T} \mid \moleculeSet_T) \nonumber
+%\end{align}
 
-As described in the previous section, if the three reaction assumptions above hold, then there are two types of electron movements that alternate: 1. movement that \emph{removes an existing bond}, and 2. movement that \emph{adds a new bond}. We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and alternately adding and removing bonds. %Figure~\ref{fig:example}(a) shows a reaction that starts from a bond between two different atoms and Figure~\ref{fig:example}(b) shows one starting from a bond between an atom and itself (i.e., an electron lone-pair). 
+\begin{align*}
+p(\electronPath_{0:T} \mid \initialAndReactants) = &
+ \quad 
+ p(s_0' \mid \initialAndReactants)
+ p(a_0 \mid \initialAndReactants)
+ \prod_{t=1}^{T} \Big[ 
+ 	p(s_t' \mid \initialAndReactants, \electronPath_{0:t-1})
+ 	p(a_t \mid \initialAndReactants, \electronPath_{0:t-1} ) 
+ \Big] \\
+ & \times p(s_{T+1} \mid  \initialAndReactants, \electronPath_{0:T} )
+\end{align*}
 
-We parameterize remove-bond, add-bond, and start-atom steps in a similar way. Specifically, the functional form of a remove-bond step is described by the following equations:
+\improvement[]{this part a bit messy}
+Where $p(s_{t})$ is the probability of stopping the path before picking the $t^{\text{th}}$ action, $p(s_{t}')$ of continuing.
+In practice we assume that the probability of an action depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
+We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to our parameterized model:
+
+\begin{align*}
+p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) = &
+ \quad p(s_0' \mid \moleculeSet_0) 
+       p(a_0 \mid \moleculeSet_0, \moleculeSet_r)
+       p(a_1 \mid \moleculeSet_0, a_0) \\
+       & \times \prod_{t=2}^{T} \Big[
+              p(s_t' \mid \moleculeSet_{\electronPath_{0:t-1}}) 
+               p(a_t \mid \moleculeSet_{\electronPath_{0:t-1}}, a_{t-1}, t)
+       \Big] \\
+       & \times p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}})
+\end{align*}
+
+Note that you cannot stop after one action, as you have to pick up a complete electron pair.
+As described in the previous section, if the three reaction assumptions above hold, then there are two types of electron movements that alternate: 1. movement that \emph{removes an existing bond}, and 2. movement that \emph{adds a new bond}. We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bonds. 
+
+\unsure[]{This part is not quite right. We currently have a f second, although Im training models that no longer have this}
+We parameterize remove-bond, add-bond, and start-atom steps in similar ways. Specifically, the functional form of a remove-bond step is described by the following equations:
 \begin{align}
-\Hb_{\Ac} \;&= f_{\Ac}(\Mc_t) \label{eq:rem_atom} \\
+\Hb_{\Ac} \;&= f_{\Ac}(\moleculeSet_{\electronPath_{0:t-1}}) \label{eq:rem_atom} \\
 %\Hb_{\Bc} \;&= f_{\Bc}(\Mc_t, \Hb_{\Ac}) \label{eq:rem_bond} \\
-p(a_t \mid a_{0:t-1}, \Mc_0) \;&= \mbox{softmax}(f_{\textrm{remove}}(\Hb_{\Ac}), a_{t-1}). \label{eq:rem_prob}  % HERERERE: think about if we allow bonds to go backwards (we could say it is very unlikely!)
-\end{align}
+p(a_t \mid \moleculeSet_{\electronPath_{0:t-1}}, a_{t-1}) \;&= \mbox{softmax}(f_{\textrm{remove}}(\Hb_{\Ac}, a_{t-1})). \label{eq:rem_prob}\end{align}
 Recall that $\Mc_t$ is a deterministic function of $\Mc_0$ and $a_{0:t-1}$.
-Function $f_{\Ac}$ in eq.~\eqref{eq:rem_atom} takes a molecular graph and outputs a set of $d$-dimensional atom features $\Hb_{\Ac} \subseteq \mathcal{R}^{d \times |\Ac|}$ for each atom. In general $f_{\Ac}$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural}.
-%In eq.~\eqref{eq:rem_bond}, $f_{\Bc}$ maps atom features $\Hb_{\Ac}$ to bond features $\Hb_{\Bc} \subseteq \mathcal{R}^{r \times (|\Ac|+1)|\Ac|/2}$, which could be as simple as a weighted-inner product or more flexible model such as a deep network. 
-In eq.~\eqref{eq:rem_prob}, $f_{\textrm{remove}}$ followed by a $\mbox{softmax}$ function maps atom features $\Hb_{\Ac}$ to probabilities (which include a `null' stop action probability). The previous action $a_{t-1}$ (if it exists) is used to mask the resulting probabilities as follows:
+
+Function $f_{\Ac}$ in eq.~\eqref{eq:rem_atom} takes a molecular graph and for each atom outputs a set of $d$-dimensional atom features, so that $\Hb_{\Ac} \subseteq \mathcal{R}^{|\Ac| \times d}$. 
+In general $f_{\Ac}$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural}. We choose to use Gated Graph Neural Network message functions \citep{li2016gated}.
+In eq.~\eqref{eq:rem_prob}, $f_{\textrm{remove}}$ followed by a $\mbox{softmax}$ function maps atom features $\Hb_{\Ac}$ and the previous action, $a_{t-1}$, to probabilities. The previous action, $a_{t-1}$, is also used to mask the resulting probabilities as follows:\improvement[]{Maybe confusing having this and also the eqn 2. above. Maybe should merge.}
+
 \begin{align}
-p(a \mid a_{0:t-1}, \Mc_0) \propto 
+p(a \mid \moleculeSet_{\electronPath_{0:t-1}}, a_{t-1})) \propto 
 \begin{cases}
-\mbox{softmax}(f_{\textrm{remove}}(\Hb_{\Ac})) & \mbox{if bond } (a_{t-1},a) \mbox{ exists in } \Mc_t \\
+\mbox{softmax}(f_{\textrm{remove}}(\Hb_{\Ac})) & \mbox{if bond } (a_{t-1},a) \mbox{ exists in } \moleculeSet_{\electronPath_{0:t-1}} \\
 0 & \mbox{otherwise}. \nonumber
 \end{cases}
 \end{align}
+When removing the initial bond we also allow the removal of self bonds.
+
+\improvement[]{add time indexing to the node features}
 For an add-bond step, we again use eq.~\eqref{eq:rem_atom} to obtain atom features $\Hb_{\Ac}$ and use a different function $f_{\textrm{add}}$ to produce add bond probabilities as follows: $p(a_t \mid a_{0:t-1}, \Mc_0) = \mbox{softmax}(f_{\textrm{add}}(\Hb_{\Ac}), a_{t-1})$
 % \begin{align}
 % \Hb_{\Ac} \;&= f_{\Ac}(\Mc_t) \label{eq:add_atom}  \\
@@ -46,14 +80,21 @@ For an add-bond step, we again use eq.~\eqref{eq:rem_atom} to obtain atom featur
 %The primary difference here is instead of a distribution over existing bonds, the distribution in eq.~\eqref{eq:add_prob} is over all possible atoms $\Ac$ (and a `null' action), as a bond may possibly form between any two atoms. 
 Again we use the previous action $a_{t-1}$ to mask probabilities (here we only mask out the probability of adding a self-bond to the current atom).
 
-Finally, in order to select the starting atom of a path we propose to model the initial probability as follows: $p(a_{0} \mid \Mc_0) = \mbox{softmax}(f_{\textrm{start}}(\Hb_{\Ac}))$.
+We calculate stop probabilities as 
+$p(s_t \mid \moleculeSet_{\electronPath_{0:t-1}} ) = \mbox{sigmoid}(\fStop(\Hb_{\Ac}))$.
+Here $\fStop$ is similar to the readout functions in \citet[eq. 4]{gilmer2017neural}. In particular,
+$\fStop(\Hb_{\Ac}) = k \left( \sum_{v \in \Ac} \left[ \mbox{sigmoid}(i(\Hb_{\Ac,v})) \cdot j(\Hb_{\Ac,v}) \right] \right)$.
+In which $i$, $j$ and $k$ are functions parameterized by neural networks, with $k$ projecting the graph down to one dimension \improvement[]{well actually just linear layers... Two things here 1. slightly different to Gilmer. 2. When doing reagents forget to mask out empty nodes when doing the sum, so they will have whatever biases the network learns...}.
+
+
+Finally, in order to select the starting atom of a path we propose to model the initial probability as follows: $p(a_0 \mid \moleculeSet_0, \moleculeSet_r) = \mbox{softmax}(f_{\textrm{start}}(\Hb_{\Ac}, \fReagEmbed(\moleculeSet_r)))$. There is no masking used for this step. Here $\fReagEmbed$ returns an embedding of the reagents. This is created by (i) computing node features for the reagents, using $f_{\Ac}$, (ii) calculating a graph embedding, by using a similar function to $\fStop$ but one which calculates multidimensional features. And then finally (iii) these features for each reagent are summed  to produce a final embedding so that we are invariant to the ordering of reagents.
 
 \subsection{Training}
-We can learn the parameters of $f_{\Ac},f_{\textrm{remove}},f_{\textrm{add}},f_{\textrm{start}}$, by minimizing the negative log-likelihood of the true path:
+We can learn the parameters of $\fModules$, by minimizing the negative log-likelihood of the true path:
 \begin{align}
 \min_{f_{\Ac},f_{\textrm{remove}},f_{\textrm{add}},f_{\textrm{start}}} - \log p(a_0 \mid \Mc_0) - \sum_{t=1}^{T-1} \log p(a_t^* \mid a_{0:t-1}^*, \Mc_0) \nonumber
 \end{align}
-where $a_t^*,a_{0:t-1}^*$ are the true electron actions and the loss above describes the log probability given by the model to these true actions.
+where $a_t^*,a_{0:t-1}^*$ are the true electron actions and the loss above describes the log probability given by the model to these true actions. We use teacher forcing \citet{williams1989learning} during training.
 
 \subsection{Sampling}
 Once trained we can sample chemically-valid paths via Algorithm~\ref{algo:valid_path}. 
