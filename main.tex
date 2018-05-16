@@ -52,6 +52,7 @@
 % For algorithms
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\renewcommand{\algorithmiccomment}[1]{~~~~\textcolor{gray}{$\triangleright$\textit{#1}}}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \makeatletter
@@ -118,6 +119,8 @@
 \newcommand{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
 \newcommand{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 
+% quick-and-dirty TKTKTK
+\newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
 
 
 \title{Predicting Electron Paths}
@@ -317,6 +320,16 @@ Note, that if we believe it requires less than $T$ steps to go from the reactant
 % - formalize variables
 % - wait a long time until writing objective
 % - wait even longer to write optimization
+
+\section{Experiments}
+
+% describe USPTO dataset and preprocessing
+\input{tex/dataset}
+
+% describe issues with evaluation
+\input{tex/evaluation}
+
+\section{Discussion}
 
 \bibliography{bibliography}
 \bibliographystyle{plainnat}

@@ -37,12 +37,12 @@ We further make the simplifying assumption that the stop probability and the act
 
 \begin{align*}
 p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) = &
- \quad p(s_0' \mid \moleculeSet_0) 
+ \quad \continueProb{0}{0}
        p(a_0 \mid \moleculeSet_0, \moleculeSet_r)
        p(a_1 \mid \moleculeSet_0, a_0) \\
        & \times \prod_{t=2}^{T} \Big[
-              p(s_t' \mid \moleculeSet_{\electronPath_{0:t-1}}) 
-               p(a_t \mid \moleculeSet_{\electronPath_{0:t-1}}, a_{t-1}, t)
+              \continueProb{t}{\electronPath_{0:t-1}}
+              \actionProb{t}
        \Big] \\
        & \times p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}})
 \end{align*}
@@ -89,15 +89,20 @@ In which $i$, $j$ and $k$ are functions parameterized by neural networks, with $
 
 Finally, in order to select the starting atom of a path we propose to model the initial probability as follows: $p(a_0 \mid \moleculeSet_0, \moleculeSet_r) = \mbox{softmax}(f_{\textrm{start}}(\Hb_{\Ac}, \fReagEmbed(\moleculeSet_r)))$. There is no masking used for this step. Here $\fReagEmbed$ returns an embedding of the reagents. This is created by (i) computing node features for the reagents, using $f_{\Ac}$, (ii) calculating a graph embedding, by using a similar function to $\fStop$ but one which calculates multidimensional features. And then finally (iii) these features for each reagent are summed  to produce a final embedding so that we are invariant to the ordering of reagents.
 
-\subsection{Training}
+\paragraph{Training}
 We can learn the parameters of $\fModules$, by minimizing the negative log-likelihood of the true path:
-\begin{align}
-\min_{f_{\Ac},f_{\textrm{remove}},f_{\textrm{add}},f_{\textrm{start}}} - \log p(a_0 \mid \Mc_0) - \sum_{t=1}^{T-1} \log p(a_t^* \mid a_{0:t-1}^*, \Mc_0) \nonumber
-\end{align}
-where $a_t^*,a_{0:t-1}^*$ are the true electron actions and the loss above describes the log probability given by the model to these true actions. We use teacher forcing \citet{williams1989learning} during training.
+\begin{align*}
+  \min_{\fModules}
+    & - \log \continueProb{0}{0} - \log p(a_0 \mid \moleculeSet_0, \moleculeSet_r)  - \log p(a_1 \mid \moleculeSet_0, a^*_0) \\
+	& - \sum_{t=2}^{T} \log \Big[ \continueProb{t}{\electronPath_{0:t-1}^*} \actionProb[*]{t} \Big] \\
+    & - \log p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}^*})
+\end{align*}
 
-\subsection{Sampling}
-Once trained we can sample chemically-valid paths via Algorithm~\ref{algo:valid_path}. 
+
+where $a_t^*$ and $\electronPath_{0:t-1}^*$ are the true electron actions or path of actions respectively so that we are using teacher forcing \citep{williams1989learning} during training. This allows us to train on all stages of the reaction at once.
+
+\paragraph{Sampling}
+Once trained we can sample chemically-valid paths from our model using beam search.  This is procedure is described in Algorithm~\ref{algo:valid_path}. 
 
 
 \input{tex/algorithm.tex}

@@ -1,0 +1,64 @@
+% !TEX root =  ../main.tex
+
+\subsection{Data and preprocessing}
+
+Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database\footnote{https://bitbucket.org/dan2097/patent-reaction-extraction/downloads/} \todo{not sure how to cite this}.
+We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits, 
+which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
+This data is in the form of reaction SMILES strings, a text-based format used for encoding the molecules present in the reaction.
+Before applying our method, we perform two data preprocessing tasks in order to extract a subset of data appropriate for training a model of electron movement during a reaction.
+
+\subsubsection{Reactant and reagent separation}
+
+Typically, reaction SMILES strings are split into three parts --- reactants, reagents, and products.
+The {\em reactant} molecules are those which are consumed during the course of the chemical reaction to form the {\em product}, 
+while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts),
+but do not explicitly take part in the reaction \todo{give an example here?} itself.
+Each non-hydrogen atom in the USPTO dataset is assigned an {\em atom map} number, an integer which serves as an unique identifier for the atom and allows us to match particular atoms in the reactants with atoms in the products.
+
+Unfortunately, the USPTO dataset as extracted does not differentiate between reagents and reactants.
+We elect to preprocess the entire USPTO dataset by separating out the reagents from the reactants using the process outlined in \citet{schwaller2017found}, where we classify as a reagent any molecule for which either 
+(i) none of its constituent atoms appear in the product, or 
+(ii) the molecule appears in the product SMILES completely unchanged from the pre-reaction SMILES.
+This allows us to properly model molecules which are included in the dataset but do not materially contribute to the reaction.
+
+\subsubsection{Identifying elementary heterolytic reactions}
+
+To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings.
+Furthermore, not every reaction in the USPTO dataset is an elementary heterolytic reaction; 
+such reactions (for example, multi-step reactions) will not have a single unique path through the atoms 
+which describes the movement of the electrons.
+
+Extracting the paths and filtering the dataset is a several-step process.
+The first step is to construct adjacency matrices for the reactants and for the product,
+and compare the number of bonds between each pair of atoms.
+To do this in a consistent way, we first read the SMILES string for the molecules in the reaction
+into the open-source chemoinformatics software RDKit.
+We then place the molecule in Kekule form, a process which makes explicit the location of single and double bonds in aromatic structures.
+Given the adjacency matrices $A_r$ for the reactants and $A_p$ for the products,
+where the entries denote the number of bonds,
+computing the difference $\Delta = A_p - A_r$ gives a matrix of all bond changes during the course of the reaction;
+positive entries denote new bonds that are formed, and negative entries denote bonds that break.
+If there are any entries in $\Delta$ which are not -1, 0, or +1, then the reaction is a multi-step reaction
+which contains more than one electron path, and we filter it out for training purposes.
+
+For the reactions that remain, we then extract an electron path from the difference matrix $\Delta$.
+Each path is defined as a sequence of pairs of atoms, alternating between add steps (+1) and remove steps (-1).
+%which can be extracted by  any atom that has a non-zero entry in its row 
+To correct for any issues that caused due to reactant and product molecules being kekulized in different ways,
+we first check if there is any through the graph which forms a cycle, 
+\todo{what's the deal with this and pericyclic reactions?}{}
+and set all entries in $\Delta$ corresponding to this cycle to 0.
+The remaining non-zero entries in $\Delta$ fully describe a unique path through the atoms,
+which we extract by starting at any atom which has exactly one non-zero entry in its row,
+and then following the adjacency matrix.
+To determine the direction of this path, we look at the change in the charge of the atoms
+between the products and the reactants:
+the atom at the end of the path will have a more negative charge in the product than in the reactants,
+and vice-versa. \todo{JOHN what do we actually do in the code here?}{}
+
+The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
+correspond to elementary heterolytic reactions.
+This comprises the majority of the dataset, containing 349,898 total reactions, of which 29,360 form the held-out test set.
+
+

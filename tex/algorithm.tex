@@ -1,38 +1,73 @@
-\begin{wrapfigure}{R}{0.5\textwidth}
-\begin{minipage}{0.5\textwidth}
+
+
+\newcommand{\cProbCont}{\texttt{calc\_prob\_continue}}
+\newcommand{\cProbAct}{\texttt{calc\_prob\_action}}
+\newcommand{\cProbInitial}{\texttt{calc\_prob\_initial}}
+\newcommand{\removeFlag}{F_\textrm{remove}}
+
+\newcommand{\outputPool}{\hat{\Pc}}
+\newcommand{\cPath}{\rho}
+\newcommand{\lProb}{p_{\textrm{path}}}
+
+
+%\begin{wrapfigure}{R}{0.5\textwidth}
+\begin{figure}
+\begin{minipage}{1.\textwidth}
 \begin{algorithm}[H]
-  \caption{Mapping to valid paths.}
-  {\bf Input:}~~Predicted path $\hat{\Pc} = [\hat{a}_0, \hat{a}_1, \ldots, \hat{a}_{T-1}]$\\
-  {\bf Input:}~~Molecule $\Mc_0$, remove flag $\texttt{F}_\textrm{remove} \!=\!1$
+  \caption{Sampling electron paths at predict time.}
+  {\bf Input:}~~Molecule $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_r$ , beam width $K$, time steps $T$
   
   \begin{algorithmic}[1]
-  	\STATE Sample initial atom $\hat{a}_0 \sim p(a_0 \mid \Mc_0)$.
-    \STATE $\hat{\Pc} = [\hat{a}_0]$%\ab^*_0]$
-  	%\FORALL{atoms $\ab$ in molecule $\Mc_1$}
-    %	\STATE 
-    	%\STATE $i^* = \arg\min_{i \in \{1,\ldots,n\}} 
-    %\ENDFOR
-    \FORALL{$t$ from $1$ to $T-1$}
-    	%\STATE Select predicted path $\hat{pb}_t$
-    	\IF{$\texttt{F}_\textrm{remove} = 1$}
-    		\STATE Sample atom $a \sim p(a_t \mid \hat{a}_{0:t-1}, \Mc_0)$% (or null action $\mathbf{0}$ if $t \neq T-1$) to $\hat{\ab}_t$, such that the bond $(\ab^*_{t-1}, \ab^*_{t})$ \emph{exists} in $\Mc_t$.
-            \IF{$a$ is not `null'}
-            	\STATE $\texttt{F}_\textrm{remove} = 0$
-            \ENDIF
-            \STATE Set $\Mc_t$ to molecule $\Mc_{t-1}$ but with bond $(\hat{a}_{t-1}, a)$ removed.
-        \ELSE
-        	\STATE Sample atom $a \sim p(a_t \mid \hat{a}_{0:t-1}, \Mc_0)$
-            \IF{$a$ is not `null'}
-            	\STATE $\texttt{F}_\textrm{remove} = 1$
-            \ENDIF
-            \STATE Set $\Mc_t$ to molecule $\Mc_{t-1}$ but with bond $(\hat{a}_{t-1}, a)$ added.
-   		\ENDIF
-        \STATE Set $\hat{a}_t = a$
-        \STATE $\hat{\Pc} = [\hat{\Pc}, \hat{a}_t]$
-    \ENDFOR
+  	% Set up pool of completed paths to sort later
+  	\STATE $\outputPool = \{\left( \emptyset, \log (1 - \cProbCont(\Mc_0)) \right) \}$  \COMMENT{This set will store all completed paths.}
+  	\STATE $\removeFlag \!=\!1$ \COMMENT{remove flag}
+  	
+  	% Pick the first action.\\
+  	\STATE
+	\STATE $\hat{\Bc} = \emptyset$.  \COMMENT{This set will store all possible open paths. Cleared at start of each timestep.}	
+	\FORALL{$v \in \Ac$} 
+		\STATE $ \cPath = (v)$
+		\STATE $ \lProb = \log \cProbCont(\Mc_0) + \log \cProbInitial(v, \moleculeSet_0, \moleculeSet_r)$
+		\STATE $\hat{\Bc} = \hat{\Bc} \cup \{\left(\cPath, \lProb \right)\}$
+	\ENDFOR
+	\STATE  $\Bc_{0} = \texttt{pick\_topK\_actions}(\hat{\Bc})$ \COMMENT{We filter down to the top K most promising actions.}
+	
+	% Then we evaluate the next stages.
+	\STATE
+	\FOR{t in (1, \ldots, T)}
+		\STATE $\hat{\Bc} = \emptyset $ 
+				
+		% We take all the previous top K open paths from the previous step...
+		\FORALL{$(\cPath, \lProb) \in \Bc_{t-1}$} 
+			
+			% We evaluate their stop probability at that point and add these stopped version to the completed pool.
+			\STATE $\Mc_\cPath = \texttt{calc\_intermediate\_mol}(\Mc_0, \cPath)$
+			\STATE $p_c = \cProbCont(\Mc_\cPath)$
+			\STATE $\hat{\Pc} = \hat{\Pc} \cup \{(\cPath, \lProb + \log (1 - p_c))\}$
+			
+			% We then see what would happen if we continued and picked another action.
+			\FORALL{$v \in \Ac$}
+				\STATE $\cPath' = \cPath^\frown (v)$ \COMMENT{New proposed path is concatenation of old path with new node.}
+
+				\STATE $v_{t-1} = $ last element of $\cPath$
+				\STATE $\hat{\Bc} = \hat{\Bc} \cup \{(\cPath' , \lProb + \log p_c + \log \cProbAct(v, \Mc_\cPath, v_{t-1}, \removeFlag) )\}$
+			\ENDFOR
+		\ENDFOR
+		
+		% We next prune down the search space for next iteration to our beam width.
+		\STATE  $\Bc_{t} = \texttt{pick\_topK\_actions}(\hat{\Bc})$ 
+		
+		% We indicate that the next step will be opposite step:
+		\STATE $\removeFlag = \removeFlag + 1 \mod 2$. \COMMENT{If on add step change to remove and vice versa.}
+	\ENDFOR
+	
+  % Finally we sort the pool and we are done
+  \STATE
+  \STATE $\outputPool = \texttt{sort\_on\_prob}(\outputPool)$
   \end{algorithmic}
-  {\bf Output:}~~Valid path~$\hat{\Pc}$
+  {\bf Output:}~~Valid paths and their respective probabilities, sorted by the latter, ~$\outputPool$
   \label{algo:valid_path}
 \end{algorithm}
 \end{minipage}
-\end{wrapfigure}
+%\end{wrapfigure}
+\end{figure}
