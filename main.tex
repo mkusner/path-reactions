@@ -118,6 +118,8 @@
 \newcommand{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
 \newcommand{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 
+% quick-and-dirty TKTKTK
+\newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
 
 
 \title{Predicting Electron Paths}
@@ -308,6 +310,20 @@ Note, that if we believe it requires less than $T$ steps to go from the reactant
 % - formalize variables
 % - wait a long time until writing objective
 % - wait even longer to write optimization
+
+\section{Experiments}
+
+\subsection{USPTO}
+
+todos:
+\begin{itemize}
+\item describe dataset
+\item describe reagent filtering?
+\end{itemize}
+
+\input{tex/evaluation}
+
+\section{Discussion}
 
 \bibliography{bibliography}
 \bibliographystyle{plainnat}
