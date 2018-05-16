@@ -1,13 +1,40 @@
 \begin{wrapfigure}{R}{0.5\textwidth}
-\begin{minipage}{0.5\textwidth}
+\begin{minipage}{1.\textwidth}
 \begin{algorithm}[H]
-  \caption{Mapping to valid paths.}
-  {\bf Input:}~~Predicted path $\hat{\Pc} = [\hat{a}_0, \hat{a}_1, \ldots, \hat{a}_{T-1}]$\\
-  {\bf Input:}~~Molecule $\Mc_0$, remove flag $\texttt{F}_\textrm{remove} \!=\!1$
+  \caption{Sampling electron paths at predict time.}
+  {\bf Input:}~~Molecule $\Mc_0$, reagents $\Mc_r$, remove flag $\texttt{F}_\textrm{remove} \!=\!1$, beam width $K$, time steps $T$
   
   \begin{algorithmic}[1]
-  	\STATE Sample initial atom $\hat{a}_0 \sim p(a_0 \mid \Mc_0)$.
-    \STATE $\hat{\Pc} = [\hat{a}_0]$%\ab^*_0]$
+  	% Set up pool of completed paths to sort later
+  	\STATE $\hat{\Pc} = \{(\emptyset, \log \continueProb{0}{0}) \}$  \COMMENT{This set will store all completed paths.}
+  	
+  	% Pick the first action.
+    \STATE Pick top $K$ most likely initial atoms, $\Ab_0$, when ranked by their initial probabilities, $p(a_0 \mid \moleculeSet_0, \moleculeSet_r))$.
+	\STATE $\Bc_0 = \emptyset$.  \COMMENT{This set will store all open paths that should be passed to next iteration.}
+	\FORALL{$v \in \Ab_0$} 
+		\STATE $\Bc_0 = \Bc_0 \cup \{((v), \log \continueProb{0}{0}) + p(v \mid \moleculeSet_0, \moleculeSet_r))\}$
+	\ENDFOR
+	
+	% Then we evaluate the next stages.
+	\FOR{t in (1, \ldots, T)}
+		\STATE $\hat{\Bc} = \emptyset $ \COMMENT{This set will store all open paths that we evaluate.}
+		
+		% We take all the previous top K open paths from the previous step...
+		\FORALL{$(\texttt{path}, \texttt{lprob} \in \Bc_{t-1}$} 
+			
+			% We evaluate their stop probability at that point and add these stopped version to the completed pool.
+			\STATE $\texttt{prob\_continue} = \continueProb{t}{\texttt{path}}$
+			\STATE $\hat{\Pc} = \hat{\Pc} \cup \{(\texttt{path}, \texttt{lprob} + \log (1 -  \texttt{prob\_continue}))\}$
+			
+			% We then see what would happen if we continued and picked another action.
+			\FORALL{$v \in \Ac$}
+				\STATE $\hat{\Bc} = \hat{\Bc} \cup \{( \texttt{path}^\frown (v), \texttt{lprob} + \log \texttt{prob\_continue} )\}$
+			\ENDFOR
+		\ENDFOR
+	\ENDFOR
+    
+    
+    %\ab^*_0]$
   	%\FORALL{atoms $\ab$ in molecule $\Mc_1$}
     %	\STATE 
     	%\STATE $i^* = \arg\min_{i \in \{1,\ldots,n\}} 
