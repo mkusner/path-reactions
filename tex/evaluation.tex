@@ -21,10 +21,9 @@ In our case, the top-5 accuracy for a particular reaction may include multiple d
 Identifying whether two product molecules are chemically the same is equivalent to solving a graph isomorphism over the atoms and bond types, comparing the output of our system to the product molecule.
 To perform this comparison, we consider an electron path as a sequence of edits performed on the reactants graph, apply these edits to define a product graph, 
 and then define a deterministic mapping from the edited graph to a canonical string representation.
-This is done by first Kekulizing the molecule, a process which makes explicit the location of single and double bonds in aromatic structures.
-We then apply the sequence of edits to the reactants graph,
-set explicit charges or hydrogen counts on the first and last atom in the electron path in order to satisfy valence constraints,
-and finally strip all atom map numbers from the graph.
+This is done by first Kekulizing the molecule, then applying the sequence of edits to the reactants graph,
+setting explicit charges or hydrogen counts on the first and last atom in the electron path in order to satisfy valence constraints.
+We then can strip all atom map numbers from the graph.
 If this graph corresponds to a valid product molecule, we can then use RDKit to express the molecule in a canonical SMILES string format;
 predicted electron paths which would yield chemically infeasible products are represented as an empty string.
 We can then evaluate whether a predicted electron path matches the ground truth electron path by a string comparison.
