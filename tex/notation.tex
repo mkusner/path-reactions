@@ -11,6 +11,7 @@
 \newcommand{\Mb}{{\mathbf{M}}}
 \newcommand{\Pb}{{\mathbf{P}}}
 \newcommand{\Hb}{{\mathbf{H}}}
+\newcommand{\Ab}{{\mathbf{A}}}
 \newcommand{\delb}{{\boldmath{\delta}}}
 
 
@@ -27,3 +28,5 @@
 \newcommand{\fStop}{f_{\textrm{stop}}}
 \newcommand{\fReagEmbed}{f_{\textrm{reagent}}}
 \newcommand{\fModules}{\fEmbed, \fAdd, \fRemove, \fInitial,\fStop, \fReagEmbed}
+\newcommand{\actionProb}[2][]{ p(a_{#2} \mid \moleculeSet_{\electronPath_{0:#2-1}^{#1}}, a^{#1}_{#2-1}, #2)}
+\newcommand{\continueProb}[2]{p(s_{#1}' \mid \moleculeSet_{#2}) }
