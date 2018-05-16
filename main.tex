@@ -171,9 +171,18 @@
 \maketitle
 
 \begin{abstract}
-The vast majority of elementary chemical reactions can be described as the movement of pairs of electrons through a set of reactant molecules. As such, reactions are often described using `arrow-pushing' diagrams which show this movement as a sequence of arrows. We propose to learn this sequence directly. Instead of predicting product molecules directly from reactant molecules in one-shot, learning a model of electron movement has the benefits of (a) being easy for chemists to interpret, (b) being able to incorporate the constraints of chemistry such as balanced atom counts each side , and (c) naturally encoding the sparsity of chemical reactions, which usually involve only a small number of atoms in the reactants.
+The vast majority of chemical reactions can be described as the movement of pairs of electrons through a set of reactant molecules. 
+As such, reactions are often described using `arrow-pushing' diagrams which show this movement as a sequence of arrows. We propose to learn this sequence directly. 
+Instead of predicting product molecules directly from reactant molecules in one-shot, learning a model of electron movement has the benefits of 
+(a) being easy for chemists to interpret, 
+(b) being able to incorporate the constraints of chemistry such as balanced atom counts each side, and 
+(c) naturally encoding the sparsity of chemical reactions, which usually involve only a small number of atoms in the reactants.
+Furthermore, we show that the model recovers basic knowledge of chemistry without being explicitly trained to do so.
 % also it means the sides balance
 \end{abstract}
+
+
+
 
 \section{Background}
 In this section we describe the types of reactions we consider in this paper, and how it relates to previous work on reaction prediction. We then describe recent related work on deep graph models that inspire our model in the following section.
