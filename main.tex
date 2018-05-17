@@ -174,17 +174,43 @@
 \maketitle
 
 \begin{abstract}
-The vast majority of elementary chemical reactions can be described as the movement of pairs of electrons through a set of reactant molecules. As such, reactions are often described using `arrow-pushing' diagrams which show this movement as a sequence of arrows. We propose to learn this sequence directly. Instead of predicting product molecules directly from reactant molecules in one-shot, learning a model of electron movement has the benefits of (a) being easy for chemists to interpret, (b) being able to incorporate the constraints of chemistry such as balanced atom counts each side , and (c) naturally encoding the sparsity of chemical reactions, which usually involve only a small number of atoms in the reactants.
+The vast majority of chemical reactions can be described as the movement of pairs of electrons through a set of reactant molecules. 
+As such, reactions are often described using `arrow-pushing' diagrams which show this movement as a sequence of arrows. We propose to learn these sequences directly from data.
+Instead of predicting product molecules directly from reactant molecules in one-shot, learning a model of electron movement has the benefits of 
+(a) being easy for chemists to interpret, 
+(b) being able to incorporate the constraints of chemistry such as balanced atom counts each side, and 
+(c) naturally encoding the sparsity of chemical reactions, which usually involve only a small number of atoms in the reactants.
+Furthermore, we show that the model recovers basic knowledge of chemistry without being explicitly trained so.
 % also it means the sides balance
 \end{abstract}
+
+\section{Introduction}
+
+The ability to reliably predict the outcome of chemical reactions is of tremendous importance for the well-being of humanity, a %BLABLA
+
+
+
+
+\paragraph{Related Work} Three main categories of approaches have been explored for reaction prediction. 
+1) In Quantum-mechanical simulations, the changes in electronic structure are calculated by approximately solving the Schrödinger equation, which due to the unfavourable scaling remains out of reach 2) Rule-based expert systems
+
+
+
+
+
 
 \section{Background}
 In this section we describe the types of reactions we consider in this paper, and how it relates to previous work on reaction prediction. We then describe recent related work on deep graph models that inspire our model in the following section.
 
 \paragraph{Chemical reactions.}
-Molecules consist of a set of atoms that are arranged into a structure by a set of bonds. As such, molecules can be depicted as a graph structure, where each node is an atom and each edge is a bond, as shown in Figure (note the convention that vertices which do not explicitly specify the atom name are assumed to be carbon C atoms). 
+Molecules consist of a set of atoms that are arranged into a structure by a set of bonds. 
+As such, molecules can be depicted as a graph structure, where each node is an atom and each edge is a bond, 
+as shown in Figure (note the convention that vertices which do not explicitly specify the atom name are assumed to be carbon C atoms). 
 
-In reality, the structure of a molecule is due to how electrons on each atom are interacting with each other. Each single bond represents the fact that two electrons are shared between the atoms that the bond connects\footnote{The vast majority of bonds in molecules are like this (so-called \emph{covalent} bonds), although our model also accommodates ionic bonds (in which one atom completely borrows the electrons of another atom and the atoms become charged ions.}.
+In reality, the structure of a molecule is due to how electrons on each atom are interacting with each other. 
+Each single bond represents the fact that two electrons are shared between the atoms that the bond connects\footnote{The vast majority of bonds in molecules are like this (so-called \emph{covalent} bonds), 
+although our model also accommodates ionic bonds 
+(in which one atom completely borrows the electrons of another atom and the atoms become charged ions.}.
 
 %Molecules are broken and built via reactions. 
 Just as electrons describe the current structure of molecules, they also describe how molecules react with other molecules to produce new ones. All chemical reactions involve the movement of electrons along paths of atoms in a set of reactant molecules. This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules.\footnote{This movement happens because it allows the set of molecules to move to a lower (and thus more favorable) energy state.} In this work, we will consider reactions that satisfy the following assumptions:
@@ -219,6 +245,7 @@ There are a number of benefits of predicting electron paths over predicting the 
 \item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where it goes wrong by comparing the steps of the path with the correct steps.
 \item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
 \item \textbf{Chemical constraints}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others.
+\item \textbf{Compositionality}: Learning to combine lower-level abstractions of chemistry potentially allows to generalize better.
 \end{itemize}
 
 
@@ -309,6 +336,8 @@ There are a number of benefits of predicting electron paths over predicting the 
 \input{tex/results}
 
 \section{Discussion}
+
+\input{tex/qualitative}
 
 \bibliography{bibliography}
 \bibliographystyle{plainnat}
