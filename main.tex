@@ -230,16 +230,6 @@ There are a number of benefits of predicting electron paths over predicting the 
 \item \textbf{Chemical constraints}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others.
 \end{itemize}
 
-\paragraph{Formal notation.}
-Below is the formal notation we will use to build a model that describes reactions as electron paths:
-\begin{itemize}
-\item A maximum number of path timesteps $T$.
-\item An initial set of reactant molecules $\Mc_0$, this is a set of molecular graphs with vertices called atoms $\Ac$ and edges called bonds $\Bc$. %We also assume we have a continuous representation of the set of molecules: $\mb_1$, of atoms $\ab$, and bonds $\bb$.
-\item A final set of product molecules $\Mc_T$. %, and its continuous representation: $\mb_T$. 
-Note, that if we believe it requires less than $T$ steps to go from the reactants to the products we assume we can perform a 'null' step in which the electrons do not move, thus the molecules do not change.
-\item A reaction is just a sequence of electron movements from atom to atom. Formally, we write an electron path as an ordering of single atoms $\Pc = (a_0, a_1, \ldots, a_{T-1})$. %, with continuous representation $\Pb = [\ab_1, \ldots, \ab_{T-1}]$.
-\end{itemize}
-
 
 \begin{figure*}
 \centering
@@ -328,6 +318,9 @@ Note, that if we believe it requires less than $T$ steps to go from the reactant
 
 % describe issues with evaluation
 \input{tex/evaluation}
+
+% put results here
+\input{tex/results}
 
 \section{Discussion}
 
