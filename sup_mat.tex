@@ -167,14 +167,12 @@
   %% \texttt{email} \\
 }
 
-\input{tex/notation}
 
 \begin{document}
 \maketitle
 
 
 \section{Example of symmetry affecting evaluation of electron path}
-
 In the main text we described the challenges of how to evaluate our model, as different electron paths can form the same products, for instance due to symmetry.
 Figure \ref{fig:symmetric-reaction-example} is an example of this.
 
@@ -199,7 +197,54 @@ Figure \ref{fig:symmetric-reaction-example} is an example of this.
 \end{figure*}
 
 
+\section{Model architecture details}
 
-	
+% these are functions parametrized by NNs: change commands here to match match notation in main paper.
+\newcommand{\Ac}{{\mathcal{A}}}
+\newcommand{\fEmbed}{f_{\Ac}}
+\newcommand{\fAdd}{f_{\textrm{add}}}
+\newcommand{\fRemove}{f_{\textrm{remove}}}
+\newcommand{\fInitial}{f_{\textrm{initial}}}
+\newcommand{\fStop}{f_{\textrm{stop}}}
+\newcommand{\fReagEmbed}{f_{\textrm{reagent}}}
+\newcommand{\fModules}{\fEmbed, \fAdd, \fRemove, \fInitial,\fStop, \fReagEmbed}
+
+In this section we provide further details of our model architecture and training regime not present in the main paper. 
+As mentioned in Section \highlight{REF HERE} of the main paper we have 6 functions, parametrized by NNs, for being able to generate sequences representing electron paths: $\fModules$. 
+
+The function $\fEmbed$ computes node embeddings . For this we use Gated Graph Neural Networks (GGNN) \citep{li2016gated, gilmer2017neural}.
+ We use 4 propagation steps. 
+ The atom features we feed in are detailed in Table \ref{table:atom-features}. These are calculated using RDKit. In total there are 101 features and we maintain this dimensionality in the hidden layers during the propagation steps of the GGNN. Three edge labels are defined: single bonds, double bonds and triple bonds. RDKit is used to Kekulize the reactant molecules. 
+
+\begin{table}
+  \caption{Atom features}
+  \label{table:atom-features}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    Feature     & Description      \\
+    \midrule
+    Atom type & 72 possible elements in total, one hot  \\
+    Degree     & One hot (0.,   1.,   2.,   3.,   4.,   5.,   6.,   7.,  10.)  \\
+    Explicit Valence     & One hot   (0.,   1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,  10.,  12.,  14.)    \\
+    Hybridization & One hot (SP, SP2, SP3, Other) \\
+    H count & integer \\
+    Electronegativity & float \\
+    Atomic number & integer \\
+    Part of an aromatic ring & boolean\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+The features 
+
+
+
+
+
+
+\bibliography{bibliography}
+\bibliographystyle{plainnat}
 \end{document}
 

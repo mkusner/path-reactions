@@ -8,9 +8,9 @@ which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
 This data consists of, for each reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
 The bond changes indicate pairs of atoms which are connected differently in the reactants and products.
 The SMILES strings encode, in a text based format, the molecules present.
-Before applying our method, we perform two data preprocessing tasks in order to extract a subset of data appropriate for training a
- model of electron movement during a reaction. We use the open-source chemo-informatics software RDKit
-  \citep{rdkit}, to manipulate the molecule data.
+Before applying our method, we perform two data preprocessing tasks (using the open-source chemo-informatics software RDKit
+  \citep{rdkit}) in order to extract a subset of data appropriate for training a
+ model of electron movement during a reaction. The remainder of this section describes those tasks.
 
 \subsubsection{Reactant and reagent separation}
 
