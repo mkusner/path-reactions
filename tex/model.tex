@@ -203,8 +203,7 @@ We can learn the parameters $\theta$ of the functions $\fModules$, by maximizing
 %    & - \log p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}^*})
 %\end{align*}
 This is evaluated by using a known true electron path $a_t^\star$ and intermediate products $\moleculeSet_t^\star$ extracted from training data,
-rather than on simulated values, 
-so that we are using teacher forcing \citep{williams1989learning} during training\todo[]{is this "teacher forcing"? I think this is just plain maximum likelihood estimation of the individual modules...}. 
+rather than on simulated values. 
 This allows us to train on all stages of the reaction at once.
 
 \paragraph{Sampling}
