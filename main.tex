@@ -48,6 +48,7 @@
 \newtheorem{lem}{Lemma}
 \newtheorem{coro}{Corollary}
 \newtheorem{condition}{Condition}
+\usepackage{xspace}
 
 % For algorithms
 \usepackage{algorithm}
@@ -109,6 +110,9 @@
 }
 \makeatother
 
+% for striking out.
+\usepackage[normalem]{ulem}
+
 % for todos
 \usepackage{xargs}                      % Use more than one optional parameter in a new commands
 \usepackage[pdftex,dvipsnames]{xcolor}
@@ -122,6 +126,9 @@
 % quick-and-dirty TKTKTK
 \newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
 
+\newcommand{\ourModel}{EPPM\xspace}
+\newcommand{\ourModelIR}{EPPM-IR\xspace}
+\newcommand{\ourModelR}{EPPM-R\xspace}
 
 \title{Predicting Electron Paths}
 
@@ -327,10 +334,11 @@ There are a number of benefits of predicting electron paths over predicting the 
 % describe USPTO dataset and preprocessing
 \input{tex/dataset}
 
+% having created dataset describe how trained and detailed model architecture.
+\input{tex/training}
+
 % describe issues with evaluation
 \input{tex/evaluation}
-
-\input{tex/training}
 
 % put results here
 \input{tex/results}
