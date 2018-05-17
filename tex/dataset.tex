@@ -2,11 +2,15 @@
 
 \subsection{Data and preprocessing}
 
-Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database\footnote{https://bitbucket.org/dan2097/patent-reaction-extraction/downloads/} \todo{not sure how to cite this}.
+Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database\footnote{https://bitbucket.org/dan2097/patent-reaction-extraction/downloads/} \citep{lowe2012extraction} \todo{not sure how to cite this} \info[]{JAB: I've put in a citation to his thesis, does this work?} .
 We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits, 
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
-This data is in the form of reaction SMILES strings, a text-based format used for encoding the molecules present in the reaction.
-Before applying our method, we perform two data preprocessing tasks in order to extract a subset of data appropriate for training a model of electron movement during a reaction.
+This data consists of, for each reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
+The bond changes indicate pairs of atoms which are connected differently in the reactants and products.
+The SMILES strings encode, in a text based format, the molecules present.
+Before applying our method, we perform two data preprocessing tasks in order to extract a subset of data appropriate for training a
+ model of electron movement during a reaction. We use the open-source chemo-informatics software RDKit
+  \citep{rdkit}, to manipulate the molecule data.
 
 \subsubsection{Reactant and reagent separation}
 
@@ -24,38 +28,36 @@ This allows us to properly model molecules which are included in the dataset but
 
 \subsubsection{Identifying elementary heterolytic reactions}
 
-To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings.
+To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings and bond changes.
 Furthermore, not every reaction in the USPTO dataset is an elementary heterolytic reaction; 
 such reactions (for example, multi-step reactions) will not have a single unique path through the atoms 
 which describes the movement of the electrons.
 
 Extracting the paths and filtering the dataset is a several-step process.
-The first step is to construct adjacency matrices for the reactants and for the product,
-and compare the number of bonds between each pair of atoms.
-To do this in a consistent way, we first read the SMILES string for the molecules in the reaction
-into the open-source chemoinformatics software RDKit.
-We then place the molecule in Kekule form, a process which makes explicit the location of single and double bonds in aromatic structures.
-Given the adjacency matrices $A_r$ for the reactants and $A_p$ for the products,
-where the entries denote the number of bonds,
-computing the difference $\Delta = A_p - A_r$ gives a matrix of all bond changes during the course of the reaction;
-positive entries denote new bonds that are formed, and negative entries denote bonds that break.
-If there are any entries in $\Delta$ which are not -1, 0, or +1, then the reaction is a multi-step reaction
-which contains more than one electron path, and we filter it out for training purposes.
+The first step is to look at the bond changes present in a reaction. 
+Each atom on the end of the path will be involved in one bond change. 
+The ones in the middle will be involved in two. 
+We can then line up bond change pairs so that neighboring pairs have one atom in common,
+ with this ordering forming a path.
+For instance, given the pairs "\texttt{11-13, 14-10, 10-13}" we can line them up to form the unordered path "\texttt{14-10, 10-13, 13-11}".
+If we are unable to form such a path, for instance due to two paths being present as a result of multiple reaction stages, then we can discard such reactions.
 
-For the reactions that remain, we then extract an electron path from the difference matrix $\Delta$.
-Each path is defined as a sequence of pairs of atoms, alternating between add steps (+1) and remove steps (-1).
-%which can be extracted by  any atom that has a non-zero entry in its row 
-To correct for any issues that caused due to reactant and product molecules being kekulized in different ways,
-we first check if there is any through the graph which forms a cycle, 
-\todo{what's the deal with this and pericyclic reactions?}{}
-and set all entries in $\Delta$ corresponding to this cycle to 0.
-The remaining non-zero entries in $\Delta$ fully describe a unique path through the atoms,
-which we extract by starting at any atom which has exactly one non-zero entry in its row,
-and then following the adjacency matrix.
-To determine the direction of this path, we look at the change in the charge of the atoms
-between the products and the reactants:
-the atom at the end of the path will have a more negative charge in the product than in the reactants,
-and vice-versa. \todo{JOHN what do we actually do in the code here?}{}
+For training our model we want to find the ordering of our path, so that we know in which direction the electrons flow.
+To do this we examine the changes of the properties of the atoms belonging to the two ends of our path. 
+In particular we look at changes in charge and attached implicit Hydrogen counts. 
+The gain of negative charge (or analogously the gain of Hydrogen as H+ ions without changing charge) indicates that electrons have arrived at this atom, 
+indicating that this is the end of the path. 
+And vice versa for the start of the path.
+However, sometimes the difference is not available in the USPTO data, as unfortunately only major products are recorded, and so the details of what happens to some of the reactant molecules' atoms may be missing.
+In these cases we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. \todo{could say we just guess if they have equal electronegativity..?}{}
+
+The next step of filtering checks that the path alternates between add steps (+1) and remove steps (-1). 
+This is done by analyzing and comparing the bond changes on the path in the reactant and product molecules. \todo{have not mentioned Kekule form}{}
+Reactions that involve greater than one change (for instance going from no bond between two atoms in the reactants to a double bond between the two in the products) can indicate multi-step 
+reactions with identical paths\todo{I think we do have an example of this, which we could put in.}, and so are discarded.
+Finally, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants.
+We check that the final product produced in this manner is consistent with the major product SMILES in the USPTO dataset. \todo{I want to say this is not needed with the other checks but not sure. Cant remember why I added it in except as an extra sanity check.}{}
+
 
 The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
 correspond to elementary heterolytic reactions.
