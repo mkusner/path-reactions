@@ -1,3 +1,9 @@
 \subsection{Training}
 
-We train our models on these extracted paths. For this we use
+We train our models on these extracted paths. 
+We train our models for ten epochs using ADAM \citep{kingma2014adam} and an initial learning rate of $1e-4$.
+We train on reaction batch sizes of one, although these can consist of multiple intermediate graphs and batches for our $\fAdd$ and  $\fRemove$ modules.
+For the GGNN we use four propagation steps and have input, node output and hidden layers all of size 101. 
+The networks representing $\fAdd$ and  $\fRemove$ consist of one hidden layer of dimension 100. 
+The network representing $\fInitial$ has two hidden layers of size 100 when including  reagent information and one when ignoring it.
+Further architecture and training details can be found in the supplementary material.
