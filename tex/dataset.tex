@@ -2,7 +2,9 @@
 
 \subsection{Data and preprocessing}
 
-Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database\footnote{https://bitbucket.org/dan2097/patent-reaction-extraction/downloads/} \citep{lowe2012extraction} \todo{not sure how to cite this} \info[]{JAB: I've put in a citation to his thesis, does this work?} .
+Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database
+%\footnote{https://bitbucket.org/dan2097/patent-reaction-extraction/downloads/} 
+\citep{lowe2012extraction,Lowe2017} \todo{not sure how to cite this} \info[]{JAB: I've put in a citation to his thesis, does this work?}\todo{MS: there is citable figshare link with DOI for the dataset, see change} . 
 We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits, 
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
 This data consists of, for each reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
