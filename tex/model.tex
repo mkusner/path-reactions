@@ -115,10 +115,11 @@ If the three reaction assumptions stated in the previous section hold, then, as 
 (ii) movement that \emph{adds a new bond}. 
 %We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
 We define atoms with free electrons as having a self-bond.
-\todo[]{...or implicit hydrogens?}
+%\todo[]{...or implicit hydrogens?}
 Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bonds;
 we can determine whether a particular step is an add step or remove step by inspecting $t$.
-Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not form or remove any bonds\todo{maybe put this somewhere else}.
+Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not form or remove any bonds
+%\todo{maybe put this somewhere else}.
 Figure~\ref{fig:reaction_model} presents a simple example reaction which demonstrates all the critical features of the model;
 the subfigures show the sequence of intermediate products and the distributions over actions.
 %The first subfigure shows two reactants, which we assume will react (i.e.\ $s_0' = 1$).
@@ -176,12 +177,12 @@ Having described how we compute node and graph embeddings, we are now ready to d
 The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
 This probability is computed as a graph embedding $\fEmbedGraphs_{\textrm{stop}}$,
 whose functional form is defined by Eq.~\eqref{eq:graph-embedding}, which projects down to a single dimension followed by a sigmoid function
-%\begin{align}
-$
+\begin{align}
+%$
 p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t})).
-$
-%\end{align}
-
+%$
+\end{align}
+%
 %This leaves us with describing the form of the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$, modules.
 % The second of these can be broken down into two parameterized functions
 Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, each defining a probability vector over actions.
@@ -204,7 +205,7 @@ The add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$ and remove step
  have as context the node embedding of the atom selected at the previous step, $\contextVect_{a_{t-1}} = \nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
 For the initial step, this context vector $\contextVect_\mathrm{reagent}$ is an embedding of all the reagents present, computed %by summing graph embeddings for reagent, each computed using
 by a graph embedding function $\fEmbedGraphs_\mathrm{reagent}$.
-\todo[]{I think this is implicitly summing over all reagents, since we aren't restricting anywhere to only summing over atoms in a single connected component...?}
+%\todo[]{I think this is implicitly summing over all reagents, since we aren't restricting anywhere to only summing over atoms in a single connected component...?}
 When computing the output probabilities,
 we use the binary vector $\bm{\beta}$ to mask out specific actions known to be impossible.
 %When computing The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. 
