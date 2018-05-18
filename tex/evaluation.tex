@@ -18,9 +18,12 @@ Here in order to associate a fixed identity with each atom, these integers repre
 The most straightforward approach then to evaluate our accuracy at predicting reaction mechanisms is to check whether the sequence of integers extracted from the raw data (by comparing the reported major product with the reactants\todo[]{change bracket content to "as described earlier"...?}) is an exact match with the sequence of integers output by our \ourModel; the top-1, top-2, top-3, and top-5 accuracies evaluated in this manner are reported in Table \ref{table:mech-predict}.
 
 \begin{table}[t]
+ \begin{minipage}[l]{0.4\textwidth}
   \caption{Results when using \ourModel  for Reaction Mechanism Prediction. Here we count a prediction as correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.}
   \label{table:mech-predict}
-  \centering
+  \end{minipage}\hfill
+ \begin{minipage}[r]{0.53\textwidth}
+%  \centering
   \begin{tabular}{lllll}
     \toprule
     & \multicolumn{4}{c}{Accuracies (\%)}                   \\
@@ -31,6 +34,7 @@ The most straightforward approach then to evaluate our accuracy at predicting re
     \ourModelR  &  77.8 &  89.2 & 92.4 & 94.7    \\
     \bottomrule
   \end{tabular}
+  \end{minipage}
 \end{table}
 
 
@@ -78,11 +82,14 @@ we will explore this further below.
 
 
 \begin{table}[t]
-  \caption{Results when using \ourModel  for Reaction Mechanism Prediction. Here we consider a prediction correct following the product matching procedure in Section~\ref{sec:product-prediction}. 
-The WLDN accuracy is computed using their own evaluation code and pretrained model outputs, on our test set.
+\begin{minipage}[l]{0.42\textwidth}
+  \caption{Results when using \ourModel  for Reaction Mechanism Prediction, following the product matching procedure in Section~\ref{sec:product-prediction}. 
+The WLDN accuracy is computed using their evaluation code and pretrained model outputs on our test set.
 We were unable to evaluate the Seq2Seq model on our test set, instead quoting their reported numbers with an asterisk.}
   \label{table:prod-predict}
-  \centering
+  \end{minipage}\hfill
+  \begin{minipage}[r]{0.53\textwidth}
+%  \centering
   \begin{tabular}{lllll}
     \toprule
     & \multicolumn{4}{c}{Accuracies (\%)}                   \\
@@ -96,6 +103,7 @@ We were unable to evaluate the Seq2Seq model on our test set, instead quoting th
     Seq2Seq \citep{schwaller2017found} & 80.3$^\star$ & 84.7$^\star$ & 86.2$^\star$ & 87.5$^\star$ \\
     \bottomrule
   \end{tabular}
+  \end{minipage}
 \end{table}
 
 
