@@ -17,7 +17,7 @@ Here in order to associate a fixed identity with each atom, these integers repre
 
 The most straightforward approach then to evaluate our accuracy at predicting reaction mechanisms is to check whether the sequence of integers extracted from the raw data (by comparing the reported major product with the reactants\todo[]{change bracket content to "as described earlier"...?}) is an exact match with the sequence of integers output by our \ourModel; the top-1, top-2, top-3, and top-5 accuracies evaluated in this manner are reported in Table \ref{table:mech-predict}.
 
-\begin{table}[h]
+\begin{table}[t]
   \caption{Results when using \ourModel  for Reaction Mechanism Prediction. Here we count a prediction as correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.}
   \label{table:mech-predict}
   \centering
@@ -77,7 +77,7 @@ we will explore this further below.
 
 
 
-\begin{table}[h]
+\begin{table}[t]
   \caption{Results when using \ourModel  for Reaction Mechanism Prediction. Here we consider a prediction correct following the product matching procedure in Section~\ref{sec:product-prediction}. 
 The WLDN accuracy is computed using their own evaluation code and pretrained model outputs, on our test set.
 We were unable to evaluate the Seq2Seq model on our test set, instead quoting their reported numbers with an asterisk.}
