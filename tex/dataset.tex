@@ -18,7 +18,7 @@ Before applying our method, we perform two data preprocessing tasks (using the o
 
 Typically, reaction SMILES strings are split into three parts --- reactants, reagents, and products.
 The {\em reactant} molecules are those which are consumed during the course of the chemical reaction to form the {\em product}, 
-while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts),
+while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts or solvents),
 but do not explicitly take part in the reaction \todo{give an example here?} itself.
 Each non-hydrogen atom in the USPTO dataset is assigned an {\em atom map} number, an integer which serves as an unique identifier for the atom and allows us to match particular atoms in the reactants with atoms in the products.
 \todo{maybe this is not needed now that we describe atom maps in model}
