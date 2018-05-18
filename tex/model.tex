@@ -45,7 +45,9 @@ of $p_\theta$, and then describe how to train the model parameters.
 
 The joint probability of an electron path can be factorized into a product of distributions
 defining the probability $p(a_0 \mid \initialAndReactants)$ of the initial state $a_0$ given the reactants and reagents, 
-the conditional probability $p(a_t \mid a_{t-1}, \moleculeSet_t, t)$ \todo[]{maybe somehow refer to "bond type" instead of $t$?} of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$,
+the conditional probability $p(a_t \mid a_{t-1}, \moleculeSet_t, t)$ 
+%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
+of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$,
 and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
 
 %The distribution over electron paths can be factorized as follows:
@@ -70,7 +72,7 @@ and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates wi
 
 
 In practice we assume that the probability of an action depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
-We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
+We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure
 \begin{align}
 \label{eq:jointprob}
 p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) 
@@ -105,8 +107,8 @@ however, it is possible to stop prior to selecting a first atom $a_0$, indicatin
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
 If the three reaction assumptions stated in the previous section hold, then, as stated earlier, there are two types of electron movements that alternate: 
-(1) movement that \emph{removes an existing bond}, and 
-(2) movement that \emph{adds a new bond}. 
+(i) movement that \emph{removes an existing bond}, and 
+(ii) movement that \emph{adds a new bond}. 
 We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
 Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bond;
 we can determine whether a particular step is an add step or remove step by inspecting $t$.
@@ -142,11 +144,11 @@ In general $\fEmbed$ could be any deep graph model that uses the graph structure
 we choose to use gated graph neural network (GGNN) message functions \citep{li2016gated}.
 
 It is also useful to be able to calculate graph embeddings $\graphEmbeddings$, which are vectors that represent groups of nodes belonging to one or more graphs; i.e.\ an entire molecule or set of molecules.
- We define the function that takes node features belonging to one or more graphs, and calculates their graph embedding by $\fEmbedGraphs$.
+ We define the function that takes node features belonging to each atom, and calculates their graph embedding by $\fEmbedGraphs$.
 These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. \todo[]{check ref the correct parts of these other papers.}
 Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any MLP but in practice we find that linear functions suffice. % use linear layers for.
 There are two stages:
-In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more graphs (with vertices $\Ac'$), by performing a gated sum over the node features
+In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more molecules (with vertices $\Ac'$), by performing a gated sum over the node features
 \todo{BP: i added $\fuk$ to this equation, so it was all together --- hope this does not cause notational problems elsewhere}
 \begin{align}
 	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]\big).
@@ -174,26 +176,54 @@ $
 
 %This leaves us with describing the form of the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$, modules.
 % The second of these can be broken down into two parameterized functions
-Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, and produce a probability vectors over actions as their output. 
+Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, each defining a probability vector over actions.
 The transition distribution $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$ 
 which selects the next atom in the sequence $\electronPath$
-can be split into two functions depending on the parity of $t$.
-The remove bond step $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
+can be split into two functions depending on the parity of $t$:
+the remove bond step $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
 and the add bond step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is taken when $t$ is even. 
 
- Each of these modules begin by computing  a single value for each node, so for the initial step we have 
- $\actionLogits_{\textrm{start}, v} = \fum^\textrm{start}(\nodeEmbeddings{\moleculeSet_t,v}, \contextVect)$ where $\fum$ is a NN and $\contextVect$ is a context vector. 
- The expressions are similar for the add and remove modules, however with different NNs used for the respective $\fum$ functions.
- Moreover, they also differ in the context vectors, $\contextVect$, which they use; for the add, $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$, and remove steps, $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, t)$, this context vector is the node embedding of the previous action, $\nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
- For the initial step, this context vector $\contextVect$ if computed by summing the graph embeddings for each reagent, computed using the embedding function $\fEmbedGraphs_r$.
+These three modules each have the same overall functional form
+\begin{align}
+\actionLogits &= f(\nodeEmbeddings{m}, \contextVect), \\
+p_\theta(a_t \mid \cdots) &\propto \bm{\beta} \odot \mbox{softmax}(\bm{\actionLogits})
+\end{align}
+where $f$ is one of the networks $\fInitial, \fAdd$, or $\fRemove$; 
+$\contextVect$ is a context vector, and $\bm{\beta}$ is a binary mask.
 
-Finally, each of the modules compute the probability vector over actions. So again starting with the initial step we have 
-$p_\theta(a_0 \mid \initialAndReactants) \propto \bm{\beta_\textrm{start}} \odot \mbox{softmax}(\bm{\actionLogits_{\textrm{start}}})$, 
-with again similar terms for the add and remove steps.  
-The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. The value of this differs for the {\em start}, {\em add} and {\em remove} steps. 
-For the initial step any action (or atom) can be picked and so this is 1 everywhere. For the remove step, $\bm{\beta_\textrm{remove}}$ masks out bonds that do not currently exist (although self bonds are allowed in the first step).
-For the add step, $\bm{\beta_\textrm{add}}$ only masks out the previous action.
+Each of the three actions has a different context and mask.
+The add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$ and remove step $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, t)$,
+ have as context the node embedding of the atom selected at the previous step, $\contextVect_{a_{t-1}} = \nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
+For the initial step, this context vector $\contextVect_\mathrm{reagent}$ is an embedding of all the reagents present, computed %by summing graph embeddings for reagent, each computed using
+by a graph embedding function $\fEmbedGraphs_\mathrm{reagent}$.
+\todo[]{I think this is implicitly summing over all reagents, since we aren't restricting anywhere to only summing over atoms in a single connected component...?}
+When computing the output probabilities,
+we use the binary vector $\bm{\beta}$ to mask out specific actions known to be impossible.
+%When computing The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. 
+The value of this differs for the {\em start}, {\em add} and {\em remove} steps;
+for the initial step any action can be picked, so this is one everywhere.
+For the remove step, $\bm{\beta}_\mathrm{remove}$ masks out (i.e.\ is set to zero for) any bonds that do not currently exist and thus cannot be removed (noting though that self-bonds are permitted in the first remove step).
+For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, preventing an atom from bonding with itself.
 
+
+% Each of these modules begin by computing  a single value for each node, so for the initial step we have 
+% $\actionLogits_{\textrm{start}, v} = \fum^\textrm{start}(\nodeEmbeddings{\moleculeSet_t,v}, \contextVect)$ where $\fum$ is a NN and $\contextVect$ is a context vector. 
+% The expressions are similar for the add and remove modules, however with different NNs used for the respective $\fum$ functions.
+% Moreover, they also differ in the context vectors $\contextVect$ which they use:
+% the add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$ and remove step $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, t)$,
+% have as context the node embedding of the atom selected at the previous step, $\contextVect_{a_{t-1}} = \nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
+%For the initial step, this context vector $\contextVect_{r}$ is an embedding of all the reagents present, computed %by summing graph embeddings for reagent, each computed using
+%by a graph embedding function $\fEmbedGraphs_r$.
+%\todo[]{I think this is implicitly summing over all reagents, since we aren't restricting anywhere to only summing over atoms in a single connected component...?}
+%
+%Finally, each of the modules compute the probability vector over actions. 
+%So again starting with the initial step we have 
+%$p_\theta(a_0 \mid \initialAndReactants) \propto \bm{\beta_\textrm{start}} \odot \mbox{softmax}(\bm{\actionLogits_{\textrm{start}}})$, 
+%with again similar terms for the add and remove steps.  
+%The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. The value of this differs for the {\em start}, {\em add} and {\em remove} steps. 
+%For the initial step any action (or atom) can be picked and so this is 1 everywhere. For the remove step, $\bm{\beta_\textrm{remove}}$ masks out bonds that do not currently exist (although self bonds are allowed in the first step).
+%For the add step, $\bm{\beta_\textrm{add}}$ only masks out the previous action.
+%
 
 
 \paragraph{Training}
@@ -210,7 +240,12 @@ rather than on simulated values.
 This allows us to train on all stages of the reaction at once.
 
 \paragraph{Sampling}
-Once trained we can sample chemically-valid paths from our model using beam search.  This is procedure is described in \todo[]{briefly describe beam search}. 
+Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_r$. 
+Simply simulating from the conditional distributions until sampling a stop value $s_t$ samples electron paths.
+We instead would like to find a ranked list of the top-$K$ predicted paths, and do so using a modified beam search,
+in which we roll out a beam of width $K$ until a maximum path length $T^\mathrm{max}$,
+while recording all paths which have terminated.
+This search procedure is described in detail in Algorithm 1 in the supplemental material.
 
 
 
