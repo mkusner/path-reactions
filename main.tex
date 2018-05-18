@@ -182,7 +182,8 @@
 
 \begin{abstract}
 The vast majority of chemical reactions can be described as the movement of pairs of electrons through a set of reactant molecules. 
-As such, reactions are often described using `arrow-pushing' diagrams which show this movement as a sequence of arrows. We propose to learn these sequences directly from data.
+As such, reactions are often described using `arrow-pushing' diagrams which show this movement as a sequence of arrows. 
+We propose ElectroNet to learn these sequences directly from data.
 Instead of predicting product molecules directly from reactant molecules in one-shot, learning a model of electron movement has the benefits of 
 (a) being easy for chemists to interpret, 
 (b) being able to incorporate the constraints of chemistry such as balanced atom counts each side, and 
@@ -191,18 +192,20 @@ Furthermore, we show that the model recovers basic knowledge of chemistry withou
 % also it means the sides balance
 \end{abstract}
 
+
 \section{Introduction}
 
-The ability to reliably predict the outcome of chemical reactions is of tremendous importance for the well-being of humanity, a %BLABLA
+The ability to reliably predict the outcome of chemical reactions is of tremendous importance for the well-being of humanity, providing molecules which serve as medicines and materials. 
 
+Theoretically, all chemical reactions can be described by the stepwise redistribution of electrons in molecules. 
+Chemical reactions can be modelled at different levels of abstraction. On the lowest level, quantum-mechanical simulations can be performed: Changes in electronic structure are calculated by approximately solving the Schrödinger equation, which is computationally expensive for most systems of interest. 
+On the other end, chemical reactions can be treated as rules that ``rewrite'' reactant molecules to products. While rules can be brittle, they allow to organize chemical knowledge by grouping reactions by these rules.
+To combine the advantages of generality and commonality, chemists use a simple but tremendously powerful model, which describes the stepwise electron shifts using sequences of arrows which indicate bond making and breaking.\cite{herges1994organizing}
 
+Machine learning has been applied for quantum chemistry\cite{NIPS2012_4830,schutt2017schnet}, and to predict global rewriting \cite{coley2017prediction,jin2017predicting,neural-symbolic,schwaller2017found,wei2016neural,zhang2005structure}. 
+Kayala et al. proposed a model which consisting of two learned learning-to-rank and scoring steps, which however relies complex hand-coded rules and expert-annotated datasets, which are usually very small.\cite{kayala2011learning,kayala2012reactionpredictor}
 
-
-\paragraph{Related Work} Three main categories of approaches have been explored for reaction prediction. 
-1) In Quantum-mechanical simulations, the changes in electronic structure are calculated by approximately solving the Schrödinger equation, which due to the unfavourable scaling remains out of reach 2) Rule-based expert systems
-
-
-
+Here, we propose ElectroNet, the first end-to-end model to learn sequences of electron shifts directly from large, unannotated datasets \todo{wording not yet elegant here}.
 
 
 
@@ -210,24 +213,29 @@ The ability to reliably predict the outcome of chemical reactions is of tremendo
 In this section we describe the types of reactions we consider in this paper, and how it relates to previous work on reaction prediction. We then describe recent related work on deep graph models that inspire our model in the following section.
 
 \paragraph{Chemical reactions.}
+%In reality, the structure of a molecule is due to how electrons on each atom are interacting with each other. 
+
+%% Bond localization?
 Molecules consist of a set of atoms that are arranged into a structure by a set of bonds. 
 As such, molecules can be depicted as a graph structure, where each node is an atom and each edge is a bond, 
 as shown in Figure (note the convention that vertices which do not explicitly specify the atom name are assumed to be carbon C atoms). 
 
-In reality, the structure of a molecule is due to how electrons on each atom are interacting with each other. 
 Each single bond represents the fact that two electrons are shared between the atoms that the bond connects\footnote{The vast majority of bonds in molecules are like this (so-called \emph{covalent} bonds), 
 although our model also accommodates ionic bonds 
-(in which one atom completely borrows the electrons of another atom and the atoms become charged ions.}.
+(in which one atom completely borrows the electrons of another atom and the atoms become charged.}.
 
 %Molecules are broken and built via reactions. 
-Just as electrons describe the current structure of molecules, they also describe how molecules react with other molecules to produce new ones. All chemical reactions involve the movement of electrons along paths of atoms in a set of reactant molecules. This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules.\footnote{This movement happens because it allows the set of molecules to move to a lower (and thus more favorable) energy state.} In this work, we will consider reactions that satisfy the following assumptions:
+Just as electrons describe the current structure of molecules, they also describe how molecules react with other molecules to produce new ones. 
+All chemical reactions involve the movement of electrons along paths of atoms in a set of reactant molecules. 
+This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules.\footnote{This movement happens because it allows the set of molecules to move to a lower (and thus more favorable) energy state.} 
+In this work, we will consider reactions that satisfy the following assumptions:
 % \begin{enumerate}
 % \item are single-step, so-called \emph{elementary} reactions.
 % \item involve a pair of electrons, so-called \emph{heterolytic} reactions.
 % \item either start with electrons on single atom, or with the electrons in an existing bond.
 % \end{enumerate}
 \begin{assumption}
-Reactions are single-step, so-called \emph{elementary} reactions.
+Reactions are single-step\todo{MS:i am not sure this is really needed}, so-called \emph{elementary} reactions.
 \label{assume:elem}
 \end{assumption}
 
@@ -241,7 +249,9 @@ Reactions either start with electrons on single atom (called \emph{free electron
 \label{assume:atom_bond}
 \end{assumption}
 
-These sorts of reactions describes the vast majority of \emph{organic reactions} (i.e., reactions involving Carbon atoms) that have a large number of applications from drug design to the invention of new materials\footnote{Organic reactions that do not satisfy these assumptions are homolytic reactions, and concerted reactions.}. For this reason organic reactions has been the focus of recent work in reaction prediction in machine learning \cite{jin2017predicting,schwaller2017found}. Note that reactions which are multi-step can be decomposed into multiple single-step reactions in order to satisfy Assumption~\ref{assume:elem}.
+These sorts of reactions describe 81\% of \emph{organic reactions}\cite{herges1994coarctate} (i.e., reactions involving Carbon atoms) that have a large number of applications from drug design to the invention of new materials\cite{segler2018planning}\footnote{Organic reactions that do not satisfy these assumptions are homolytic reactions, and concerted reactions.}. 
+%For this reason organic reactions has been the focus of recent work in reaction prediction in machine learning \cite{jin2017predicting,schwaller2017found}. 
+Note that reactions which are multi-step can be decomposed into multiple single-step reactions in order to satisfy Assumption~\ref{assume:elem}.
 
 
 \paragraph{Reactions as single electron paths.}
