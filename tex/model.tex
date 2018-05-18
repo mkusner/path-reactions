@@ -166,15 +166,15 @@ $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ for the remove bond
  Each of these three parameterized conditional probability distributions for the {\em initial}, {\em add} and {\em remove} steps have similar forms, and produce a probability vectors over actions as their output. 
  
  Each of these modules start by computing  a single value for each node, so for the initial step we have 
- $\actionLogits_{\textrm{initial}, v} = \fum^\textrm{intial}(\nodeEmbeddings{\moleculeSet_t,v}, \contextVect)$ where $\fum$ is a NN and $\\contextVect$ is a context vector. The expressions are similar for the add and remove modules, however with different NNs used for the respective $\fum$ functions.
+ $\actionLogits_{\textrm{initial}, v} = \fum^\textrm{intial}(\nodeEmbeddings{\moleculeSet_t,v}, \contextVect)$ where $\fum$ is a NN and $\contextVect$ is a context vector. The expressions are similar for the add and remove modules, however with different NNs used for the respective $\fum$ functions.
  Moreover, they also differ in the context vectors, $\contextVect$, which they use; for the add, $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$, and remove steps, $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, t)$, this context vector is the node embedding of the previous action, $\nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
  For the initial step, this context vector $\contextVect$ if computed by summing the graph embeddings for each reagent, computed using the embedding function $\fEmbedGraphs_r$.
 
-Finally each of the modules compute the probability vector over actions. So again for the initial step we have 
+Finally, each of the modules compute the probability vector over actions. So again starting with the initial step we have 
 $p_\theta(a_0 \mid \initialAndReactants) \propto \bm{\beta_\textrm{initial}} \odot \mbox{softmax}(\bm{\actionLogits_{\textrm{initial}}})$, 
 with again similar terms for the add and remove steps.  
-The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. This value of this differs for the {\em initial}, {\em add} and {\em remove} steps. 
-For initial step any action (or atom) can be picked and so this is 1 everywhere. For the remove step $\bm{\beta_\textrm{remove}}$ masks out bonds that do not currently exist (although self bonds are allowed in the first step).
+The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. The value of this differs for the {\em initial}, {\em add} and {\em remove} steps. 
+For the initial step any action (or atom) can be picked and so this is 1 everywhere. For the remove step, $\bm{\beta_\textrm{remove}}$ masks out bonds that do not currently exist (although self bonds are allowed in the first step).
 For the add step, $\bm{\beta_\textrm{add}}$ only masks out the previous action.
 
 
