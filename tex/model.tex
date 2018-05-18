@@ -16,17 +16,20 @@
 In this section we define a probabilistic model that describes the flow of movement of electrons that define an elementary heterolytic reaction.
 We represent a set of molecules as a set of graphs $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges;
 each connected component of the graph defines an individual molecule.
-We can associate an ordering over all the atoms in all the molecules in the set using an atom's ``atom mapped'' number \footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.}. This gives us a consistent way to index particular atoms.
+We can associate an ordering over all the atoms in all the molecules in the set using an {\em atom map} number,
+an integer label assigned to each non-hydrogen atom in both the reactants and the products which 
+both permits easy matching between atoms before and after the reaction, and
+%\footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.}. 
+gives us a consistent way to index particular atoms.
 Each atom $v \in \Ac$ includes a set of features, which are described in the supplementary material.
-Input molecules into the model have been Kekulized \todo[]{1. is this a proper noun and 2. I hope this has been defined by now!} so that each bond $b \in \Bc$ can be a single bond, double bond, or triple bond.
-
-
-
+Input molecules into the model are first put in a Kekul\'e form, a process which makes explicit the location of single and double bonds in aromatic structures;
+each bond $b \in \Bc$ is either a single, double, or triple bond.
 
 
 Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
 our model defines a conditional distribution over a sequence of atoms $\electronPath_{0:T} = (a_0, a_1, \ldots, a_T)$,
 which fully characterizes the electron path.
+\improvement[]{maybe instead $\electronPath$ goes up to $T-1$ and $\moleculeSet$ goes up to $T$? then both are length $T$}
 This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
 denoting the outcome of the reaction,
 as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T$,
@@ -72,12 +75,11 @@ We further make the simplifying assumption that the stop probability and the act
 p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) 
 &=
 	   p_\theta(s'_0 \mid \moleculeSet_0)
-       p_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_r)
-\prod_{t=1}^{T}
-	\big[ 
+       p_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_r)\\ \nonumber &\quad \times
+	\left[\prod_{t=1}^{T}
 		p_\theta(s_{t}' \mid \moleculeSet_{t})
 		p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
-	\big]
+	\right]
 	p_\theta(s_{T+1} \mid \moleculeSet_{T+1})
 	,
 \label{eq:jointprob}
