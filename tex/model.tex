@@ -17,8 +17,9 @@ In this section we define a probabilistic model that describes the flow of movem
 We represent a set of molecules as a graph $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges;
 each connected component of the graph defines an individual molecule.
 We can associate an ordering over all the atoms in all the molecules in the set using an atom's ``atom mapped'' number \footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.}. This gives us a consistent way to index particular atoms.
-Each atom $\Ac$ includes a set of features,
-and input molecules into the model have been Kekulized \todo[]{1. is this a proper noun and 2. I hope this has been defined by now!} so that each bond $\Bc$ can be a single bond, double bond, or triple bond.
+Each atom $v \in \Ac$ includes a set of features,
+and input molecules into the model have been Kekulized \todo[]{1. is this a proper noun and 2. I hope this has been defined by now!} so that each bond $b \in \Bc$ can be a single bond, double bond, or triple bond.
+
 
 
 
