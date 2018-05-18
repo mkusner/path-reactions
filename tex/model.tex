@@ -117,19 +117,22 @@ Thus, all reactions start by first selecting an atom, removing a bond (between t
 we can determine whether a particular step is an add step or remove step by inspecting $t$.
 Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not remove or form any bonds\todo{maybe put this somewhere else}.
 
+Figure~\ref{fig:reaction_model} presents a simple example reaction which demonstrates all the critical features of the model;
+the subfigures show the sequence of intermediate products and the distributions over actions.
+%The first subfigure shows two reactants, which we assume will react (i.e.\ $s_0' = 1$).
+%Subsequent subfigures show the network picking an initial atom to begin the electron path,
+%and then iteratively selecting atoms for removing and adding bonds, potentially stopping after each action.
+%Masking at each add and remove step can reduce the total number of possibilities: 
+%for example, it is not possible to remove a bond which does not exist in the graph $\moleculeSet_t$.
+%\todo[]{walk through figure. do we want to that HERE, or in the caption? or elsewhere?}
+
+
 Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameterized by neural networks:
 for each stage the network takes the current intermediate product graph, 
 along with the previous action and the reagents if relevant, 
 to compute a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
-These structure of these networks will be described in the following section and more detailed information on the architectures is given in the supplementary material.
-
-Figure~\ref{fig:reaction_model} shows a simple example reaction, which demonstrates all the critical features of the model.
-The first subfigure shows two reactants, which we assume will react (i.e.\ $s_0' = 1$).
-Subsequent subfigures show the network picking an initial atom to begin the electron path,
-and then iteratively selecting atoms for removing and adding bonds, potentially stopping after each action.
-Masking at each add and remove step can reduce the total number of possibilities: 
-for example, it is not possible to remove a bond which does not exist in the graph $\moleculeSet_t$.
-\todo[]{walk through figure. do we want to that HERE, or in the caption? or elsewhere?}
+These structure of these networks will be described in the following section.
+% and more detailed information on the architectures is given in the supplementary material.
 
 \subsection{Computing atom and molecule features}
 
