@@ -6,7 +6,13 @@
 \begin{figure*}
 \centering
 \includegraphics[width=\textwidth]{reaction_model_blue}
-\caption{A visualization of the actions taken by the model to sequentially perform a simple reaction.}
+\caption{
+ This Figure shows the sequence of actions in transforming the reactants in box 1 to the products in box 9.
+ The sequence of actions will result in a sequence of pairs of atoms, between which bonds will alternately be removed and created, creating a series of intermediate products. 
+At each step the model sees the current intermediate product graph (shown in the boxes) as well as the previous action, if applicable, shown by the grey circle. It uses this to decide on the next action.
+We represent the characteristic probabilities the model may have over these next actions as colored circles over each atom.
+Some actions are disallowed on certain steps, for instance you cannot remove a bond that does not exist; these blocked actions are shown as red crosses.
+}
 \label{fig:reaction_model}
 \end{figure*}
 
