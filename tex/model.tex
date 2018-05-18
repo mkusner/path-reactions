@@ -135,7 +135,7 @@ Full architectural details (e.g.\ number of layers and hidden units)
 and training settings are deferred to the supplemental material.
 
 Node embeddings are representations of all the atoms (vertices) in all the molecules present in $\moleculeSet_t$.
- We denote them by the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \Rc^{|\Ac|\times d}$.
+ We denote them by the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \mathbb{R}^{|\Ac|\times d}$.
 Each row contains a $d$-dimensional embedding of an atom (vertex).
 A natural ordering for the rows are  the corresponding atoms' atom-mapped numbers.
 We define the function $\fEmbed$ to take in a set of graphs representing each molecule and compute these node embeddings.
@@ -149,7 +149,7 @@ Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\
 They are used to form the graph embedding, $\graphEmbeddings$, in the following way:
 \begin{align}
 %	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]\big).
-	\graphEmbeddings = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\Hb_{\Ac,v})\right) \fuj(\Hb_{\Ac,v})\right).
+	\graphEmbeddings = \fEmbedGraphs(\nodeEmbeddings{\moleculeSet_t}) = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\nodeEmbeddings{\moleculeSet_t,v})\right) \fuj(\nodeEmbeddings{\moleculeSet_t, v})\right).
 	\label{eq:graph-embedding}
 \end{align}
 We can break this down into two stages.
