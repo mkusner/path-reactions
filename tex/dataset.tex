@@ -20,19 +20,12 @@ for a significant subset of the data.
 \subsection{Reactant and reagent separation}
 
 Typically, reaction SMILES strings are split into three parts --- reactants, reagents, and products.
-<<<<<<< HEAD
-The {\em reactant} molecules are those which are consumed during the course of the chemical reaction to form the {\em product}, 
-while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts or solvents),
-but do not explicitly take part in the reaction \todo{give an example here?} itself.
-Each non-hydrogen atom in the USPTO dataset is assigned an {\em atom map} number, an integer which serves as an unique identifier for the atom and allows us to match particular atoms in the reactants with atoms in the products.
-\todo{maybe this is not needed now that we describe atom maps in model}
-=======
+
 The reactant molecules are those which are consumed during the course of the chemical reaction to form the  product, 
 while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts),
 but do not explicitly take part in the reaction itself; we see this in the example in Figure~\ref{fig:task-overview}.
 %Each non-hydrogen atom in the USPTO dataset is assigned an atom map number, an integer which serves as an unique identifier for the atom and allows us to match particular atoms in the reactants with atoms in the products.
 %\todo{maybe this is not needed now that we describe atom maps in model}
->>>>>>> master
 
 Unfortunately, the USPTO dataset as extracted does not differentiate between reagents and reactants.
 We elect to preprocess the entire USPTO dataset by separating out the reagents from the reactants using the process outlined in \citet{schwaller2017found}, where we classify as a reagent any molecule for which either 
