@@ -21,7 +21,7 @@ Some actions are disallowed on certain steps, for instance you cannot remove a b
 In this section we define a probabilistic model that describes the flow of movement of electrons that define an elementary heterolytic reaction.
 We represent a set of molecules as a set of graphs $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges;
 each connected component of the graph defines an individual molecule.
-We can associate an ordering over all the atoms in all the molecules in the set using an {\em atom map} number,
+We can associate an ordering over all the atoms in all the molecules in the set using an {\em atom map} number:
 an integer label assigned to each non-hydrogen atom in both the reactants and the products which 
 both permits easy matching between atoms before and after the reaction, and
 %\footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.}. 
@@ -34,7 +34,6 @@ each bond $b \in \Bc$ is either a single, double, or triple bond.
 Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
 our model defines a conditional distribution over a sequence of atoms $\electronPath_{0:T} = (a_0, a_1, \ldots, a_T)$,
 which fully characterizes the electron path.
-\improvement[]{maybe instead $\electronPath$ goes up to $T-1$ and $\moleculeSet$ goes up to $T$? then both are length $T$}
 This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
 denoting the outcome of the reaction,
 as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T$,
@@ -43,7 +42,7 @@ which correspond to the state of the graph after the first $t$ steps in the subs
 
 We propose to learn a parameterized distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
 We begin by describing the generative process %(i.e., the forward pass) 
-of $p_\theta$, and then describe how to train the model parameters.
+that specifies $p_\theta$, and then describe how to train the model parameters.
 
 
 \subsection{Generative process}
@@ -118,19 +117,22 @@ Thus, all reactions start by first selecting an atom, removing a bond (between t
 we can determine whether a particular step is an add step or remove step by inspecting $t$.
 Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not remove or form any bonds\todo{maybe put this somewhere else}.
 
+Figure~\ref{fig:reaction_model} presents a simple example reaction which demonstrates all the critical features of the model;
+the subfigures show the sequence of intermediate products and the distributions over actions.
+%The first subfigure shows two reactants, which we assume will react (i.e.\ $s_0' = 1$).
+%Subsequent subfigures show the network picking an initial atom to begin the electron path,
+%and then iteratively selecting atoms for removing and adding bonds, potentially stopping after each action.
+%Masking at each add and remove step can reduce the total number of possibilities: 
+%for example, it is not possible to remove a bond which does not exist in the graph $\moleculeSet_t$.
+%\todo[]{walk through figure. do we want to that HERE, or in the caption? or elsewhere?}
+
+
 Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameterized by neural networks:
 for each stage the network takes the current intermediate product graph, 
 along with the previous action and the reagents if relevant, 
 to compute a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
-These structure of these networks will be described in the following section and more detailed information on the architectures is given in the supplementary material.
-
-Figure~\ref{fig:reaction_model} shows a simple example reaction, which demonstrates all the critical features of the model.
-The first subfigure shows two reactants, which we assume will react (i.e.\ $s_0' = 1$).
-Subsequent subfigures show the network picking an initial atom to begin the electron path,
-and then iteratively selecting atoms for removing and adding bonds, potentially stopping after each action.
-Masking at each add and remove step can reduce the total number of possibilities: 
-for example, it is not possible to remove a bond which does not exist in the graph $\moleculeSet_t$.
-\todo[]{walk through figure. do we want to that HERE, or in the caption? or elsewhere?}
+These structure of these networks will be described in the following section.
+% and more detailed information on the architectures is given in the supplementary material.
 
 \subsection{Computing atom and molecule features}
 
@@ -150,7 +152,7 @@ we choose to use gated graph neural network (GGNN) message functions \citep{li20
 
 It is also useful to be able to calculate graph embeddings $\graphEmbeddings$, which are vectors that represent groups of nodes belonging to one or more graphs; i.e.\ an entire molecule or set of molecules.
  We define the function that takes node features belonging to each atom, and calculates their graph embedding by $\fEmbedGraphs$.
-These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. \todo[]{check ref the correct parts of these other papers.}
+These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
 Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any MLP but in practice we find that linear functions suffice. % use linear layers for.
 They are used to form the graph embedding, $\graphEmbeddings$, in the following way:
 \begin{align}
@@ -168,8 +170,7 @@ Having formed this embedding of the graphs, we project this down to a lower dime
 
 \subsection{Computing our probabilities over actions}
 
-Having described how we compute node and graph embeddings, we are now ready to define each of our action modules.
-\todo{are these "actions"? where do we first use "action" to refer to atom selection} 
+Having described how we compute node and graph embeddings, we are now ready to define each of our parameterized distributions over actions.
 The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
 This probability is computed as a graph embedding $\fEmbedGraphs_{\textrm{stop}}$,
 whose functional form is defined by Eq.~\eqref{eq:graph-embedding}, which projects down to a single dimension followed by a sigmoid function
@@ -184,8 +185,8 @@ $
 Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, each defining a probability vector over actions.
 The transition distribution $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$ 
 which selects the next atom in the sequence $\electronPath$
-can be split into two functions depending on the parity of $t$:
-the remove bond step $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
+can be split into two distributions depending on the parity of $t$:
+the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
 and the add bond step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is taken when $t$ is even. 
 
 These three modules each have the same overall functional form
@@ -245,7 +246,7 @@ This allows us to train on all stages of the reaction at once, given electron pa
 We train our models using ADAM \citep{kingma2014adam} and an initial learning rate of $10^{-4}$,
 with minibatch sizes of one, although these can consist of multiple intermediate graphs.
 
-\paragraph{Sampling}
+\paragraph{Prediction}
 Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_r$, 
 simply by simulating from the conditional distributions until sampling a stop value $s_t$.
 We instead would like to find a ranked list of the top-$K$ predicted paths, and do so using a modified beam search,

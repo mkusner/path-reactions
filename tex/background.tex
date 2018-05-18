@@ -4,7 +4,7 @@
 \begin{figure*}[t!]
 \centering
 \includegraphics[width=\textwidth]{reaction_diagram}
-\caption{Left: the reaction prediction problem: Given the reactants and reagents, predict the structure of the product. Right: the reaction mechanism prediction problem: Given the reactants, reagents and products, predict how the reaction occurred to form the products.}
+\caption{Left: the reaction prediction problem: Given the reactants and reagents, predict the structure of the product. Right: the reaction mechanism prediction problem: Given the reactants \& reagents, predict how the reaction occurred to form the products. The red arrows in the right hand plot result in bond removal and the green arrows bond creation.}
 \label{fig:task-overview}
 \end{figure*}
 
@@ -48,12 +48,17 @@ Predicting the final product is thus a byproduct of predicting this series of el
 However, there are a number of benefits of predicting electron paths over predicting the outcomes of reactions directly (as in previous work \cite{jin2017predicting,schwaller2017found}):
 \begin{itemize}
 \item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where it goes wrong by comparing the steps of the path with the correct steps.
+\vspace{-0.1cm}
 \item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
+\vspace{-0.1cm}
 \item \textbf{Chemical constraints}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others.
-\item \textbf{Compositionally}: Learning to combine lower-level abstractions of chemistry potentially allows to generalize better.
+\vspace{-0.1cm}
+\item \textbf{Compositionality}: Learning to combine lower-level abstractions of chemistry potentially allows to generalize better.
+\vspace{-0.1cm}
 \end{itemize}
-The only other work we are aware of to use machine learning to predict reaction mechanism are the works \cite{kayala2011learning,kayala2012reactionpredictor}. However,
-it relies on complex hand-coded rules and expert-annotated datasets, which are usually small and proprietary.
+The only other work we are aware of to use machine learning to predict reaction mechanism are \cite{kayala2011learning,kayala2012reactionpredictor}. 
+However,
+they rely on complex hand-coded rules and expert-annotated datasets, which are usually small and proprietary.
 % Machine learning has been applied mostly for the quantum chemistry-level\cite{NIPS2012_4830,schutt2017schnet}. Additionally, various models have been proposed to predict global rewriting rules for reaction prediction\cite{coley2017prediction,jin2017predicting,neural-symbolic,schwaller2017found,wei2016neural,zhang2005structure}. These models can be trained on large sets of reported chemical reactions. 
 %At the medium level of abstraction, Kayala et al. proposed a model to predict electron shift steps using of two independently learned learning-to-rank and scoring stages,
 % which however relies on complex hand-coded rules and expert-annotated datasets, which are usually very small.
