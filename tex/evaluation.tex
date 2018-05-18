@@ -1,13 +1,19 @@
 % !TEX root =  ../main.tex
 
-\subsection{Results and Evaluation}
+%\subsection{Results and Evaluation}
 
-Having trained our model, one surprising challenge is accurately defining what it means for our model to ``correctly'' predict the reaction outcome. 
+In our experiments we ultimately will consider two variants of the model: 
+the first, which we call \ourModelR, is exactly as defined in this section, and includes reagent information;
+a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), allowing us to gauge the importance of reagents.
+
+
+%Having trained our model, 
+One challenge is precise definition what it means for our model to ``correctly'' predict the reaction outcome. 
 Part of this relates to whether we are interested in  \emph{Reaction Mechanism Prediction} or \emph{Reaction Product Prediction}. \todo{these should have been described by now using fig 1 but back check.} 
 In this section we evaluate our model in each of these regimes in turn.
 %Sampling from our model, or selecting high-probability candidates using beam search, yields
 
-\subsubsection{Reaction Mechanism Prediction}
+\subsection{Reaction Mechanism Prediction}
 
  For Reaction Mechanism Prediction we are interested in making sure that we got the exact sequence of actions correct.
 For instance, when forming a bond between two pairs of atoms we want to know which one of the atoms donated the electron pair needed to form the bond, even if the end result is the same. 
@@ -40,7 +46,7 @@ The most straightforward approach then to evaluate our accuracy at predicting re
 
 
 
-\subsubsection{Reaction Product Prediction}
+\subsection{Reaction Product Prediction}
 \label{sec:product-prediction}
 
 Reaction Mechanism Prediction is useful for ensuring that we formed the correct product in the {\em correct way}.
