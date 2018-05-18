@@ -14,11 +14,11 @@
 
 
 In this section we define a probabilistic model that describes the flow of movement of electrons that define an elementary heterolytic reaction.
-We represent a set of molecules as a graph $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges;
+We represent a set of molecules as a set of graphs $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges;
 each connected component of the graph defines an individual molecule.
 We can associate an ordering over all the atoms in all the molecules in the set using an atom's ``atom mapped'' number \footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.}. This gives us a consistent way to index particular atoms.
-Each atom $v \in \Ac$ includes a set of features,
-and input molecules into the model have been Kekulized \todo[]{1. is this a proper noun and 2. I hope this has been defined by now!} so that each bond $b \in \Bc$ can be a single bond, double bond, or triple bond.
+Each atom $v \in \Ac$ includes a set of features, which are described in the supplementary material.
+Input molecules into the model have been Kekulized \todo[]{1. is this a proper noun and 2. I hope this has been defined by now!} so that each bond $b \in \Bc$ can be a single bond, double bond, or triple bond.
 
 
 
@@ -42,7 +42,7 @@ of $p_\theta$, and then describe how to train the model parameters.
 
 The joint probability of an electron path can be factorized into a product of distributions
 defining the probability $p(a_0 \mid \initialAndReactants)$ of the initial state $a_0$ given the reactants and reagents, 
-the conditional probability $p(a_t \mid \moleculeSet_t, t)$ \todo[]{maybe somehow refer to "bond type" instead of $t$?} of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$,
+the conditional probability $p(a_t \mid a_{t-1}, \moleculeSet_t, t)$ \todo[]{maybe somehow refer to "bond type" instead of $t$?} of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$,
 and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
 
 %The distribution over electron paths can be factorized as follows:
@@ -100,9 +100,9 @@ where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \molecu
 %
 Note that you cannot stop after one action, as you have to pick up a complete electron pair;
 however, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
-Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $M_{t}$ to produce the next set of (intermediate) products $M_{t+1}$.
+Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
-As described in the previous section, if the three reaction assumptions stated in that section hold, then there are two types of electron movements that alternate: 
+If the three reaction assumptions stated in the previous section hold, then, as stated earlier, there are two types of electron movements that alternate: 
 (1) movement that \emph{removes an existing bond}, and 
 (2) movement that \emph{adds a new bond}. 
 We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
@@ -127,81 +127,60 @@ for example, it is not possible to remove a bond which does not exist in the gra
 \subsection{Computing atom and molecule features}
 
 
-As each of the remove-bond, add-bond, and start-atom steps represent probability distributions over a fixed set of atoms in the intermediate product graph $M_t$, they are specified in similar ways. 
-Essential to each is an appropriate representation of the molecule graph $M_t$.
-We define a function $\fEmbed (\moleculeSet)$ which returns a matrix $\nodeEmbeddings \subseteq \Rc^{|\Ac|\times d}$, where each row contains a $d$-dimensional embedding for each vertex (atom) in the graph $\moleculeSet$, and the rows are ordered by the corresponding atom's atom-mapped number.
-% so that $f_{\Ac}(\moleculeSet) \subseteq \mathbb{R}^{|\Ac| \times d}$. 
+We are left now with describing how we define our conditional distributions for continuing, $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1}, \moleculeSet_t, t)$.
+However, before describing these modules we need to describe how we compute node embeddings and graph embeddings as these  are  essential to each.
+
+Node embeddings are representations of all the atoms (vertices) in all the molecules present in $\moleculeSet_t$.
+ We denote them by the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \Rc^{|\Ac|\times d}$.
+Each row contains a $d$-dimensional embedding of an atom (vertex).
+A natural ordering for the rows are  the corresponding atoms' atom-mapped numbers.
+We define the function $\fEmbed$ to take in a set of graphs representing each molecule and compute these node embeddings.
+ 
 In general $\fEmbed$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural}. 
-We choose to use Gated Graph Neural Network (GGNN) message functions \citep{li2016gated},
-which take our original set of vertex features for each atom $\Ac$ and compute new representations that
-additionally embed information about the atom in relation to other atoms in its neighborhood in the graph\todo[]{this is hokey, i'm sorry, please delete}.
+We choose to use Gated Graph Neural Network (GGNN) message functions \citep{li2016gated}.
 
-Using these atom features, we can define the conditional distribution for the remove, add, and start steps.
-To produce probabilities over the individual atoms given the atom features and the previous action $a_{t-1}$,
-both are input to a function $f_{\textrm{remove}}$ which is input to a softmax function and then masked, with
-\begin{align}
-\nodeEmbeddings \;&= f_{\Ac}(\moleculeSet_t) \label{eq:rem_atom} \\
-%\Hb_{\Bc} \;&= f_{\Bc}(\Mc_t, \Hb_{\Ac}) \label{eq:rem_bond} \\
-p(a_t \mid \moleculeSet_{t}, a_{t-1}) 
-\;&\propto \beta_{\mathrm{remove}}(a_{t-1}, \cdot) \  \mathrm{softmax}(f_{\textrm{remove}}(\Hb_{\Ac}, a_{t-1})). \label{eq:rem_prob}
-\end{align}
-The masks are binary values with $\beta_{\mathrm{remove}}({a_{t-1}, a}) = 1$ if the bond $(a_{t-1}, a)$ exists in the molecule set $\moleculeSet_t$.
-In this manner, the previous action can be used to mask the possible probabilities, as it is structurally impossible to remove a bond which does not exist.
-The function $f_{\textrm{remove}}$ is defined as a neural network with a single hidden layer.
-\todo[]{is this correct? network architecture details are missing everywhere...}
-When removing the initial bond we also allow the removal of self bonds.
+It is also useful to be able to calculate graph embeddings, $\graphEmbeddings$, which are vectors that represent groups of nodes belonging to one or more graphs.
+ We define the function that takes node features belonging to one or more graphs, and calculates their graph embedding by $\fEmbedGraphs$.
+These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. \todo[]{check ref the correct parts of these other papers.}
 
 
-%Recall that $\Mc_t$ is a deterministic function of $\Mc_0$ and $a_{0:t-1}$.
-%
-%Function $f_{\Ac}$ in eq.~\eqref{eq:rem_atom} takes a molecular graph and for each atom outputs a set of $d$-dimensional atom features, so that $\Hb_{\Ac} \subseteq \mathcal{R}^{|\Ac| \times d}$. 
-%To produce probabilities over the individual atoms given the atom features $\Hb_{\Ac}$ and the previous action $a_{t-1}$, we introduce a function $f_{\textrm{remove}}$, followed by a $\mbox{softmax}$ function.
-%The previous action $a_{t-1}$ is used to mask the resulting probabilities as 
-%\improvement[]{Maybe confusing having this and also the eqn 2. above. Maybe should merge.}
-%
-%\begin{align}
-%p(a \mid \moleculeSet_t, a_{t-1})) \propto 
-%\begin{cases}
-%\mbox{softmax}(f_{\textrm{remove}}(\Hb_{\Ac})) & \mbox{if bond } (a_{t-1},a) \mbox{ exists in } \moleculeSet_{t} \\
-%0 & \mbox{otherwise}. \nonumber
-%\end{cases}
-%%\label{eq:rem_prob}
-%%In Eq.~\eqref{eq:rem_prob}
-%\end{align}
+More specifically $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any MLP but in practice we use linear layers for.
+ There are two stages. 
+In stage (i) similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more graphs (with vertices $\Ac'$), by performing a gated sum over the node features:
+\begin{align*}
+	\graphEmbeddings = \sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]
+\end{align*}
+More specifically, the function $\fui$ is used to decide how much that node should contribute towards the embedding and $\fuj$ projects the node embedding up to a higher dimensional space, which like \citet[\S B.1]{li2018learning}, we choose to be double the dimension of the node features.
+Having formed this embedding of the graphs, we project this down to a lower dimensional space, which is done by function $\fuk$. 
+Again we use a single linear layer for this function.
 
-\improvement[]{add time indexing to the node features}
-For an add-bond step, we again use Eq.~\eqref{eq:rem_atom} to obtain atom features $\Hb_{\Ac}$ and use a different function $f_{\textrm{add}}$ to produce probabilities for adding bonds as 
-\begin{align}
-p(a_t \mid \Mc_t, a_{t-1}) \propto \beta_{\mathrm{add}}(a_{t-1}, \cdot) \ \mbox{softmax}(f_{\textrm{add}}(\Hb_{\Ac}), a_{t-1})
-% \begin{align}
-% \Hb_{\Ac} \;&= f_{\Ac}(\Mc_t) \label{eq:add_atom}  \\
-% p(a_t \mid a_{0:t-1}, \Mc_0) \;&= \mbox{softmax}(f_{\textrm{add}}(\Hb_{\Ac}, a_{t-1})). \label{eq:add_prob}
- \end{align}
-%The primary difference here is instead of a distribution over existing bonds, the distribution in eq.~\eqref{eq:add_prob} is over all possible atoms $\Ac$ (and a `null' action), as a bond may possibly form between any two atoms. 
-The primary difference here is in the choice of mask:
-we again use the previous action $a_{t-1}$ to mask probabilities, 
-although here we only mask out the probability of adding a self-bond to the current atom
-(that is, $\beta_{\mathrm{add}}(a_{t-1}, a) = 1$ for all $a \neq a_{t-1}$).
 
-\highlight{[BP: i don't understand this next paragraph...]} We calculate stop probabilities as 
-\begin{align}
-p(s_t \mid \moleculeSet_{\electronPath_{0:t-1}} ) = \mbox{sigmoid}(\fStop(\Hb_{\Ac})).
-\end{align}
-Here $\fStop$ is similar to the readout functions in \citet[eq. 4]{gilmer2017neural}. In particular,
-$\fStop(\Hb_{\Ac}) = k \left( \sum_{v \in \Ac} \left[ \mbox{sigmoid}(i(\Hb_{\Ac,v})) \cdot j(\Hb_{\Ac,v}) \right] \right)$.
-In which $i$, $j$ and $k$ are functions parameterized by neural networks, with $k$ projecting the graph down to one dimension \improvement[]{well actually just linear layers... Two things here 1. slightly different to Gilmer. 2. When doing reagents forget to mask out empty nodes when doing the sum, so they will have whatever biases the network learns...}.
+\subsection{Computing our probabilities over actions}
 
-Finally, in order to select the starting atom of a path we propose to model the initial probability as 
-\begin{align}
-p(a_0 \mid \moleculeSet_0, \moleculeSet_r) = \mbox{softmax}(f_{\textrm{start}}(\Hb_{\Ac}, \fReagEmbed(\moleculeSet_r))).
-\end{align}
-There is no masking used for this step. 
-Here $\fReagEmbed$ returns an embedding of the reagents.
-This is created by (i) computing node features for the reagents, using $f_{\Ac}$, then (ii) calculating a graph embedding, by using a similar function to $\fStop$ but one which calculates multidimensional features;
-finally (iii) these features for each reagent are summed  to produce a final embedding that is invariant to the ordering of reagents.
+Having described how we compute node and graph embeddings we are now ready to describe each of our action modules. We start with $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. This probability is computed as a graph embedding down to one dimension followed by a sigmoid function: $p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t}))$.
+
+
+This leaves us with describing the form of the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$, modules.
+ The second of these can be broken down into two parameterized functions
+$p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ for the remove bond step, taken when $t$ is odd, and $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ for the add bond step, taken when $t$ is even. 
+ Each of these three parameterized conditional probability distributions for the {\em initial}, {\em add} and {\em remove} steps have similar forms, and produce a probability vectors over actions as their output. 
+ 
+ Each of these modules start by computing  a single value for each node, so for the initial step we have 
+ $\actionLogits_{\textrm{initial}, v} = \fum^\textrm{intial}(\nodeEmbeddings{\moleculeSet_t,v}, \contextVect)$ where $\fum$ is a NN and $\\contextVect$ is a context vector. The expressions are similar for the add and remove modules, however with different NNs used for the respective $\fum$ functions.
+ Moreover, they also differ in the context vectors, $\contextVect$, which they use; for the add, $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$, and remove steps, $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, t)$, this context vector is the node embedding of the previous action, $\nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
+ For the initial step, this context vector $\contextVect$ if computed by summing the graph embeddings for each reagent, computed using the embedding function $\fEmbedGraphs_r$.
+
+Finally each of the modules compute the probability vector over actions. So again for the initial step we have 
+$p_\theta(a_0 \mid \initialAndReactants) \propto \bm{\beta_\textrm{initial}} \odot \mbox{softmax}(\bm{\actionLogits_{\textrm{initial}}})$, 
+with again similar terms for the add and remove steps.  
+The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. This value of this differs for the {\em initial}, {\em add} and {\em remove} steps. 
+For initial step any action (or atom) can be picked and so this is 1 everywhere. For the remove step $\bm{\beta_\textrm{remove}}$ masks out bonds that do not currently exist (although self bonds are allowed in the first step).
+For the add step, $\bm{\beta_\textrm{add}}$ only masks out the previous action.
+
+
 
 \paragraph{Training}
-We can learn the parameters $\theta$ of the functions $\fModules$, by maximizing the likelihood of the true path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$.
+We can learn the parameters $\theta$ of all the parameterized functions, by maximizing the likelihood of the true path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$.
 %\begin{align*}
 %%  \min_{\fModules}
 %\min_{\theta}
