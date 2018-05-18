@@ -2,7 +2,7 @@
 
 For our experiments we train our \ourModel models on these extracted paths.
 We consider two variants of {\ourModel}s, one as defined before which includes reagent information, called \ourModelR, and one which ignores the reagents when selecting the initial actions which we call \ourModelIR.
-We train our models for ten epochs using ADAM \citep{kingma2014adam} and an initial learning rate of $1e-4$.
+We train our models using ADAM \citep{kingma2014adam} and an initial learning rate of $1e-4$.
 We train on reaction minibatch sizes of one, although these can consist of multiple intermediate graphs.
 For the GGNN we use four propagation steps and have input, node output and hidden layers all of size 101. 
 The NNs representing $\fAdd$ and  $\fRemove$ consist of one hidden layer of dimension 100. 

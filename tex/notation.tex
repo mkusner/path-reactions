@@ -21,12 +21,18 @@
 \newcommand{\moleculeSet}{\Mc}
 \newcommand{\initialAndReactants}{\Mc_0, \Mc_r}
 
-\newcommand{\fEmbed}{f_{\Ac}}
+
+% Then the modules!
+\newcommand{\fEmbed}{g_{\Ac}}
 \newcommand{\fAdd}{f_{\textrm{add}}}
 \newcommand{\fRemove}{f_{\textrm{remove}}}
 \newcommand{\fInitial}{f_{\textrm{initial}}}
 \newcommand{\fStop}{f_{\textrm{stop}}}
 \newcommand{\fReagEmbed}{f_{\textrm{reagent}}}
 \newcommand{\fModules}{\fEmbed, \fAdd, \fRemove, \fInitial,\fStop, \fReagEmbed}
+\newcommand{\fui}{f_i}
+\newcommand{\fuj}{f_j}
+\newcommand{\fuk}{f_k}
+
 \newcommand{\actionProb}[2][]{ p(a_{#2} \mid \moleculeSet_{\electronPath_{0:#2-1}^{#1}}, a^{#1}_{#2-1}, #2)}
 \newcommand{\continueProb}[2]{p(s_{#1}' \mid \moleculeSet_{#2}) }

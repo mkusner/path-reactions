@@ -13,7 +13,7 @@ In this section we evaluate our model in each of these regimes in turn.
 For instance, when forming a bond between two pairs of atoms we want to know which one of the atoms donated the electron pair needed to form the bond, even if the end result is the same. 
 
 The representation of the reaction mechanism produced by our model is a sequence of atoms, detailing the path taken by the electrons in a series of alternating steps in which bonds are broken and formed; this then can take the form of a sequence of integers.
-Here in order to associate a fixed identity with each atom, these integers represent the ``atom mapped'' labels\footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.} associated to each atom in the sequence.
+Here in order to associate a fixed identity with each atom, these integers represent the ``atom mapped'' labels associated to each atom in the sequence.
 
 The most straightforward approach then to evaluate our accuracy at predicting reaction mechanisms is to check whether the sequence of integers extracted from the raw data (by comparing the reported major product with the reactants\todo[]{change bracket content to "as described earlier"...?}) is an exact match with the sequence of integers output by our \ourModel; the top-1, top-2, top-3, and top-5 accuracies evaluated in this manner are reported in Table \ref{table:mech-predict}.
 

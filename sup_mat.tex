@@ -167,7 +167,7 @@
   %% \texttt{email} \\
 }
 
-
+\input{tex/notation}
 \begin{document}
 \maketitle
 
@@ -200,19 +200,19 @@ Figure \ref{fig:symmetric-reaction-example} is an example of this.
 \section{Model architecture details}
 
 % these are functions parametrized by NNs: change commands here to match match notation in main paper.
-\newcommand{\Ac}{{\mathcal{A}}}
-\newcommand{\Hb}{{\mathbf{H}}}
-
-\newcommand{\fEmbed}{f_{\Ac}}
-\newcommand{\fAdd}{f_{\textrm{add}}}
-\newcommand{\fRemove}{f_{\textrm{remove}}}
-\newcommand{\fInitial}{f_{\textrm{initial}}}
-\newcommand{\fStop}{f_{\textrm{stop}}}
-\newcommand{\fReagEmbed}{f_{\textrm{reagent}}}
-\newcommand{\fModules}{\fEmbed, \fAdd, \fRemove, \fInitial,\fStop, \fReagEmbed}
+%\newcommand{\Ac}{{\mathcal{A}}}
+%\newcommand{\Hb}{{\mathbf{H}}}
+%
+%\newcommand{\fEmbed}{f_{\Ac}}
+%\newcommand{\fAdd}{f_{\textrm{add}}}
+%\newcommand{\fRemove}{f_{\textrm{remove}}}
+%\newcommand{\fInitial}{f_{\textrm{initial}}}
+%\newcommand{\fStop}{f_{\textrm{stop}}}
+%\newcommand{\fReagEmbed}{f_{\textrm{reagent}}}
+%\newcommand{\fModules}{\fEmbed, \fAdd, \fRemove, \fInitial,\fStop, \fReagEmbed}
 
 In this section we provide further details of our model architecture and training regime not present in the main paper. 
-As mentioned in Section \highlight{REF HERE} of the main paper we have 6 functions, parametrized by NNs, for being able to generate sequences representing electron paths: $\fModules$. 
+As mentioned in Section \highlight{REF HERE} of the main paper we have 6 main modules, parametrized by NNs, for being able to generate sequences representing electron paths: $\fModules$. 
 
 The function $\fEmbed$ computes node embeddings, $\Hb_{\Ac}$. For this we use Gated Graph Neural Networks (GGNN) \citep{li2016gated, gilmer2017neural}.
  We use 4 propagation steps. 
@@ -245,29 +245,32 @@ Concatenated onto the node features going into these networks are the current no
 
 The network $\fStop$ operates on the node embeddings of all the graphs in the intermediate products and produces a stop logit, that is then fed through a sigmoid function to calculate the stop probability.
  It is similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural}. 
-The $\fStop$ module consists of three functions, $i$, $j$ and $k$, which in practice we use single linear layers for. There are two stages. 
+The $\fStop$ module consists of three functions, $\fui$, $\fuj$ and $\fuk$, which in practice we use single linear layers for. There are two stages. 
 In stage (i) similar to \citet[\S B.1]{li2018learning} we form an embedding of the sets of graphs present, by performing a gated sum over the node features:
 \begin{align*}
-	\mathbf{h_g} = \sum_{v \in \Ac} \left[ \mbox{sigmoid}(i(\Hb_{\Ac,v})) \cdot j(\Hb_{\Ac,v}) \right]
+	\mathbf{h_g} = \sum_{v \in \Ac} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]
 \end{align*}
-More specifically, the function $i$ is used to decide how much that node should contribute towards the embedding and $j$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. This is double the dimension of the node features.
-Having formed this embedding of the graphs present in the intermediate products we need to map this to a single logit, which is done by function $k$. 
+More specifically, the function $\fui$ is used to decide how much that node should contribute towards the embedding and $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. This is double the dimension of the node features.
+Having formed this embedding of the graphs present in the intermediate products we need to map this to a single logit, which is done by function $\fuk$. 
 Again we use a single linear layer for this function.
- So in summary, the probability of stopping is given by $p(s| \ldots) = \mbox{sigmoid} (k(\mathbf{h_g}))$
+ So in summary, the probability of stopping is given by $p(s| \ldots) = \mbox{sigmoid} (\fuk(\mathbf{h_g}))$
 
-The module $\fReagEmbed$ is similar to $\fStop$, except that the function $k$, again represented by a single linear layer, projects  to a dimensionality of 100, rather than one. There is also no sigmoid function present in this module.
+The module $\fReagEmbed$ is similar to $\fStop$, except that the function $\fuk$, again represented by a single linear layer, projects  to a dimensionality of 100, rather than one. There is also no final sigmoid function after this module.
 
 The final function $\fInitial$ is represented by an MLP with hidden layers of 100 units. When conditioning on reagents the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers. When ignoring reagents we use one hidden layer.
 
-We train everything using ADAM \citep{kingma2014adam} and an initial learning rate of 0.0001, which we decay after 5 and 9 epochs by a factor of 0.1. We use reaction batch sizes of 1.
+We train everything using ADAM \citep{kingma2014adam} and an initial learning rate of 0.0001, which we decay after 5 and 9 epochs by a factor of 0.1. We use reaction batch sizes of 1. We train for a total of 10 epochs.
 
 
 
 
 
 
+\section{Prediction using our model}
 
+At predict time, as discussed in the main text, we use beam search to find high probable chemically-valid paths from our model. Further details are given in Algorithm~\ref{algo:valid_path}.
 
+\input{tex/algorithm.tex}
 
 
 

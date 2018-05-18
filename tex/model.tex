@@ -16,16 +16,20 @@
 In this section we define a probabilistic model that describes the flow of movement of electrons that define an elementary heterolytic reaction.
 We represent a set of molecules as a graph $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges;
 each connected component of the graph defines an individual molecule.
-Each atom $\Ac$ includes a set of features \todo[]{LIST THESE},
-and each bond $\Bc$ can be a single bond, double bond, or triple bond \todo[]{aromatic bonds?}.
+We can associate an ordering over all the atoms in all the molecules in the set using an atom's ``atom mapped'' number \footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.}. This gives us a consistent way to index particular atoms.
+Each atom $\Ac$ includes a set of features,
+and input molecules into the model have been Kekulized \todo[]{1. is this a proper noun and 2. I hope this has been defined by now!} so that each bond $\Bc$ can be a single bond, double bond, or triple bond.
+
+
+
 
 Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
 our model defines a conditional distribution over a sequence of atoms $\electronPath_{0:T} = (a_0, a_1, \ldots, a_T)$,
 which fully characterizes the electron path.
-This electron path in turn deterministically defines both a final product $\moleculeSet_{T}$, 
+This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
 denoting the outcome of the reaction,
-as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T-1$,
-which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_t$.
+as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T$,
+which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_0$.
 
 
 We propose to learn a parameterized distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
@@ -38,7 +42,7 @@ of $p_\theta$, and then describe how to train the model parameters.
 The joint probability of an electron path can be factorized into a product of distributions
 defining the probability $p(a_0 \mid \initialAndReactants)$ of the initial state $a_0$ given the reactants and reagents, 
 the conditional probability $p(a_t \mid \moleculeSet_t, t)$ \todo[]{maybe somehow refer to "bond type" instead of $t$?} of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$,
-and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_t$.
+and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
 
 %The distribution over electron paths can be factorized as follows:
 %%\begin{align}
@@ -62,15 +66,19 @@ and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates wi
 
 
 In practice we assume that the probability of an action depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
-We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a model with dependency structure
+We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
 \begin{align}
 p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) 
 &=
-       p(a_0 \mid \moleculeSet_0, \moleculeSet_r)
-       p(s'_0 \mid \moleculeSet_0)
-\prod_{t=1}^{T} 
-	p(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
-	p(s_{t+1} \mid \moleculeSet_{t+1}),
+	   p_\theta(s'_0 \mid \moleculeSet_0)
+       p_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_r)
+\prod_{t=1}^{T}
+	\big[ 
+		p_\theta(s_{t}' \mid \moleculeSet_{t})
+		p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
+	\big]
+	p_\theta(s_{T+1} \mid \moleculeSet_{T+1})
+	,
 \label{eq:jointprob}
 \end{align}
 where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$\improvement[]{this part still a bit messy}.
@@ -207,7 +215,7 @@ rather than on simulated values.
 This allows us to train on all stages of the reaction at once.
 
 \paragraph{Sampling}
-Once trained we can sample chemically-valid paths from our model using beam search.  This is procedure is described in Algorithm~\ref{algo:valid_path}\todo[]{briefly describe beam search}. 
+Once trained we can sample chemically-valid paths from our model using beam search.  This is procedure is described in \todo[]{briefly describe beam search}. 
 
 
-\input{tex/algorithm.tex}
+
