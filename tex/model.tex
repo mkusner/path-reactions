@@ -150,6 +150,7 @@ In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of 
 \todo{BP: i added $\fuk$ to this equation, so it was all together --- hope this does not cause notational problems elsewhere}
 \begin{align}
 	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]\big).
+	\label{eq:graph-embedding}
 \end{align}
 
 In this manner the function $\fui$ is used to decide how much that node should contribute towards the embedding,
@@ -160,23 +161,36 @@ Having formed this embedding of the graphs, we project this down to a lower dime
 
 \subsection{Computing our probabilities over actions}
 
-Having described how we compute node and graph embeddings we are now ready to describe each of our action modules. We start with $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. This probability is computed as a graph embedding down to one dimension followed by a sigmoid function: $p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t}))$.
+Having described how we compute node and graph embeddings, we are now ready to define each of our action modules.
+\todo{are these "actions"? where do we first use "action" to refer to atom selection} 
+The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
+This probability is computed as a graph embedding $\fEmbedGraphs_{\textrm{stop}}$,
+whose functional form is defined by Eq.~\eqref{eq:graph-embedding}, which projects down to a single dimension followed by a sigmoid function
+%\begin{align}
+$
+p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t})).
+$
+%\end{align}
 
+%This leaves us with describing the form of the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$, modules.
+% The second of these can be broken down into two parameterized functions
+Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, and produce a probability vectors over actions as their output. 
+The transition distribution $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$ 
+which selects the next atom in the sequence $\electronPath$
+can be split into two functions depending on the parity of $t$.
+The remove bond step $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
+and the add bond step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is taken when $t$ is even. 
 
-This leaves us with describing the form of the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$, modules.
- The second of these can be broken down into two parameterized functions
-$p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ for the remove bond step, taken when $t$ is odd, and $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ for the add bond step, taken when $t$ is even. 
- Each of these three parameterized conditional probability distributions for the {\em initial}, {\em add} and {\em remove} steps have similar forms, and produce a probability vectors over actions as their output. 
- 
- Each of these modules start by computing  a single value for each node, so for the initial step we have 
- $\actionLogits_{\textrm{initial}, v} = \fum^\textrm{intial}(\nodeEmbeddings{\moleculeSet_t,v}, \contextVect)$ where $\fum$ is a NN and $\contextVect$ is a context vector. The expressions are similar for the add and remove modules, however with different NNs used for the respective $\fum$ functions.
+ Each of these modules begin by computing  a single value for each node, so for the initial step we have 
+ $\actionLogits_{\textrm{start}, v} = \fum^\textrm{start}(\nodeEmbeddings{\moleculeSet_t,v}, \contextVect)$ where $\fum$ is a NN and $\contextVect$ is a context vector. 
+ The expressions are similar for the add and remove modules, however with different NNs used for the respective $\fum$ functions.
  Moreover, they also differ in the context vectors, $\contextVect$, which they use; for the add, $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$, and remove steps, $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, t)$, this context vector is the node embedding of the previous action, $\nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
  For the initial step, this context vector $\contextVect$ if computed by summing the graph embeddings for each reagent, computed using the embedding function $\fEmbedGraphs_r$.
 
 Finally, each of the modules compute the probability vector over actions. So again starting with the initial step we have 
-$p_\theta(a_0 \mid \initialAndReactants) \propto \bm{\beta_\textrm{initial}} \odot \mbox{softmax}(\bm{\actionLogits_{\textrm{initial}}})$, 
+$p_\theta(a_0 \mid \initialAndReactants) \propto \bm{\beta_\textrm{start}} \odot \mbox{softmax}(\bm{\actionLogits_{\textrm{start}}})$, 
 with again similar terms for the add and remove steps.  
-The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. The value of this differs for the {\em initial}, {\em add} and {\em remove} steps. 
+The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. The value of this differs for the {\em start}, {\em add} and {\em remove} steps. 
 For the initial step any action (or atom) can be picked and so this is 1 everywhere. For the remove step, $\bm{\beta_\textrm{remove}}$ masks out bonds that do not currently exist (although self bonds are allowed in the first step).
 For the add step, $\bm{\beta_\textrm{add}}$ only masks out the previous action.
 
