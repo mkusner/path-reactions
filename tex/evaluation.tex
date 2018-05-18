@@ -2,6 +2,27 @@
 
 %\subsection{Results and Evaluation}
 
+\begin{table}[t]
+ \begin{minipage}[l]{0.4\textwidth}
+  \caption{Results when using \ourModel  for reaction mechanism prediction. Here we count a prediction as correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.}
+  \label{table:mech-predict}
+  \end{minipage}\hfill
+ \begin{minipage}[r]{0.53\textwidth}
+%  \centering
+  \begin{tabular}{lllll}
+    \toprule
+    & \multicolumn{4}{c}{Accuracies (\%)}                   \\
+    \cmidrule(r){2-5}
+    Model Name & Top-1 & Top-2 & Top-3 & Top-5 \\
+    \midrule
+    \ourModelIR &  70.3 &  82.8 & 87.7 & 92.2    \\
+    \ourModelR  &  77.8 &  89.2 & 92.4 & 94.7    \\
+    \bottomrule
+  \end{tabular}
+  \end{minipage}
+\end{table}
+
+
 In our experiments we ultimately will consider two variants of the model: 
 the first model \ourModelR  is exactly as defined in Section\ \ref{sec:model}, including all reagent information;
 a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), 
@@ -25,12 +46,21 @@ The representation of the reaction mechanism produced by our model is a sequence
 The most straightforward approach then to evaluate our accuracy at predicting reaction mechanisms is to check whether the sequence of integers extracted from the raw data as described earlier
 is an exact match with the sequence of integers output by \ourModel; the top-1, top-2, top-3, and top-5 accuracies evaluated in this manner are reported in Table \ref{table:mech-predict}.
 
+
+
+\subsection{Reaction Product Prediction}
+\label{sec:product-prediction}
+
+
+
 \begin{table}[t]
- \begin{minipage}[l]{0.4\textwidth}
-  \caption{Results when using \ourModel  for reaction mechanism prediction. Here we count a prediction as correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.}
-  \label{table:mech-predict}
+\begin{minipage}[l]{0.42\textwidth}
+  \caption{Results when using \ourModel  for Reaction Mechanism Prediction, following the product matching procedure in Section~\ref{sec:product-prediction}. 
+The WLDN accuracy is computed using their evaluation code and pretrained model outputs on our test set.
+We were unable to evaluate the Seq2Seq model on our test set, instead quoting their reported numbers with an asterisk.}
+  \label{table:prod-predict}
   \end{minipage}\hfill
- \begin{minipage}[r]{0.53\textwidth}
+  \begin{minipage}[r]{0.53\textwidth}
 %  \centering
   \begin{tabular}{lllll}
     \toprule
@@ -38,18 +68,16 @@ is an exact match with the sequence of integers output by \ourModel; the top-1, 
     \cmidrule(r){2-5}
     Model Name & Top-1 & Top-2 & Top-3 & Top-5 \\
     \midrule
-    \ourModelIR &  70.3 &  82.8 & 87.7 & 92.2    \\
-    \ourModelR  &  77.8 &  89.2 & 92.4 & 94.7    \\
+    \ourModelIR &  78.2 & 87.7 & 91.5 & 94.4   \\
+    \ourModelR  &  {\bf 87.0} & {\bf 92.6} & {\bf 94.5} & {\bf 95.9}    \\
+    \bottomrule \toprule
+    WLDN \citep{jin2017predicting} & 84.0  & 89.2 &  91.1 & 92.3 \\
+    Seq2Seq \citep{schwaller2017found} & 80.3$^\star$ & 84.7$^\star$ & 86.2$^\star$ & 87.5$^\star$ \\
     \bottomrule
   \end{tabular}
   \end{minipage}
 \end{table}
 
-
-
-
-\subsection{Reaction Product Prediction}
-\label{sec:product-prediction}
 
 Reaction mechanism prediction is useful for ensuring that we formed the correct product in the {\em correct way}.
 However, this can underestimate the actual predictive accuracy of the model: 
@@ -87,32 +115,6 @@ Overall, \ourModelR outperforms all other approaches on this metric, with 87\% t
 Omitting the reagents in \ourModelR degrades top-1 accuracy slightly, but maintains a high top-3 and top-5 accuracy,
 suggesting that reagent information is necessary to provide context in disambiguating different plausible reaction paths.
 \todo[]{say more here...?}
-
-
-\begin{table}[t]
-\begin{minipage}[l]{0.42\textwidth}
-  \caption{Results when using \ourModel  for Reaction Mechanism Prediction, following the product matching procedure in Section~\ref{sec:product-prediction}. 
-The WLDN accuracy is computed using their evaluation code and pretrained model outputs on our test set.
-We were unable to evaluate the Seq2Seq model on our test set, instead quoting their reported numbers with an asterisk.}
-  \label{table:prod-predict}
-  \end{minipage}\hfill
-  \begin{minipage}[r]{0.53\textwidth}
-%  \centering
-  \begin{tabular}{lllll}
-    \toprule
-    & \multicolumn{4}{c}{Accuracies (\%)}                   \\
-    \cmidrule(r){2-5}
-    Model Name & Top-1 & Top-2 & Top-3 & Top-5 \\
-    \midrule
-    \ourModelIR &  78.2 & 87.7 & 91.5 & 94.4   \\
-    \ourModelR  &  {\bf 87.0} & {\bf 92.6} & {\bf 94.5} & {\bf 95.9}    \\
-    \bottomrule \toprule
-    WLDN \citep{jin2017predicting} & 84.0  & 89.2 &  91.1 & 92.3 \\
-    Seq2Seq \citep{schwaller2017found} & 80.3$^\star$ & 84.7$^\star$ & 86.2$^\star$ & 87.5$^\star$ \\
-    \bottomrule
-  \end{tabular}
-  \end{minipage}
-\end{table}
 
 
 
