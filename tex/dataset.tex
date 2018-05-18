@@ -13,9 +13,8 @@ The bond changes indicate pairs of atoms which are connected differently in the 
 The SMILES strings encode the molecules present in a text based format.
 Before we can apply our method, we perform two data preprocessing tasks 
 (using the open-source chemo-informatics software RDKit \citep{rdkit}) 
-in order to automatically extract paths of electron movement during a reaction, 
-for a significant subset of the data.
-%in order to extract a subset of data appropriate for training a model of electron movement during a reaction. 
+in order to automatically
+extract a subset of data appropriate for training a model of electron movement during a reaction. 
 % The remainder of this section describes those tasks.
 
 \subsection{Reactant and reagent separation}
@@ -66,7 +65,7 @@ Reactions that involve greater than one change (for instance going from no bond 
 reactions with identical paths, and so are discarded.
 %\todo{I think we do have an example of this, which we could put in.}
 Finally, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants,
-to confirm the final product produced in this manner is consistent with the major product SMILES in the USPTO dataset.
+to confirm the final product that is produced by out extracted electron path is consistent with the major product SMILES in the USPTO dataset.
 % \todo{I want to say this is not needed with the other checks but not sure. Cant remember why I added it in except as an extra sanity check.}{}
 
 The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
