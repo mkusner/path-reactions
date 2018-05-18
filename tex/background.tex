@@ -13,7 +13,7 @@ Consider Figure \ref{fig:task-overview}. In it we show the two challenges we tac
 On the left we show reaction prediction; this involves predicting the reaction products, given a set of reactants and reagents. However, for this task we do not care {\em how} the reactants react.
  This job of finding the {\em how} is the target in reaction mechanism prediction, where the steps in a reaction are called a reaction mechanism.
  Before discussing how our model predicts mechanisms in the next section we use the rest of this section to describe the types of reactions we consider in this paper, and their properties.
-\todo[]{Where is the related work section going...? "And how it relates to previous work on reaction prediction. -- " }
+%\todo[]{Where is the related work section going...? "And how it relates to previous work on reaction prediction. -- " }
 
 \paragraph{Chemical reactions.}
 %In reality, the structure of a molecule is due to how electrons on each atom are interacting with each other. 
@@ -22,13 +22,15 @@ On the left we show reaction prediction; this involves predicting the reaction p
 Molecules consist of a set of atoms that are arranged into a structure by a set of bonds. 
 As such, molecules can be depicted as a graph structure, where each node is an atom and each edge is a bond.
 Edges are only used to represent covalent bonds. 
-These covalent bonds which make up the vast majority of bonds in molecules \todo[]{Marwin is this right} represent the fact that one or more pairs of electrons are shared between the atoms that the bond connects. 
- Ionic bonds are bonds in which one atom completely borrows the electrons of another atom and the atoms become charged, however these are not represented by edges but rather by attaching charge to vertices in the graph \todo[]{do we really need this part about ionic bonds?}.
+These covalent bonds % \todo[]{Marwin is this right} 
+represent the fact that one or more pairs of electrons are shared between the atoms that the bond connects. 
+% Ionic bonds are bonds in which one atom completely borrows the electrons of another atom and the atoms become charged, however these are not represented by edges but rather by attaching charge to vertices in the graph \todo[]{do we really need this part about ionic bonds?}.
 
 %Molecules are broken and built via reactions. 
 Just as electrons describe the current structure of molecules, they also describe how molecules react with other molecules to produce new ones. 
 All chemical reactions involve the movement of electrons along paths of atoms in a set of reactant molecules. 
-This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules. The movement occurs because it allows the set of molecules to move to a lower (and thus more favorable) energy state \todo[]{Marwin: is this right? Is this realted to exothermic and endothermic reactions}.
+This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules. 
+%The movement occurs because it allows the set of molecules to move to a lower (and thus more favorable) energy state \todo[]{Marwin: is this right? Is this realted to exothermic and endothermic reactions}.
 In this work, we will consider reactions that satisfy the following assumptions:
 % \begin{enumerate}
 % \item are single-step, so-called \emph{elementary} reactions.
@@ -57,7 +59,7 @@ Note that reactions which are multi-step can be decomposed into multiple single-
 
 \paragraph{Reactions as single electron paths.}
 If reactions satisfy the above assumptions, then a chemical reaction is the result of pairs of electrons moving in a \emph{single path} through the reactant atoms. 
-Further, this electron path will alternately remove existing bonds in molecules, and form new ones. We show this alternating structure in the right hand part of Figure \ref{fig:task-overview}.\todo[]{someone check the chemically accurateness of this.}
+Further, this electron path will alternately remove existing bonds in molecules, and form new ones. We show this alternating structure in the right hand part of Figure \ref{fig:task-overview}. \todo[]{someone check the chemically accurateness of this.}
 In this Figure, the reaction starts by taking the pair of electrons between the Li and C atoms and moving them to the C atom (step 1). This is a remove bond step. 
 Next comes an add step where electrons are moved from the C atom to form a bond between the two reactant molecules (step 2).
 Finally a pair of electrons are removed between a C and O and moved to the O atom, ending the reaction (step 3).
