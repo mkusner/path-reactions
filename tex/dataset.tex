@@ -2,9 +2,9 @@
 
 \subsection{Data and preprocessing}
 
-Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database
+Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database.
 %\footnote{https://bitbucket.org/dan2097/patent-reaction-extraction/downloads/} 
-\citep{lowe2012extraction,Lowe2017} \todo{not sure how to cite this} \info[]{JAB: I've put in a citation to his thesis, does this work?}\todo{MS: there is citable figshare link with DOI for the dataset, see change} . 
+%\citep{lowe2012extraction,Lowe2017} \todo{not sure how to cite this} \info[]{JAB: I've put in a citation to his thesis, does this work?}\todo{MS: there is citable figshare link with DOI for the dataset, see change}
 We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits, 
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
 This data consists of, for each reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
@@ -21,6 +21,7 @@ The {\em reactant} molecules are those which are consumed during the course of t
 while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts),
 but do not explicitly take part in the reaction \todo{give an example here?} itself.
 Each non-hydrogen atom in the USPTO dataset is assigned an {\em atom map} number, an integer which serves as an unique identifier for the atom and allows us to match particular atoms in the reactants with atoms in the products.
+\todo{maybe this is not needed now that we describe atom maps in model}
 
 Unfortunately, the USPTO dataset as extracted does not differentiate between reagents and reactants.
 We elect to preprocess the entire USPTO dataset by separating out the reagents from the reactants using the process outlined in \citet{schwaller2017found}, where we classify as a reagent any molecule for which either 
