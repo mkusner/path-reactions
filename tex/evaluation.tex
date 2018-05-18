@@ -3,12 +3,12 @@
 %\subsection{Results and Evaluation}
 
 In our experiments we ultimately will consider two variants of the model: 
-the first, which we call \ourModelR, is exactly as defined in this section, and includes reagent information;
-a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), allowing us to gauge the importance of reagents.
-
+the first model \ourModelR  is exactly as defined in Section\ \ref{sec:model}, including all reagent information;
+a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), 
+allowing us to gauge the importance of reagents in determining what reaction occurs.
 
 %Having trained our model, 
-One challenge is precise definition what it means for our model to ``correctly'' predict the reaction outcome. 
+One challenge is forming a precise definition of what it means for to ``correctly'' predict the reaction outcome. 
 Part of this relates to whether we are interested in  \emph{Reaction Mechanism Prediction} or \emph{Reaction Product Prediction}. \todo{these should have been described by now using fig 1 but back check.} 
 In this section we evaluate our model in each of these regimes in turn.
 %Sampling from our model, or selecting high-probability candidates using beam search, yields
