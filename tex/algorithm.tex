@@ -14,8 +14,8 @@
 \begin{figure}
 \begin{minipage}{1.\textwidth}
 \begin{algorithm}[H]
-  \caption{Sampling electron paths at predict time.}
-  {\bf Input:}~~Molecule $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_r$ , beam width $K$, time steps $T$
+  \caption{Predicting electron paths at test time.}
+  {\bf Input:}~~Molecule $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_r$ , beam width $K$, time steps $T^\mathrm{max}$
   
   \begin{algorithmic}[1]
   	% Set up pool of completed paths to sort later
@@ -34,7 +34,7 @@
 	
 	% Then we evaluate the next stages.
 	\STATE
-	\FOR{t in (1, \ldots, T)}
+	\FOR{t in $(1, \ldots, T^\mathrm{max})$}
 		\STATE $\hat{\Bc} = \emptyset $ 
 				
 		% We take all the previous top K open paths from the previous step...

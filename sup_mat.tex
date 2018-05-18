@@ -172,7 +172,7 @@
 \maketitle
 
 
-\section{Example of symmetry affecting evaluation of electron path}
+\section{Example of symmetry affecting evaluation of electron paths}
 In the main text we described the challenges of how to evaluate our model, as different electron paths can form the same products, for instance due to symmetry.
 Figure \ref{fig:symmetric-reaction-example} is an example of this.
 
@@ -180,26 +180,26 @@ Figure \ref{fig:symmetric-reaction-example} is an example of this.
 \begin{figure*}[h]
 
     \centering
-    \begin{subfigure}[b]{0.8\textwidth}
+    \begin{subfigure}[b]{0.95\textwidth}
         \centering
         \includegraphics[height=1.2in]{imgs/reaction}
         \caption{Reaction as defined by USPTO SMILES}
     \end{subfigure}
     
     \par\bigskip % force a bit of vertical whitespace 
-    \begin{subfigure}[b]{0.8\textwidth}
+    \begin{subfigure}[b]{0.95\textwidth}
         \centering
         \includegraphics[height=1.2in]{imgs/routes}
         \caption{Possible action sequences that all result in same major product.}
     \end{subfigure}
-    \caption{This example shows how symmetry can affect the evaluation of electron paths. In this example, although one electron path is given in the USPTO dataset, after the O (atom map number 27) loses its Hydrogen it can react with any of the CH3 groups in the second reactant to form the same major product. This is why judging purely based on electron path accuracy is misleading.}
+    \caption{This example shows how symmetry can affect the evaluation of electron paths. In this example, although one electron path is given in the USPTO dataset, after the O (atom map number 27) loses its Hydrogen it can react with any of the CH3 groups in the second reactant to form the same major product. This is why judging purely based on electron path accuracy can sometimes be misleading.}
     \label{fig:symmetric-reaction-example}
 \end{figure*}
 
 
 \section{More training details}
 
-In this section we go through more specific model architecture details omitted from the main text. Further details can be found from our code, available on GitHub at REDACTED.
+In this section we go through more specific model architecture details omitted from the main text. Further details can be found from our code, available at REDACTED.
 
 
 \subsection{Model architectures}
@@ -212,10 +212,10 @@ In particular we are interested in computing three conditional probability terms
 of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
 and (3) the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
 
-Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules: $\fEmbed$, $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$, $\fAdd$, $\fRemove$ and $\fInitial$.
- In this section we shall go through these in turn.
+Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules, all introduced in the main text: $\fEmbed$, $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$, $\fAdd$, $\fRemove$ and $\fInitial$.
+ In this section we shall go through each of these in turn.
 
-The function $\fEmbed$ computes node embeddings, $\Hb_{\Ac}$, which are used as input to all the other modules. For this we use Gated Graph Neural Networks (GGNN) \citep{li2016gated, gilmer2017neural}.
+The function $\fEmbed$ computes node embeddings, $\nodeEmbeddings{\moleculeSet_t}$, which are used as input to all the other modules. For this we use Gated Graph Neural Networks (GGNN) \citep{li2016gated, gilmer2017neural}.
  We use 4 propagation steps. 
  The atom features we feed in are detailed in Table \ref{table:atom-features}. These are calculated using RDKit. In total there are 101 features and we maintain this dimensionality in the hidden layers during the propagation steps of the GGNN. Three edge labels are defined: single bonds, double bonds and triple bonds. RDKit is used to Kekulize the reactant molecules. 
 
@@ -242,15 +242,15 @@ The function $\fEmbed$ computes node embeddings, $\Hb_{\Ac}$, which are used as 
 As mentioned in Section 3 of the main paper both $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$ consist of three
 linear functions. 
 For  both the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
-Again for both $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. This is double the dimension of the node features. 
+Again for both, $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
 This is double the dimension of the node features, and similar to the approach taken by \citet[\S B.1]{li2018learning}.
-Finally $\fuk$ differs between the two modules, as for $\fEmbedGraphs_{\textrm{stop}}$ it projects down to one dimension (to later go through a sigmoid function and compute a stop probability), whereas for  $\fEmbedGraphs_\mathrm{reagent}$ $\fuk$ projects  to a dimensionality of 100 to form the reagent embedding.
+Finally, $\fuk$ differs between the two modules, as for $\fEmbedGraphs_{\textrm{stop}}$ it projects down to one dimension (to later go through a sigmoid function and compute a stop probability), whereas for  $\fEmbedGraphs_\mathrm{reagent}$, $\fuk$ projects  to a dimensionality of 100 to form the reagent embedding.
 
 
 The modules for $\fAdd$ and $\fRemove$, that operate on each node to produce a action logit, are both NNs consisting of one hidden layer of 100 units. 
-Concatenated onto the node features going into these networks are the current node features belonging to the previous atom in the path.
+Concatenated onto the node features going into these networks are the node features belonging to the previous atom in the path.
 
-The final function $\fInitial$ is represented by an NN with hidden layers of 100 units. When conditioning on reagents the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers. When ignoring reagents we use one hidden layer for this network.
+The final function, $\fInitial$, is represented by an NN with hidden layers of 100 units. When conditioning on reagents the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents we use one hidden layer for this network.
 
 \subsection{Training}
 
@@ -272,6 +272,16 @@ At predict time, as discussed in the main text, we use beam search to find high 
 
 \input{tex/algorithm.tex}
 
+\section{Further example of actions proposed by our model}
+
+Figure \ref{fig:extra-textbook-example} shows the model's predictions for the mechanism of how two molecules will react.
+
+\begin{figure*}[h]
+        \centering
+        \includegraphics{imgs/textbook/reactants2}
+        \caption{Predicted mechanism of our model on reactant molecules. Green arrow shows preferred mechanism, whereas pink shows the model's second preferred choice.}
+        \label{fig:extra-textbook-example}
+\end{figure*}
 
 
 \bibliography{bibliography}
