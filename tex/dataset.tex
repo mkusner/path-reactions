@@ -63,8 +63,8 @@ The next step of filtering checks that the path alternates between add steps (+1
 This is done by analyzing and comparing the bond changes on the path in the reactant and product molecules. 
 Reactions that involve greater than one change (for instance going from no bond between two atoms in the reactants to a double bond between the two in the products) can indicate multi-step 
 reactions with identical paths\todo{I think we do have an example of this, which we could put in.}, and so are discarded.
-Finally, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants.
-We check that the final product produced in this manner is consistent with the major product SMILES in the USPTO dataset.
+Finally, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants,
+to confirm the final product produced in this manner is consistent with the major product SMILES in the USPTO dataset.
 % \todo{I want to say this is not needed with the other checks but not sure. Cant remember why I added it in except as an extra sanity check.}{}
 
 The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
