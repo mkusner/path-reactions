@@ -1,0 +1,17 @@
+% !TEX root =  ../main.tex
+
+The ability to reliably predict the outcome of chemical reactions is of tremendous importance for the well-being of humanity, providing molecules which serve as medicines and materials. 
+%
+Theoretically, all chemical reactions can be described by the stepwise redistribution of electrons in molecules, called the mechanism. 
+This can be treated at different levels of abstraction. On the lowest level, quantum-mechanical simulations of the  
+changes in electronic structure are calculated by approximately solving the Schrödinger equation, which is computationally expensive for most systems of interest. 
+On the other end, chemical reactions can be treated as rules that ``rewrite'' reactant molecules to products, which abstracts away the individual electron redistribution steps into a single transformation step. While rules can be brittle, they allow to organize chemical knowledge by grouping reactions by these rules, which facilitates learning.
+To combine the advantages of generality and commonality, chemists use a tremendously powerful model, which simplifies the stepwise electron shifts using sequences of arrows which indicate bond making and breaking \cite{herges1994organizing}. 
+Using this compositional, medium-level abstraction, chemists are able to make predictions beyond the established global rules, and understand the underlying mechanism, with essentially just pencil and paper.
+
+Machine learning has been applied mostly for the quantum chemistry-level\cite{NIPS2012_4830,schutt2017schnet}. Additionally, various models have been proposed to predict global rewriting rules for reaction prediction\cite{coley2017prediction,jin2017predicting,neural-symbolic,schwaller2017found,wei2016neural,zhang2005structure}. These models can be trained on large sets of reported chemical reactions. 
+At the medium level of abstraction, Kayala et al. proposed a model to predict electron shift steps using of two independently learned learning-to-rank and scoring stages,
+ which however relies on complex hand-coded rules and expert-annotated datasets, which are usually very small.\cite{kayala2011learning,kayala2012reactionpredictor} 
+
+
+Here, we propose ElectronNet, the first end-to-end model to learn sequences of electron shifts directly from large, unannotated reaction datasets \todo{wording not yet elegant here}.
