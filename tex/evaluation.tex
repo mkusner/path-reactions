@@ -7,7 +7,7 @@ Part of this relates to whether we are interested in  \emph{Reaction Mechanism P
 In this section we evaluate our model in each of these regimes in turn.
 %Sampling from our model, or selecting high-probability candidates using beam search, yields
 
-\subsubsection*{Reaction Mechanism Prediction}
+\subsubsection{Reaction Mechanism Prediction}
 
  For Reaction Mechanism Prediction we are interested in making sure that we got the exact sequence of actions correct.
 For instance, when forming a bond between two pairs of atoms we want to know which one of the atoms donated the electron pair needed to form the bond, even if the end result is the same. 
@@ -17,7 +17,7 @@ Here in order to associate a fixed identity with each atom, these integers repre
 
 The most straightforward approach then to evaluate our accuracy at predicting reaction mechanisms is to check whether the sequence of integers extracted from the raw data (by comparing the reported major product with the reactants\todo[]{change bracket content to "as described earlier"...?}) is an exact match with the sequence of integers output by our \ourModel; the top-1, top-2, top-3, and top-5 accuracies evaluated in this manner are reported in Table \ref{table:mech-predict}.
 
-\begin{table}[h]
+\begin{table}[t]
   \caption{Results when using \ourModel  for Reaction Mechanism Prediction. Here we count a prediction as correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.}
   \label{table:mech-predict}
   \centering
@@ -36,7 +36,8 @@ The most straightforward approach then to evaluate our accuracy at predicting re
 
 
 
-\subsubsection*{Reaction Product Prediction}
+\subsubsection{Reaction Product Prediction}
+\label{sec:product-prediction}
 
 Reaction Mechanism Prediction is useful for ensuring that we formed the correct product in the {\em correct way}.
 However, this can underestimate the actual predictive accuracy of the model: 
@@ -61,7 +62,43 @@ predicted electron paths which would yield chemically infeasible products are re
 We can then evaluate whether a predicted electron path matches the ground truth electron path by a string comparison.
 
 To use our model to produce a ranked list of predicted products, we can compute the estimated canonicalized product SMILES for each of the outputs of our beam search over electron paths, removing duplicates along the way. 
-These product-level accuracies are reported in \highlight{ROW OF TABLE}.
+These product-level accuracies are reported in Table~\ref{table:prod-predict}.
+For product prediction we compare with the state-of-the-art graph-based method \cite{jin2017predicting};
+we use their evaluation code and pre-trained model \footnote{\url{https://github.com/wengong-jin/nips17-rexgen}},
+re-evaluated on our extracted set of elementary heterolytic reactions.
+%We note their performance is slightly better on this test set than on the USPTO dataset as a whole.
+We also trained a Seq2Seq baseline model following \cite{schwaller2017found}. 
+Unfortunately, with the hyperparameter settings described in the paper we were not able to reproduce their results.
+As the authors have not released their code or a trained model, we are unable to evaluate its performance on our test set, and instead quote their reported performance on a different USPTO test set for reference.
+Overall, \ourModelR outperforms all other approaches on this metric, with 87\% top-1 accuracy and 95.9\% top-5 accuracy.
+Omitting the reagents in \ourModelR degrades top-1 accuracy slightly, but maintains a high top-3 and top-5 accuracy,
+suggesting that reagent information is necessary to provide context in disambiguating different plausible reaction paths;
+we will explore this further below.
+
+
+
+\begin{table}[t]
+  \caption{Results when using \ourModel  for Reaction Mechanism Prediction. Here we consider a prediction correct following the product matching procedure in Section~\ref{sec:product-prediction}. 
+The WLDN accuracy is computed using their own evaluation code and pretrained model outputs, on our test set.
+We were unable to evaluate the Seq2Seq model on our test set, instead quoting their reported numbers with an asterisk.}
+  \label{table:prod-predict}
+  \centering
+  \begin{tabular}{lllll}
+    \toprule
+    & \multicolumn{4}{c}{Accuracies (\%)}                   \\
+    \cmidrule(r){2-5}
+    Model Name & Top-1 & Top-2 & Top-3 & Top-5 \\
+    \midrule
+    \ourModelIR &  78.2 & 87.7 & 91.5 & 94.4   \\
+    \ourModelR  &  {\bf 87.0} & {\bf 92.6} & {\bf 94.5} & {\bf 95.9}    \\
+    \bottomrule \toprule
+    WLDN \citep{jin2017predicting} & 84.0  & 89.2 &  91.1 & 92.3 \\
+    Seq2Seq \citep{schwaller2017found} & 80.3$^\star$ & 84.7$^\star$ & 86.2$^\star$ & 87.5$^\star$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
 
 A benefit of our approach, even if the ultimate the desired goal is to predict the product molecule rather than the electron path,
 is that the predicted electron paths then can serve as explanation.
