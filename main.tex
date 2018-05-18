@@ -132,6 +132,8 @@
 \newcommand{\ourModelIR}{EPPM-IR\xspace}
 \newcommand{\ourModelR}{EPPM-R\xspace}
 
+\newcommand{\MATT}[1]{\textcolor{black}{#1}}
+
 \title{Predicting Electron Paths}
 
 % The \author macro works with any number of authors. There are two
@@ -207,6 +209,8 @@ Furthermore, we show that the model recovers basic knowledge of chemistry withou
 
 
 % KEY: separate assumptions from data processing
+\section{Model}
+\label{sec:model}
 \input{tex/model}
 
 
@@ -264,13 +268,17 @@ Furthermore, we show that the model recovers basic knowledge of chemistry withou
 % - wait a long time until writing objective
 % - wait even longer to write optimization
 
-\section{Experiments}
+\section{Reaction Mechanism Identification}
 
 % describe USPTO dataset and preprocessing
 \input{tex/dataset}
 
+
+\section{Experiments and Evaluation}
+
+
 % having created dataset describe how trained and detailed model architecture.
-\input{tex/training}
+%\input{tex/training}
 
 % describe issues with evaluation, results tables
 \input{tex/evaluation}
