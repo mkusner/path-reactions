@@ -24,6 +24,8 @@
 \usepackage{hyperref}
 
 \usepackage{amssymb}
+\usepackage{xspace}
+
 \usepackage{amsmath}
 
 % For citations
@@ -168,6 +170,8 @@
 }
 
 \input{tex/notation}
+
+
 \begin{document}
 \maketitle
 
@@ -250,7 +254,13 @@ Finally, $\fuk$ differs between the two modules, as for $\fEmbedGraphs_{\textrm{
 The modules for $\fAdd$ and $\fRemove$, that operate on each node to produce a action logit, are both NNs consisting of one hidden layer of 100 units. 
 Concatenated onto the node features going into these networks are the node features belonging to the previous atom in the path.
 
-The final function, $\fInitial$, is represented by an NN with hidden layers of 100 units. When conditioning on reagents the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents we use one hidden layer for this network.
+
+
+The final function, $\fInitial$, is represented by an NN with hidden layers of 100 units. 
+When conditioning on reagents (ie for
+ \ourModelR
+ )
+  the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network.
 
 \subsection{Training}
 
