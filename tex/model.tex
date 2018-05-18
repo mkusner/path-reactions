@@ -72,17 +72,17 @@ and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates wi
 In practice we assume that the probability of an action depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
 We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
 \begin{align}
+\label{eq:jointprob}
 p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) 
 &=
-	   p_\theta(s'_0 \mid \moleculeSet_0)
-       p_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_r)\\ \nonumber &\quad \times
+	p_\theta(s'_0 \mid \moleculeSet_0)
+	p_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_r)\\ \nonumber &\quad \times
 	\left[\prod_{t=1}^{T}
 		p_\theta(s_{t}' \mid \moleculeSet_{t})
 		p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
 	\right]
 	p_\theta(s_{T+1} \mid \moleculeSet_{T+1})
 	,
-\label{eq:jointprob}
 \end{align}
 where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
 %
