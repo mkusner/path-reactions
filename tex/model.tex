@@ -43,13 +43,6 @@ of $p_\theta$, and then describe how to train the model parameters.
 
 \subsection{Generative process}
 
-The joint probability of an electron path can be factorized into a product of distributions
-defining the probability $p(a_0 \mid \initialAndReactants)$ of the initial state $a_0$ given the reactants and reagents, 
-the conditional probability $p(a_t \mid a_{t-1}, \moleculeSet_t, t)$ 
-%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
-of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$,
-and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
-
 %The distribution over electron paths can be factorized as follows:
 %%\begin{align}
 %%p_\theta(\electronPath \mid \moleculeSet_0) = p_\theta(s_{0}' \mid \moleculeSet_0) p_\theta(a_{0} \mid \moleculeSet_0) \prod_{t=1}^{T-1} \left( p_\theta(a_{t} \mid a_{t-1}, \Mc_{t-1} ) p_\theta(s_{0}' \mid \moleculeSet_0) \right) p_\theta(a_{T} \mid a_{T}, \Mc_{T-1} ) p_\theta(s_{T} \mid \moleculeSet_T) \nonumber
@@ -86,7 +79,13 @@ p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)
 	p_\theta(s_{T+1} \mid \moleculeSet_{T+1})
 	,
 \end{align}
-where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
+where we have defined $p_\theta(s'_t \mid \moleculeSet_t) \equiv 1 - p_\theta(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
+The other terms include $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
+the conditional probability $p_\theta(a_t \mid a_{t-1}, \moleculeSet_t, t)$ 
+%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
+of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
+and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
+
 %
 %
 %%% THIS IS THE PREVIOUS VERSION:
@@ -102,7 +101,7 @@ where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \molecu
 %       & \times p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}})
 %\end{align*}
 %
-Note that you cannot stop after one action, as you have to pick up a complete electron pair;
+Note that in our model you cannot stop after one action, as you have to pick up a complete electron pair;
 however, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
