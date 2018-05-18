@@ -43,13 +43,6 @@ of $p_\theta$, and then describe how to train the model parameters.
 
 \subsection{Generative process}
 
-The joint probability of an electron path can be factorized into a product of distributions
-defining the probability $p(a_0 \mid \initialAndReactants)$ of the initial state $a_0$ given the reactants and reagents, 
-the conditional probability $p(a_t \mid a_{t-1}, \moleculeSet_t, t)$ 
-%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
-of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$,
-and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
-
 %The distribution over electron paths can be factorized as follows:
 %%\begin{align}
 %%p_\theta(\electronPath \mid \moleculeSet_0) = p_\theta(s_{0}' \mid \moleculeSet_0) p_\theta(a_{0} \mid \moleculeSet_0) \prod_{t=1}^{T-1} \left( p_\theta(a_{t} \mid a_{t-1}, \Mc_{t-1} ) p_\theta(s_{0}' \mid \moleculeSet_0) \right) p_\theta(a_{T} \mid a_{T}, \Mc_{T-1} ) p_\theta(s_{T} \mid \moleculeSet_T) \nonumber
@@ -86,7 +79,13 @@ p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)
 	p_\theta(s_{T+1} \mid \moleculeSet_{T+1})
 	,
 \end{align}
-where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
+where we have defined $p_\theta(s'_t \mid \moleculeSet_t) \equiv 1 - p_\theta(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
+The other terms include $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
+the conditional probability $p_\theta(a_t \mid a_{t-1}, \moleculeSet_t, t)$ 
+%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
+of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
+and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
+
 %
 %
 %%% THIS IS THE PREVIOUS VERSION:
@@ -102,7 +101,7 @@ where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \molecu
 %       & \times p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}})
 %\end{align*}
 %
-Note that you cannot stop after one action, as you have to pick up a complete electron pair;
+Note that in our model you cannot stop after one action, as you have to pick up a complete electron pair;
 however, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
@@ -110,11 +109,11 @@ If the three reaction assumptions stated in the previous section hold, then, as 
 (i) movement that \emph{removes an existing bond}, and 
 (ii) movement that \emph{adds a new bond}. 
 We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
-Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bond;
+Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bonds;
 we can determine whether a particular step is an add step or remove step by inspecting $t$.
 Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not remove or form any bonds\todo{maybe put this somewhere else}.
 
-Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} is parameterized by a neural network:
+Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameterized by neural networks:
 for each stage the network takes the current intermediate product graph, 
 along with the previous action and the reagents if relevant, 
 to compute a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
@@ -147,17 +146,17 @@ It is also useful to be able to calculate graph embeddings $\graphEmbeddings$, w
  We define the function that takes node features belonging to each atom, and calculates their graph embedding by $\fEmbedGraphs$.
 These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. \todo[]{check ref the correct parts of these other papers.}
 Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any MLP but in practice we find that linear functions suffice. % use linear layers for.
-There are two stages:
-In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more molecules (with vertices $\Ac'$), by performing a gated sum over the node features
-\todo{BP: i added $\fuk$ to this equation, so it was all together --- hope this does not cause notational problems elsewhere}
+They are used to form the graph embedding, $\graphEmbeddings$, in the following way:
 \begin{align}
-	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]\big).
+%	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]\big).
+	\graphEmbeddings = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\Hb_{\Ac,v})\right) \fuj(\Hb_{\Ac,v})\right).
 	\label{eq:graph-embedding}
 \end{align}
-
+We can break this down into two stages.
+In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more molecules (with vertices $\Ac'$), by performing a gated sum over the node features.
 In this manner the function $\fui$ is used to decide how much that node should contribute towards the embedding,
  and $\fuj$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose to be double the dimension of the node features.
-Having formed this embedding of the graphs, we project this down to a lower dimensional space, which is done by the function $\fuk$. 
+Having formed this embedding of the graphs, we project this down to a lower dimensional space in stage (ii), which is done by the function $\fuk$. 
 %Again we use a single linear layer for this function. % already said this above
 
 
