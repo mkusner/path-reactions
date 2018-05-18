@@ -261,6 +261,8 @@ The final function $\fInitial$ is represented by an MLP with hidden layers of 10
 
 We train everything using ADAM \citep{kingma2014adam} and an initial learning rate of 0.0001, which we decay after 5 and 9 epochs by a factor of 0.1. We use reaction batch sizes of 1. We train for a total of 10 epochs.
 
+We will make code available for our model on acceptance of our paper. \todo[]{this good Brooks?} 
+
 
 
 
@@ -272,9 +274,10 @@ At predict time, as discussed in the main text, we use beam search to find high 
 
 \input{tex/algorithm.tex}
 
-
+\FloatBarrier
 
 \bibliography{bibliography}
 \bibliographystyle{plainnat}
 \end{document}
 
+ 

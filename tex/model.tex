@@ -82,7 +82,7 @@ p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)
 	,
 \label{eq:jointprob}
 \end{align}
-where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$\improvement[]{this part still a bit messy}.
+where we have defined $p(s'_t \mid \moleculeSet_t) \equiv 1 - p(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
 %
 %
 %%% THIS IS THE PREVIOUS VERSION:
@@ -102,7 +102,7 @@ Note that you cannot stop after one action, as you have to pick up a complete el
 however, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $M_{t}$ to produce the next set of (intermediate) products $M_{t+1}$.
 
-As described in the previous section, if the three reaction assumptions above hold, then there are two types of electron movements that alternate: 
+As described in the previous section, if the three reaction assumptions stated in that section hold, then there are two types of electron movements that alternate: 
 (1) movement that \emph{removes an existing bond}, and 
 (2) movement that \emph{adds a new bond}. 
 We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
@@ -114,10 +114,10 @@ Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} is parameteriz
 for each stage the network takes the current intermediate product graph, 
 along with the previous action and the reagents if relevant, 
 to compute a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
-These architectures will be described in the following section.
+These structure of these networks will be described in the following section and more detailed information on the architectures is given in the supplementary material.
 
 Figure~\ref{fig:reaction_model} shows a simple example reaction, which demonstrates all the critical features of the model.
-The first subfigure shows two reactants, which we assume will react (i.e.\ $s_0 = 1$).
+The first subfigure shows two reactants, which we assume will react (i.e.\ $s_0' = 1$).
 Subsequent subfigures show the network picking an initial atom to begin the electron path,
 and then iteratively selecting atoms for removing and adding bonds, potentially stopping after each action.
 Masking at each add and remove step can reduce the total number of possibilities: 
@@ -127,14 +127,12 @@ for example, it is not possible to remove a bond which does not exist in the gra
 \subsection{Computing atom and molecule features}
 
 
-%\unsure[]{This part is not quite right. We currently have a f second, although Im training models that no longer have this}
-As each of the remove-bond, add-bond, and start-atom steps represent probability distributions over a fixed set of atoms in the intermediate product graph $M_t$, they are specified in similar ways.
+As each of the remove-bond, add-bond, and start-atom steps represent probability distributions over a fixed set of atoms in the intermediate product graph $M_t$, they are specified in similar ways. 
 Essential to each is an appropriate representation of the molecule graph $M_t$.
-We define a function $f_{\Ac} (\moleculeSet)$ which returns a set of $d$-dimensional feature vectors, 
-one for each vertex (atom) $\Ac$ in the graph $\moleculeSet$.
+We define a function $\fEmbed (\moleculeSet)$ which returns a matrix $\nodeEmbeddings \subseteq \Rc^{|\Ac|\times d}$, where each row contains a $d$-dimensional embedding for each vertex (atom) in the graph $\moleculeSet$, and the rows are ordered by the corresponding atom's atom-mapped number.
 % so that $f_{\Ac}(\moleculeSet) \subseteq \mathbb{R}^{|\Ac| \times d}$. 
-In general $f_{\Ac}$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural}. 
-We choose to use Gated Graph Neural Network message functions \citep{li2016gated},
+In general $\fEmbed$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural}. 
+We choose to use Gated Graph Neural Network (GGNN) message functions \citep{li2016gated},
 which take our original set of vertex features for each atom $\Ac$ and compute new representations that
 additionally embed information about the atom in relation to other atoms in its neighborhood in the graph\todo[]{this is hokey, i'm sorry, please delete}.
 
@@ -142,7 +140,7 @@ Using these atom features, we can define the conditional distribution for the re
 To produce probabilities over the individual atoms given the atom features and the previous action $a_{t-1}$,
 both are input to a function $f_{\textrm{remove}}$ which is input to a softmax function and then masked, with
 \begin{align}
-\Hb_{\Ac} \;&= f_{\Ac}(\moleculeSet_t) \label{eq:rem_atom} \\
+\nodeEmbeddings \;&= f_{\Ac}(\moleculeSet_t) \label{eq:rem_atom} \\
 %\Hb_{\Bc} \;&= f_{\Bc}(\Mc_t, \Hb_{\Ac}) \label{eq:rem_bond} \\
 p(a_t \mid \moleculeSet_{t}, a_{t-1}) 
 \;&\propto \beta_{\mathrm{remove}}(a_{t-1}, \cdot) \  \mathrm{softmax}(f_{\textrm{remove}}(\Hb_{\Ac}, a_{t-1})). \label{eq:rem_prob}
