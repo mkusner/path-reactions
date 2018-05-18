@@ -48,9 +48,13 @@ Predicting the final product is thus a byproduct of predicting this series of el
 However, there are a number of benefits of predicting electron paths over predicting the outcomes of reactions directly (as in previous work \cite{jin2017predicting,schwaller2017found}):
 \begin{itemize}
 \item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where it goes wrong by comparing the steps of the path with the correct steps.
+\vspace{-0.1cm}
 \item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
+\vspace{-0.1cm}
 \item \textbf{Chemical constraints}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others.
+\vspace{-0.1cm}
 \item \textbf{Compositionality}: Learning to combine lower-level abstractions of chemistry potentially allows to generalize better.
+\vspace{-0.1cm}
 \end{itemize}
 The only other work we are aware of to use machine learning to predict reaction mechanism are \cite{kayala2011learning,kayala2012reactionpredictor}. 
 However,
