@@ -70,7 +70,7 @@ and the probability $p(s_t \mid \moleculeSet_t)$ that the reaction terminates wi
 
 
 In practice we assume that the probability of an action depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
-We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
+We further make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure
 \begin{align}
 \label{eq:jointprob}
 p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) 
@@ -105,8 +105,8 @@ however, it is possible to stop prior to selecting a first atom $a_0$, indicatin
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
 If the three reaction assumptions stated in the previous section hold, then, as stated earlier, there are two types of electron movements that alternate: 
-(1) movement that \emph{removes an existing bond}, and 
-(2) movement that \emph{adds a new bond}. 
+(i) movement that \emph{removes an existing bond}, and 
+(ii) movement that \emph{adds a new bond}. 
 We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
 Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bond;
 we can determine whether a particular step is an add step or remove step by inspecting $t$.
@@ -174,11 +174,11 @@ $
 
 %This leaves us with describing the form of the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$, modules.
 % The second of these can be broken down into two parameterized functions
-Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, and produce a probability vectors over actions as their output. 
+Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, each defining a probability vector over actions.
 The transition distribution $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$ 
 which selects the next atom in the sequence $\electronPath$
-can be split into two functions depending on the parity of $t$.
-The remove bond step $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
+can be split into two functions depending on the parity of $t$:
+the remove bond step $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
 and the add bond step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is taken when $t$ is even. 
 
  Each of these modules begin by computing  a single value for each node, so for the initial step we have 
