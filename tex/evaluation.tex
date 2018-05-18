@@ -69,10 +69,10 @@ and then define a deterministic mapping from the edited graph to a canonical str
 This is done by first kekulizing the molecule, % \todo[]{proper noun or what?},
 then applying the sequence of edits to the reactants graph,
 setting explicit charges or hydrogen counts on the first and last atom in the electron path in order to satisfy valence constraints.
-Finally, we strip all atom map numbers from the graph.
-If this graph corresponds to a valid product molecule, we can then use RDKit to express the molecule in a canonical SMILES string format;
-predicted electron paths which would yield chemically infeasible products are considered failures.
-We can then evaluate whether a predicted electron path matches the ground truth electron path by a string comparison.
+We then strip all atom map numbers from the graph.
+If this graph corresponds to a valid product molecule, we can use RDKit to express the molecule in a canonical SMILES string format;
+predicted electron paths which yield chemically infeasible products are considered failures.
+We can then evaluate whether a predicted electron path matches the ground truth by a string comparison.
 
 To use our model to produce a ranked list of predicted products, we compute the canonicalized product SMILES for each of the predictions found by beam search over electron paths, removing duplicates along the way. 
 These product-level accuracies are reported in Table~\ref{table:prod-predict}.
