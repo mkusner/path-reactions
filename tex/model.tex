@@ -150,7 +150,8 @@ There are two stages:
 In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more molecules (with vertices $\Ac'$), by performing a gated sum over the node features
 \todo{BP: i added $\fuk$ to this equation, so it was all together --- hope this does not cause notational problems elsewhere}
 \begin{align}
-	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]\big).
+%	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \left[ \mbox{sigmoid}(\fui(\Hb_{\Ac,v})) \cdot \fuj(\Hb_{\Ac,v}) \right]\big).
+	\graphEmbeddings = \fuk\big(\sum_{v \in \Ac'} \sigma\left(\fui(\Hb_{\Ac,v})\right) \fuj(\Hb_{\Ac,v})\big).
 	\label{eq:graph-embedding}
 \end{align}
 
