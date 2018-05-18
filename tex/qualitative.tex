@@ -9,10 +9,27 @@ which have been established over the course of three centuries of experimental o
 To qualitatively study whether the model has learned such trends from data we queried the model with several typical text book examples from the chemical curriculum (see Figure \ref{fig:qualitative} and appendix). 
 We found that the model predicts most examples correctly. In the few incorrect cases, interpreting the model's output reveals that the model made chemically plausible predictions.
 
-\begin{figure*}
-\centering
-%\includegraphics[width=\textwidth]{rxn_example}
-%\vspace{-3ex}
-\caption{In a) 2nd-order nucleophilic substitutions $S_N 2$-reactions, and b) Suzuki-couplings, halides lower in the period table usually react preferably ($I>Br>Cl$). In both cases, our model has correctly picked up this trend.}
-\label{fig:qualitative}
+
+\begin{figure*}[h]
+
+    \centering
+%    \begin{subfigure}[b]{0.3\textwidth}
+%        \centering
+%        \includegraphics[height=1.2in]{imgs/textbook/reactants2}
+%        %\caption{}
+%    \end{subfigure}%
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[height=1.2in]{imgs/textbook/reaction3}
+        %\caption{}
+    \end{subfigure}%
+     \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[height=1.2in]{imgs/textbook/reaction7}
+        %\caption{}
+    \end{subfigure}
+	\caption{In a) 2nd-order nucleophilic substitutions $S_N 2$-reactions, and b) Suzuki-couplings, halides lower in the period table usually react preferably ($I>Br>Cl$). In both cases, our model has correctly picked up this trend.}
+	\label{fig:qualitative}
 \end{figure*}
+
+
