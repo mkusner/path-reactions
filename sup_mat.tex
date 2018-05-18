@@ -284,12 +284,12 @@ At predict time, as discussed in the main text, we use beam search to find high 
 
 \section{Further example of actions proposed by our model}
 
-Figure \ref{fig:extra-textbook-example} shows the model's predictions for the mechanism of how two molecules will react.
+Figure \ref{fig:extra-textbook-example} shows the model's predictions for the mechanism of how two molecules will react. 
 
 \begin{figure*}[h]
         \centering
         \includegraphics{imgs/textbook/reactants2}
-        \caption{Predicted mechanism of our model on reactant molecules. Green arrow shows preferred mechanism, whereas pink shows the model's second preferred choice.}
+        \caption{Predicted mechanism of our model on reactant molecules. Green arrow shows preferred mechanism, whereas pink shows the model's second preferred choice. Here, the top1 prediction is incorrect, but chemically reasonable. It should be rank2 instead.}
         \label{fig:extra-textbook-example}
 \end{figure*}
 
