@@ -176,8 +176,7 @@ Having formed this embedding of the graphs, we project this down to a lower dime
 
 Having described how we compute node and graph embeddings, we are now ready to define each of our parameterized distributions over actions.
 The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
-This probability is computed as a graph embedding $\fEmbedGraphs_{\textrm{stop}}$,
-whose functional form is defined by Eq.~\eqref{eq:graph-embedding}, which projects down to a single dimension followed by a sigmoid function
+This probability is computed from a graph embedding via the function $\fEmbedGraphs_{\textrm{stop}}$, which projects down to a single dimension. We then map this to the $[0,1]$ interval via the sigmoid function $\sigma$ which yields the following expression:
 \begin{align}
 %$
 p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t})).
