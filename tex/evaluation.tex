@@ -92,34 +92,36 @@ have evaluated whether the major product reported in the test dataset matches pr
 In our case, the top-5 accuracy for a particular reaction may include multiple different electron paths that ultimately yield the same product molecule.
 
 Identifying whether two product molecules are chemically the same is equivalent to solving a graph isomorphism over the atoms and bond types, comparing the output of our system to the product molecule.
-To perform this comparison, we consider an electron path as a sequence of edits performed on the reactants graph, apply these edits to define a product graph, 
+To perform this comparison, we take the sequence of edits on the reactants graph defined by an electron path, 
+%an electron path as a sequence of edits performed on the reactants graph, 
+apply these edits to define a product graph, 
 and then define a deterministic mapping from the edited graph to a canonical string representation.
-This is done by first kekulizing the molecule, % \todo[]{proper noun or what?},
+This is done by mapping the molecule to Kekul\'e form, % \todo[]{proper noun or what?},
 then applying the sequence of edits to the reactants graph,
 setting explicit charges or hydrogen counts on the first and last atom in the electron path in order to satisfy valence constraints.
 We then strip all atom map numbers from the graph.
-If this graph corresponds to a valid product molecule, we can use RDKit to express the molecule in a canonical SMILES string format;
-predicted electron paths which yield chemically infeasible products are considered failures.
+If this graph corresponds to a valid product molecule, we can use RDKit to express the molecule in a canonical SMILES string format 
+(predicted electron paths which yield chemically infeasible products are considered failures).
 We can then evaluate whether a predicted electron path matches the ground truth by a string comparison.
 
 To use our model to produce a ranked list of predicted products, we compute the canonicalized product SMILES for each of the predictions found by beam search over electron paths, removing duplicates along the way. 
 These product-level accuracies are reported in Table~\ref{table:prod-predict}.
 For product prediction we compare with the state-of-the-art graph-based method \cite{jin2017predicting};
 we use their evaluation code and pre-trained model\footnote{\url{https://github.com/wengong-jin/nips17-rexgen}},
-re-evaluated on our extracted test set.% of elementary heterolytic reactions.
+re-evaluated on our extracted test set. % of elementary heterolytic reactions.
 %We note their performance is slightly better on this test set than on the USPTO dataset as a whole.
 We also trained a Seq2Seq baseline model following \cite{schwaller2017found};
 unfortunately, with the hyperparameter settings described in the paper we were not able to reproduce their results.
 As the authors have not released code or a trained model, we were unable to evaluate it on our test set, and instead quote their reported performance on a different USPTO test set for reference.
 Overall, \ourModelR outperforms all other approaches on this metric, with 87\% top-1 accuracy and 95.9\% top-5 accuracy.
 Omitting the reagents in \ourModelR degrades top-1 accuracy slightly, but maintains a high top-3 and top-5 accuracy,
-suggesting that reagent information is necessary to provide context in disambiguating different plausible reaction paths.
+suggesting that reagent information is necessary to provide context in disambiguating plausible reaction paths.
 %\todo[]{say more here...?}
 
 
 
 If the ultimate desired goal is to predict the product molecule rather than the electron path,
-a benefit of our approach is the predicted electron paths then can serve as explanation. 
+a benefit of our approach is the predicted electron paths can then serve as an explanation. 
 In this manner, when showing predicted products, we can list, alongside the maximum likelihood path, any other candidate paths that result in the same product. 
 %\todo[]{point to figure in supplement if there is one}
 
