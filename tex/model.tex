@@ -210,9 +210,9 @@ When computing the output probabilities,
 we use the binary vector $\bm{\beta}$ to mask out specific actions known to be impossible.
 %When computing The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. 
 The value of this differs for the {\em start}, {\em add} and {\em remove} steps;
-for the start step any action can be picked, so $\bm{\beta}$ is one everywhere.
+for the start step any action can be picked, so $\bm{\beta}$ is the all-ones vector.
 For the remove step, $\bm{\beta}_\mathrm{remove}$ masks out (i.e.\ is set to zero for) any bonds that do not currently exist and thus cannot be removed (noting though that self-bonds are permitted in the first remove step).
-For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, preventing an atom from bonding with itself.
+For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, preventing the model from stalling in the same state for multiple time-steps. %an atom from bonding with itself.
 
 
 % Each of these modules begin by computing  a single value for each node, so for the initial step we have 
@@ -235,7 +235,7 @@ For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, 
 %
 
 \paragraph{Training}
-We can learn the parameters $\theta$ of all the parameterized functions, by maximizing the likelihood of the true path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$.
+We can learn the parameters $\theta$ of all the parameterized functions, by maximizing the likelihood of a full path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$.
 %\begin{align*}
 %%  \min_{\fModules}
 %\min_{\theta}
@@ -243,11 +243,11 @@ We can learn the parameters $\theta$ of all the parameterized functions, by maxi
 %	& - \sum_{t=2}^{T} \log \Big[ \continueProb{t}{\electronPath_{0:t-1}^*} \actionProb[*]{t} \Big] \\
 %    & - \log p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}^*})
 %\end{align*}
-This is evaluated by using a known true electron path $a_t^\star$ and intermediate products $\moleculeSet_t^\star$ extracted from training data,
+This is evaluated by using a known electron path $a_t^\star$ and intermediate products $\moleculeSet_t^\star$ extracted from training data,
 rather than on simulated values. 
 This allows us to train on all stages of the reaction at once, given electron path data.
 We train our models using ADAM \citep{kingma2014adam} and an initial learning rate of $10^{-4}$,
-with minibatch sizes of one, although these can consist of multiple intermediate graphs.
+with minibatch sizes of one, where batches often consist of multiple intermediate graphs.
 
 \paragraph{Prediction}
 Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_r$, 
