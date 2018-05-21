@@ -25,7 +25,7 @@ which correspond to the state of the graph after the first $t$ steps in the subs
 
 We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
 We first detail the generative process %(i.e., the forward pass) 
-that specifies $p_\theta$, before describing how to train the model's parameters.
+that specifies $p_\theta$, before describing how to train the model's parameters, $\theta$.
 
 
 \subsection{Generative process}
@@ -130,8 +130,8 @@ the subfigures show the sequence of intermediate products and the distributions 
 %\todo[]{walk through figure. do we want to that HERE, or in the caption? or elsewhere?}
 
 
-Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameterized by neural networks:
-for each stage the network takes the current intermediate graphs, 
+Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameterized by neural networks.
+At each step of the electron path, the network takes the current intermediate graphs, 
 the previous action, and the reagents if relevant, 
 and computes a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
 The structure of these networks is described in the following section.
