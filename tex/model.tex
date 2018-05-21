@@ -247,7 +247,7 @@ This is evaluated by using a known electron path $a_t^\star$ and intermediate pr
 rather than on simulated values. 
 This allows us to train on all stages of the reaction at once, given electron path data.
 We train our models using ADAM \citep{kingma2014adam} and an initial learning rate of $10^{-4}$,
-with minibatch sizes of one, where batches often consist of multiple intermediate graphs.
+with minibatches of size one, where batches often consist of multiple intermediate graphs.
 
 \paragraph{Prediction}
 Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_r$, 
