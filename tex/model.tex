@@ -190,8 +190,8 @@ Each of the three parameterized conditional probability distributions for the {\
 The transition distribution $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$ 
 which selects the next atom in the sequence $\electronPath$
 can be split into two distributions depending on the parity of $t$:
-the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ is taken when $t$ is odd, 
-and the add bond step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is taken when $t$ is even. 
+the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ is used when $t$ is odd, 
+and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is used when $t$ is even. 
 
 These three modules each have the same overall functional form
 \begin{align}
