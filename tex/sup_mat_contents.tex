@@ -82,7 +82,7 @@ The final function, $\fInitial$, is represented by an NN with hidden layers of 1
 When conditioning on reagents (ie for
  \ourModelR
  )
-  the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network. In total \ourModelR has approximately 250 000 parameters and \ourModelIR has approximately 190 000.
+  the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network. In total \ourModelR has approximately 250,000 parameters and \ourModelIR has approximately 190,000.
 
 \subsection{Training}
 
@@ -111,7 +111,7 @@ Figure \ref{fig:extra-textbook-example} shows the model's predictions for the me
 \begin{figure*}[h]
         \centering
         \includegraphics{imgs/textbook/reactants2}
-        \caption{Predicted mechanism of our model on reactant molecules. Green arrow shows preferred mechanism, whereas pink shows the model's second preferred choice. Here, the top1 prediction is incorrect, but chemically reasonable. It should be rank2 instead.}
+        \caption{Predicted mechanism of our model on reactant molecules. Green arrow shows preferred mechanism, whereas pink shows the model's second preferred choice. Here, the first-choice prediction is incorrect, but chemically reasonable. The second-choice prediction is correct.}
         \label{fig:extra-textbook-example}
 \end{figure*}
 
