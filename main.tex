@@ -2,15 +2,16 @@
 
 % if you need to pass options to natbib, use, e.g.:
 \PassOptionsToPackage{numbers, compress}{natbib}
-% before loading nips_2017
+% before loading nips_2018
 %
 % to avoid loading the natbib package, add option nonatbib:
-% \usepackage[nonatbib]{nips_2017}
-
-\usepackage[final]{gen_report}
-
 % to compile a camera-ready version, add the [final] option, e.g.:
-% \usepackage[final]{nips_2017}
+% \usepackage[final]{nips_2018}
+\usepackage[preprint]{nips_2018}
+% as described here: https://nips.cc/Conferences/2018/PaperInformation/StyleFiles
+
+%%%%%\usepackage[final]{gen_report}
+
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -297,7 +298,7 @@ Furthermore, we show that the model recovers a basic knowledge of chemistry with
 \input{tex/discussion}
 
 
-\newpage
+%\newpage
 \bibliography{bibliography}
 \bibliographystyle{plainnat}
 
