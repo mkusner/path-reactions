@@ -36,11 +36,11 @@ This allows us to properly model molecules which are included in the dataset but
 \subsection{Identifying reactions with linear electron topology}
 
 To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings and bond changes.
-Furthermore, not every reaction in the USPTO dataset has a linear electron shift topology; 
-such reactions (for example, more complex multi-step reactions and cycloadditions) will not have a single unique path through the atoms 
+Furthermore, not every reaction in the USPTO dataset has a linear electron topology; 
+such reactions (for example, multi-step reactions and cycloadditions) will not have a single unique path through the atoms 
 which describes the movement of the electrons.
 
-Extracting the paths and filtering the dataset is a several-step process.
+%Extracting the paths and filtering the dataset is a several-step process.
 The first step is to look at the bond changes present in a reaction. 
 Each atom on the ends of the path will be involved in exactly one bond change;
 the atoms in the middle will be involved in two. 
