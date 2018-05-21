@@ -33,11 +33,11 @@ We elect to preprocess the entire USPTO dataset by separating out the reagents f
 (ii) the molecule appears in the product SMILES completely unchanged from the pre-reaction SMILES.
 This allows us to properly model molecules which are included in the dataset but do not materially contribute to the reaction.
 
-\subsection{Identifying elementary heterolytic reactions}
+\subsection{Identifying reactions with linear electron shift}
 
 To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings and bond changes.
-Furthermore, not every reaction in the USPTO dataset is an elementary heterolytic reaction; 
-such reactions (for example, multi-step reactions) will not have a single unique path through the atoms 
+Furthermore, not every reaction in the USPTO dataset has a linear electron shift topology; 
+such reactions (for example, more complex multi-step reactions and cycloadditions) will not have a single unique path through the atoms 
 which describes the movement of the electrons.
 
 Extracting the paths and filtering the dataset is a several-step process.
@@ -69,7 +69,7 @@ to confirm the final product that is produced by our extracted electron path is 
 % \todo{I want to say this is not needed with the other checks but not sure. Cant remember why I added it in except as an extra sanity check.}{}
 
 The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
-correspond to elementary heterolytic reactions.
+correspond to reactions of linear topology.
 This comprises the majority of the dataset, containing 349,898 total reactions, of which 29,360 form the held-out test set.
 
 
