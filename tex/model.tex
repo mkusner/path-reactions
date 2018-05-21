@@ -105,8 +105,9 @@ and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction termin
 %       & \times p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}})
 %\end{align*}
 %
-If the model doesn't stop at step $t\!=\!0$ we restrict our model to not stop $t\!=\!1$, as it is necessary to pick up a complete electron pair. 
-However, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
+
+It is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
+However, we restrict our model to not stop $t\!=\!1$, as it is necessary to pick up a complete electron pair. 
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
 Given our reaction assumptions, then, as stated earlier, there are two types of electron movements that alternate: 
