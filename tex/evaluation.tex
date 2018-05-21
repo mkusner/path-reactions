@@ -26,17 +26,15 @@
 In our experiments we consider two variants of our model: 
 the first model \ourModelR  is exactly as defined in Section\ \ref{sec:model}, including all reagent information;
 a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), 
-allowing us to gauge the importance of reagents in determining what reaction occurs.
+allowing us to gauge the importance of reagents in determining what reaction occurs. We now evaluate our model on the \emph{reaction mechanism prediction} and \emph{reaction product prediction} problems.
 
-%Having trained our model, 
-One challenge is in forming a precise definition of what it means for us to ``correctly'' predict the reaction outcome. 
-Part of this relates to whether we are interested in  \emph{reaction mechanism prediction} or \emph{reaction product prediction}. %\todo{these should have been described by now using fig 1 but back check.} 
-In this section we evaluate our model in each of these regimes in turn.
-%Sampling from our model, or selecting high-probability candidates using beam search, yields
+% One challenge is in forming a precise definition of what it means for us to ``correctly'' predict the reaction outcome. 
+% Part of this relates to whether we are interested in  \emph{reaction mechanism prediction} or \emph{reaction product prediction}. 
+% In this section we evaluate our model in each of these regimes in turn.
 
 \subsection{Reaction Mechanism Prediction}
 
-For mechanism prediction we are interested in making sure that we got the exact sequence of actions correct.
+For mechanism prediction we are interested in ensuring we obtain the exact sequence of electron actions correctly.
 For instance, when forming a bond between two pairs of atoms we want to know which one of the atoms donated the electron pair needed to form the bond, even if the end result is the same. 
 The representation of the reaction mechanism produced by our model is a sequence of atoms, detailing the path taken by the electrons in a series of alternating steps in which bonds are broken and formed; using the atom mapping from the USPTO dataset this takes the form of a series of integers.
 %
@@ -82,10 +80,11 @@ We were unable to evaluate the Seq2Seq model on our test set, instead quoting th
 
 Reaction mechanism prediction is useful for ensuring that we formed the correct product in the {\em correct way}.
 However, this can underestimate the model's actual predictive accuracy: 
-although a single atom mapping is provided as part of the USPTO dataset, in general atom mappings are not unique; 
-when a reactant contains some symmetries, then multiple different atom mappings are effectively equivalent.
-Here this would manifest as multiple different sequences of integers which correspond to chemically identical electron paths. 
-Figure 1 in the Appendix shows an example of a reaction with many symmetries, where the mechanism may be correct despite a different atom sequence.
+although a single atom mapping is provided as part of the USPTO dataset, in general atom mappings are not unique (e.g., if a molecule contains symmetries). 
+%; 
+%when a reactant contains some symmetries, then multiple different atom mappings are effectively equivalent.
+Here this would manifest as multiple different sequences of integers which correspond to chemically-identical electron paths. 
+Figure 1 in the Appendix shows an example of a reaction with many symmetries, where different electron paths produce the same product. % correct despite a different atom sequence.
 %\sout{An extreme example is a reaction in which one reactant is benzene, a molecule which is formed of six carbon atoms in a completely symmetric ring: while this would be present with a unique atom mapping in the dataset, any reaction path which includes one of these carbon atoms could equally well have selected any of the other five \todo{maybe toss in an inline figure with an example}.}
 
 Recent machine learning approaches to {\em reaction product prediction} \citep{jin2017predicting,schwaller2017found}
