@@ -190,11 +190,14 @@
 Chemical reactions can be described as the stepwise redistribution of electrons in molecules. 
 As such, reactions are often visualized using ``arrow-pushing'' diagrams which show this movement as a sequence of arrows. 
 We propose an electron path prediction model (\ourModel) to learn these sequences directly from data.
-Instead of predicting product molecules directly from reactant molecules in one-shot, learning a model of electron movement has the benefits of 
+Instead of predicting product molecules directly from reactant molecules in one shot, learning a model of electron movement has the benefits of 
 (a) being easy for chemists to interpret, 
 (b) incorporating constraints of chemistry, such as balanced atom counts before and after the reaction, and 
 (c) naturally encoding the sparsity of chemical reactions, which usually involve only a small number of atoms in the reactants.
-Furthermore, we show that the model recovers a basic knowledge of chemistry without being explicitly trained to do so.
+
+We design a method to extract approximate reaction paths from any dataset of reaction SMILES strings. Even though this procedure removes $27\%$ of the USPTO reaction training dataset, our model achieves state-of-the-art results on it. Furthermore, we show that the model recovers a basic knowledge of chemistry without being explicitly trained to do so.
+% also it means the sides balance
+
 \end{abstract}
 
 
