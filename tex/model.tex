@@ -21,11 +21,10 @@ which fully characterizes the electron path.
 This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
 denoting the outcome of the reaction,
 as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T$,
-which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_0$.
+which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_0$. We also define a stopping sequence $\mathcal{S}_t = (s_0, \ldots, s_T)$ which indicates if the reaction should stop (i.e, $s_t\!=\!1$ if the reaction should stop and is $0$ otherwise). 
 
-
-We propose to learn a parameterized distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
-We begin by describing the generative process %(i.e., the forward pass) 
+We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
+We first detail the generative process %(i.e., the forward pass) 
 that specifies $p_\theta$, before describing how to train the model's parameters.
 
 
@@ -68,9 +67,9 @@ Some actions are disallowed on certain steps, for instance you cannot remove a b
 
 
 
-
-In practice we assume that the probability of an action depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
-We make the simplifying assumption that the stop probability and the actions after $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure
+First note that since our reactions are a single path of electrons through the reactants then, at any point, the next step in the path depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
+%In practice we assume that the probability of an action depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
+We make the simplifying assumption that the stop probability and the actions after the initial action $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
 \begin{align}
 \label{eq:jointprob}
 p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) 
@@ -106,11 +105,11 @@ and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction termin
 %       & \times p(s_{T+1} \mid \moleculeSet_{\electronPath_{0:T}})
 %\end{align*}
 %
-Note that in our model we cannot stop after one action, as it is necessary to pick up a complete electron pair;
-however, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
+If the model doesn't stop at step $t\!=\!0$ we restrict our model to not stop $t\!=\!1$, as it is necessary to pick up a complete electron pair. 
+However, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
-If the reaction assumptions stated in the previous section hold, then, as stated earlier, there are two types of electron movements that alternate: 
+Given our reaction assumptions, then, as stated earlier, there are two types of electron movements that alternate: 
 (i) movement that \emph{removes an existing bond}, and 
 (ii) movement that \emph{adds a new bond}. 
 %We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
@@ -118,7 +117,7 @@ We define atoms with free electrons as having a self-bond.
 %\todo[]{...or implicit hydrogens?}
 Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bonds;
 we can determine whether a particular step is an add step or remove step by inspecting $t$.
-Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not form or remove any bonds
+Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not form or remove any bonds.
 %\todo{maybe put this somewhere else}.
 Figure~\ref{fig:reaction_model} presents a simple example reaction which demonstrates all the critical features of the model;
 the subfigures show the sequence of intermediate products and the distributions over actions.
@@ -131,9 +130,9 @@ the subfigures show the sequence of intermediate products and the distributions 
 
 
 Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameterized by neural networks:
-for each stage the network takes the current intermediate product graph, 
-along with the previous action and the reagents if relevant, 
-to compute a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
+for each stage the network takes the current intermediate graphs, 
+the previous action, and the reagents if relevant, 
+and computes a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
 The structure of these networks is described in the following section.
 % and more detailed information on the architectures is given in the supplementary material.
 
@@ -145,16 +144,16 @@ However, before describing these modules we need to describe how we compute node
 Full architectural details (e.g.\ number of layers and hidden units) 
 and training settings are deferred to the Appendix.
 
-Node embeddings are representations of all the atoms (vertices) in all the molecules present in $\moleculeSet_t$.
+Node embeddings are representations of all the atoms in all the molecules present in $\moleculeSet_t$.
  We denote them by the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \mathbb{R}^{|\Ac|\times d}$.
-Each row contains a $d$-dimensional embedding of an atom (vertex).
-A natural ordering for the rows are  the corresponding atoms' atom-mapped numbers.
-We define the function $\fEmbed$ to take in a set of graphs representing each molecule and to compute these node embeddings.
-In general $\fEmbed$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural};
+Each row contains a $d$-dimensional embedding of an atom. 
+A natural ordering for the rows are the atom-map numbers assigned to each atom.
+We define the function $\fEmbed$ to map a set of graphs representing each molecule to these node embeddings.
+In general $\fEmbed$ could be any graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural};
 we choose to use gated graph neural network (GGNN) message functions \citep{li2016gated}.
 
 It is also useful to be able to calculate graph embeddings $\graphEmbeddings$, which are vectors that represent groups of nodes belonging to one or more graphs; i.e.\ an entire molecule or set of molecules.
- We define the function that takes node features belonging to each atom, and calculates their graph embedding by $\fEmbedGraphs$.
+ We define the function that maps node features belonging to each atom to their graph embedding by $\fEmbedGraphs$.
 These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
 Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any MLP but in practice we find that linear functions suffice. % use linear layers for.
 They are used to form the graph embedding, $\graphEmbeddings$, in the following way:
