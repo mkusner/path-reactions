@@ -21,7 +21,7 @@ which fully characterizes the electron path.
 This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
 denoting the outcome of the reaction,
 as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T$,
-which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_0$. We also define a stopping sequence $\mathcal{S}_t = (s_0, \ldots, s_T)$ which indicates if the reaction should stop (i.e, $s_t\!=\!1$ if the reaction should stop and is $0$ otherwise). 
+which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_0$. We also define a stopping sequence $\mathcal{S}_t = (s_0, \ldots, s_{T+1})$ which indicates if the reaction should stop (i.e, $s_t\!=\!1$ if the reaction should stop and is $0$ otherwise). 
 
 We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
 We first detail the generative process %(i.e., the forward pass) 
