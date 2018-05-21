@@ -210,7 +210,7 @@ When computing the output probabilities,
 we use the binary vector $\bm{\beta}$ to mask out specific actions known to be impossible.
 %When computing The $\bm{\beta}$ term is a binary vector, that allows us to mask out specific actions. 
 The value of this differs for the {\em start}, {\em add} and {\em remove} steps;
-for the initial step any action can be picked, so this is one everywhere.
+for the start step any action can be picked, so $\bm{\beta}$ is one everywhere.
 For the remove step, $\bm{\beta}_\mathrm{remove}$ masks out (i.e.\ is set to zero for) any bonds that do not currently exist and thus cannot be removed (noting though that self-bonds are permitted in the first remove step).
 For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, preventing an atom from bonding with itself.
 
