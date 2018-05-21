@@ -13,11 +13,9 @@
 In Figure~\ref{fig:task-overview} we show the two challenges we tackle in this paper. 
 On the left we show product prediction; where the goal is to predict the reaction products, given a set of reactants and reagents. However, for this task we do not care {\em how} the reactants react.
  This job of finding the {\em how} is the target of reaction mechanism prediction. 
- %where the steps in a reaction are called a reaction mechanism.
  Before describing how our model predicts mechanisms, we use this section to detail the types of reactions we consider in this paper, and their properties.
 
 
-%\todo[]{Where is the related work section going...? "And how it relates to previous work on reaction prediction. -- " }
 
 \vspace{-0.15cm}
 \paragraph{Molecules and Chemical reactions.}
@@ -25,19 +23,24 @@ On the left we show product prediction; where the goal is to predict the reactio
 
 %In reality, the structure of a molecule is due to how electrons on each atom are interacting with each other. 
 %Molecules consist of a set of atoms that are arranged into a structure by bonds, which are localized electrons. 
-Molecules can be modeled as a graph structure, where each node is an atom and each edge is a covalent bond.
+Organic Molecules (those involving predominantly carbon) can be modeled as a graph structure, where each node is an atom and each edge is a covalent bond.
 These covalent bonds represent the fact that 
 one or more pairs of electrons are shared between the atoms that the bond connects. 
 
 
 Just as electrons describe the current structure of molecules, 
 they also describe how molecules react with other molecules to produce new ones. All chemical reactions involve the stepwise movement of electrons along the atoms in a set of reactant molecules. 
-This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules \cite{herges1994coarctate}. Reagent molecules, while helping facilitate the reaction, are not involved in this electron movement.
-In this work, we will only consider reactions with steps that involve a single pair of electrons, and
-where steps start either with the electron pair on a single atom (called a \emph{lone pair}), or with the electrons in an existing bond. This class of reactions is called \emph{elementary heterolytic reactions}.
-These kind of reactions describe more than 80\% of \emph{organic reactions} \cite{herges1994coarctate} 
-(reactions outside of this group are homolytic reactions, and electrocyclic reactions).
-Organic reactions are those involving carbon atoms, and have a large number of applications from drug design to the invention of new materials \citep{segler2018planning}.
+This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules \cite{herges1994coarctate}. 
+%Reagent molecules, while helping facilitate the reaction, are not involved in this electron movement.
+Reaction mechanisms can be classified by the topology of their "electron-pushing arrows". Here, the class of reactions with linear electron flow topology is by far the most important, following by those with cyclic topology.\cite{herges1994coarctate}
+
+In this work, we will only consider reactions with linear topology that involve the movement of pairs of electrons.
+
+%where steps start either with the electron pair on a single atom (called a \emph{lone pair}), or with the electrons in an existing bond. 
+
+%These kind of reactions describe more than 80\% of \emph{organic reactions} \cite{herges1994coarctate} 
+%(reactions outside of this group are homolytic reactions, and electrocyclic reactions).
+%Organic reactions are those involving predominantly carbon atoms, which have a large number of applications from drug design to the invention of new materials \citep{segler2018planning}.
 
 \vspace{-0.15cm}
 \paragraph{Reactions as single electron paths.}
@@ -53,12 +56,8 @@ However, there are a number of benefits of predicting electron paths over predic
 \item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where, and possibly why, it goes wrong by comparing the steps of the path with the correct steps.
 \item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
 \item \textbf{Chemical constraints}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others.
-% MATT note: not sure I understand this last point
-\item \textbf{Compositionally}: Learning to combine lower-level abstractions of chemistry potentially allows us to generalize better.
+% MATT note: not sure I understand this last point: 
+\item \textbf{Compositional}: Learning to combine lower-level abstractions of chemistry potentially allows us to generalize better.
 \end{itemize}
 The only other work we are aware of to use machine learning to predict reaction mechanisms are the works \cite{kayala2011learning,kayala2012reactionpredictor}. However,
 these rely on complex hand-coded rules and expert-annotated datasets, which are usually small and proprietary.
-% Machine learning has been applied mostly for the quantum chemistry-level\cite{NIPS2012_4830,schutt2017schnet}. Additionally, various models have been proposed to predict global rewriting rules for reaction prediction\cite{coley2017prediction,jin2017predicting,neural-symbolic,schwaller2017found,wei2016neural,zhang2005structure}. These models can be trained on large sets of reported chemical reactions. 
-%At the medium level of abstraction, Kayala et al. proposed a model to predict electron shift steps using of two independently learned learning-to-rank and scoring stages,
-% which however relies on complex hand-coded rules and expert-annotated datasets, which are usually very small.
-
