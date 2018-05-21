@@ -8,12 +8,12 @@ Our dataset for evaluating our model is a collection of chemical reactions extra
 % \todo{not sure how to cite this} \info[]{JAB: I've put in a citation to his thesis, does this work?}\todo{MS: there is citable figshare link with DOI for the dataset, see change}
 We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits, 
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
-This data consists, per reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
+This data consists of, per reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
 The bond changes indicate pairs of atoms which are connected differently in the reactants and products.
 The SMILES strings encode the molecules present in a text based format.
-Before we can apply our method, we perform two data preprocessing tasks 
-(using the open-source chemo-informatics software RDKit \citep{rdkit}) 
-in order to automatically
+Before we can apply our method, we perform two data preprocessing tasks described in the subsections below
+(using the open-source chemo-informatics software RDKit \citep{rdkit}).
+These steps automatically
 extract a subset of data appropriate for training our model of electron movement during a reaction. 
 % The remainder of this section describes those tasks.
 
