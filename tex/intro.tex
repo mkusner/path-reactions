@@ -9,12 +9,14 @@ This sequence of bond-making and breaking is known as the \emph{reaction mechani
 Understanding the reaction mechanism is crucial because it not only determines the products (formed at the last step of the mechanism), 
 but it also provides insight into why the products are formed on an atomistic level. 
 %
-Mechanisms can be treated at different levels of abstraction. On the lowest level, quantum-mechanical simulations of the electronic structure can be performed, which is computationally expensive for most systems of interest. 
+Mechanisms can be treated at different levels of abstraction. 
+On the lowest level, quantum-mechanical simulations of the electronic structure can be performed, which is prohibitively computationally expensive for most systems of interest. 
 On the other end, chemical reactions can be treated as rules that ``rewrite'' reactant molecules to products, which abstracts away the individual electron redistribution steps into a single, global transformation step. 
 To combine the advantages of both approaches, chemists use a tremendously powerful intermediate model, which simplifies the stepwise electron shifts using sequences of arrows which indicate the path of electrons throughout molecular graphs \cite{herges1994organizing}. 
 
-
-Recently, there have been a number of machine learning models proposed for directly predicting the products of chemical reactions on a global level\cite{coley2017prediction,jin2017predicting,schwaller2017found,neural-symbolic,segler2018planning,wei2016neural}, largely using graph-based or machine translation models. The task of reaction product prediction is shown on the left-hand side of Figure~\ref{fig:task-overview}. On the other hand, approaches combining hand-coded heuristics and quantum-mechanics, but not machine learning, have been suggested to predict reaction mechanisms.\cite{kim2018efficient,rappoport2014complex,zimmerman2013automated,bergeler2015heuristics,simm2017context}
+Recently, there have been a number of machine learning models proposed for directly predicting the products of chemical reactions on a global level \cite{coley2017prediction,jin2017predicting,schwaller2017found,neural-symbolic,segler2018planning,wei2016neural}, largely using graph-based or machine translation models. 
+The task of reaction product prediction is shown on the left-hand side of Figure~\ref{fig:task-overview}. 
+Alternative approaches have been proposed to predict reaction mechanisms, combining hand-coded heuristics and quantum-mechanics \cite{bergeler2015heuristics,kim2018efficient,rappoport2014complex,simm2017context,zimmerman2013automated}, rather than machine learning.
 
 
 In this paper we propose a machine learning model to predict the reaction mechanism, as shown on the right-hand side of Figure~\ref{fig:task-overview}, of a particularly important subset of organic reactions.
