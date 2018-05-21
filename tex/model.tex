@@ -163,8 +163,9 @@ They are used to form the graph embedding, $\graphEmbeddings$, in the following 
 	\graphEmbeddings = \fEmbedGraphs(\nodeEmbeddings{\moleculeSet_t}) = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\nodeEmbeddings{\moleculeSet_t,v})\right) \fuj(\nodeEmbeddings{\moleculeSet_t, v})\right).
 	\label{eq:graph-embedding}
 \end{align}
-We can break this down into two stages.
-In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more molecules (with vertices $\Ac'$), by performing a gated sum over the node features.
+Where $\sigma$ is a sigmoid function.
+We can break this equation down into two stages.
+In stage (i), similar to \citet[\S B.1]{li2018learning}, we form an embedding of one or more molecules (with vertices $\Ac'$ and with $\Ac' \subset  \Ac$) by performing a gated sum over the node features. 
 In this manner the function $\fui$ is used to decide how much that node should contribute towards the embedding,
  and $\fuj$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose this to be double the dimension of the node features.
 Having formed this embedding of the graphs, we project this down to a lower dimensional space in stage (ii), which is done by the function $\fuk$. 
