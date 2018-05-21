@@ -33,7 +33,7 @@ We elect to preprocess the entire USPTO dataset by separating out the reagents f
 (ii) the molecule appears in the product SMILES completely unchanged from the pre-reaction SMILES.
 This allows us to properly model molecules which are included in the dataset but do not materially contribute to the reaction.
 
-\subsection{Identifying reactions with linear electron shift}
+\subsection{Identifying reactions with linear electron topology}
 
 To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings and bond changes.
 Furthermore, not every reaction in the USPTO dataset has a linear electron shift topology; 
