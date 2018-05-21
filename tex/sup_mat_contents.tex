@@ -8,25 +8,27 @@ Figure \ref{fig:symmetric-reaction-example} is an example of this.
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \centering
-        \includegraphics[height=1.2in]{imgs/reaction}
+        \includegraphics[width=\textwidth]{imgs/symmetry/main_reaction}
         \caption{Reaction as defined by USPTO SMILES}
     \end{subfigure}
     
     \par\bigskip % force a bit of vertical whitespace 
     \begin{subfigure}[b]{0.95\textwidth}
         \centering
-        \includegraphics[height=1.2in]{imgs/routes}
+        \includegraphics[width=0.4\textwidth]{imgs/symmetry/possible1}
+        \qquad
+        \qquad
+        \includegraphics[width=0.4\textwidth]{imgs/symmetry/possible2}
         \caption{Possible action sequences that all result in same major product.}
     \end{subfigure}
-    \caption{This example shows how symmetry can affect the evaluation of electron paths. In this example, although one electron path is given in the USPTO dataset, after the O (atom map number 27) loses its Hydrogen it can react with any of the CH3 groups in the second reactant to form the same major product. This is why judging purely based on electron path accuracy can sometimes be misleading.}
+    \caption{This example shows how symmetry can affect the evaluation of electron paths. In this example, although one electron path is given in the USPTO dataset, the initial N that reacts could be either 15 or 12, with no difference in the final product. This is why judging purely based on electron path accuracy can sometimes be misleading.}
     \label{fig:symmetric-reaction-example}
 \end{figure*}
 
 
 \section{More training details}
 
-In this section we go through more specific model architecture details omitted from the main text. Further details can be found from our code, available at REDACTED.
-
+In this section we go through more specific model architecture details omitted from the main text. 
 
 \subsection{Model architectures}
 In this section we provide further details of our model architectures.
