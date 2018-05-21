@@ -10,13 +10,13 @@ an integer label assigned to each non-hydrogen atom in both the reactants and th
 both permits easy matching between atoms before and after the reaction, and
 %\footnote{In the USPTO dataset, all reactions have been ``atom mapped'', which means that integer labels have been assigned to each non-hydrogen atom in both the reactants and the products.}. 
 gives us a consistent way to index particular atoms.
-Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 1 of the supplementary material.
+Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 1 of the Appendix.
 Input molecules into the model are first put in a Kekul\'e form, a process which makes explicit the location of single and double bonds in aromatic structures;
 each bond $b \in \Bc$ is either a single, double, or triple bond.
 
 
 Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
-our model defines a conditional distribution over a sequence of atoms $\electronPath_{0:T} = (a_0, a_1, \ldots, a_T)$,
+our model defines a conditional distribution over a sequence of atoms (which we also refer to as actions) $\electronPath_{0:T} = (a_0, a_1, \ldots, a_T)$,
 which fully characterizes the electron path.
 This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
 denoting the outcome of the reaction,
@@ -110,7 +110,7 @@ Note that in our model we cannot stop after one action, as it is necessary to pi
 however, it is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
 Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
-If the three reaction assumptions stated in the previous section hold, then, as stated earlier, there are two types of electron movements that alternate: 
+If the reaction assumptions stated in the previous section hold, then, as stated earlier, there are two types of electron movements that alternate: 
 (i) movement that \emph{removes an existing bond}, and 
 (ii) movement that \emph{adds a new bond}. 
 %We can generalize assumption 3 by defining that atoms with free electrons have a self-bond. 
@@ -134,22 +134,22 @@ Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameteri
 for each stage the network takes the current intermediate product graph, 
 along with the previous action and the reagents if relevant, 
 to compute a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
-These structure of these networks is described in the following section.
+The structure of these networks is described in the following section.
 % and more detailed information on the architectures is given in the supplementary material.
 
 \subsection{Computing atom and molecule features}
 
 
 We are left now with defining the functional form of our conditional distributions for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t \mid a_{t-1}, \moleculeSet_t, t)$.
-However, before describing these modules we need to describe how we compute node embeddings and graph embeddings as these  are  essential to each.
+However, before describing these modules we need to describe how we compute node embeddings and graph embeddings, as these  are  essential to each.
 Full architectural details (e.g.\ number of layers and hidden units) 
-and training settings are deferred to the supplemental material.
+and training settings are deferred to the Appendix.
 
 Node embeddings are representations of all the atoms (vertices) in all the molecules present in $\moleculeSet_t$.
  We denote them by the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \mathbb{R}^{|\Ac|\times d}$.
 Each row contains a $d$-dimensional embedding of an atom (vertex).
 A natural ordering for the rows are  the corresponding atoms' atom-mapped numbers.
-We define the function $\fEmbed$ to take in a set of graphs representing each molecule and compute these node embeddings.
+We define the function $\fEmbed$ to take in a set of graphs representing each molecule and to compute these node embeddings.
 In general $\fEmbed$ could be any deep graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural};
 we choose to use gated graph neural network (GGNN) message functions \citep{li2016gated}.
 
@@ -166,7 +166,7 @@ They are used to form the graph embedding, $\graphEmbeddings$, in the following 
 We can break this down into two stages.
 In stage (i), similar to \citet[\S B.1]{li2018learning} we form an embedding of one or more molecules (with vertices $\Ac'$), by performing a gated sum over the node features.
 In this manner the function $\fui$ is used to decide how much that node should contribute towards the embedding,
- and $\fuj$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose to be double the dimension of the node features.
+ and $\fuj$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose this to be double the dimension of the node features.
 Having formed this embedding of the graphs, we project this down to a lower dimensional space in stage (ii), which is done by the function $\fuk$. 
 %Again we use a single linear layer for this function. % already said this above
 
