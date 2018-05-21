@@ -35,7 +35,7 @@ In this section we provide further details of our model architectures.
 
 Section 3 of the main paper discusses our model.
 In particular we are interested in computing three conditional probability terms: (1) $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
-(2) the conditional probability $p_\theta(a_t \mid a_{t-1}, \moleculeSet_t, t)$ 
+(2) the conditional probability $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$ 
 %\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
 of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
 and (3) the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
@@ -69,14 +69,14 @@ The function $\fEmbed$ computes node embeddings, $\nodeEmbeddings{\moleculeSet_t
 
 As mentioned in Section 3 of the main paper both $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$ consist of three
 linear functions. 
-For  both the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
+For  both, the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
 Again for both, $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
 This is double the dimension of the node features, and similar to the approach taken by \citet[\S B.1]{li2018learning}.
 Finally, $\fuk$ differs between the two modules, as for $\fEmbedGraphs_{\textrm{stop}}$ it projects down to one dimension (to later go through a sigmoid function and compute a stop probability), whereas for  $\fEmbedGraphs_\mathrm{reagent}$, $\fuk$ projects  to a dimensionality of 100 to form the reagent embedding.
 
 
 The modules for $\fAdd$ and $\fRemove$, that operate on each node to produce a action logit, are both NNs consisting of one hidden layer of 100 units. 
-Concatenated onto the node features going into these networks are the node features belonging to the previous atom in the path.
+Concatenated onto the node features going into these networks are the node features belonging to the previous atom on the path.
 
 
 
