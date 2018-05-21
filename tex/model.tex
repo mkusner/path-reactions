@@ -86,7 +86,7 @@ p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)
 \end{align}
 where we have defined $p_\theta(s'_t \mid \moleculeSet_t) \equiv 1 - p_\theta(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
 The other terms include $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
-the conditional probability $p_\theta(a_t \mid a_{t-1}, \moleculeSet_t, t)$ 
+the conditional probability $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$ 
 %\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
 of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
 and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
@@ -140,7 +140,7 @@ The structure of these networks is described in the following section.
 \subsection{Computing atom and molecule features}
 
 
-We are left now with defining the functional form of our conditional distributions for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t \mid a_{t-1}, \moleculeSet_t, t)$.
+We are left now with defining the functional form of our conditional distributions for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$.
 However, before describing these modules we need to describe how we compute node embeddings and graph embeddings, as these  are  essential to each.
 Full architectural details (e.g.\ number of layers and hidden units) 
 and training settings are deferred to the Appendix.
@@ -186,22 +186,22 @@ p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeE
 %This leaves us with describing the form of the initial action, $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions, $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$, modules.
 % The second of these can be broken down into two parameterized functions
 Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, each defining a probability vector over actions.
-The transition distribution $p_\theta(a_t \mid a_{t-1} \moleculeSet_t, t)$ 
+The transition distribution $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$ 
 which selects the next atom in the sequence $\electronPath$
 can be split into two distributions depending on the parity of $t$:
-the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid a_{t-1}, \moleculeSet_t)$ is taken when $t$ is odd, 
+the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ is taken when $t$ is odd, 
 and the add bond step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is taken when $t$ is even. 
 
 These three modules each have the same overall functional form
 \begin{align}
-\actionLogits &= f(\nodeEmbeddings{m}, \contextVect), \\
+\actionLogits &= f(\nodeEmbeddings{\moleculeSet_t}, \contextVect), \\
 p_\theta(a_t \mid \cdots) &\propto \bm{\beta} \odot \mbox{softmax}(\bm{\actionLogits})
 \end{align}
 where $f$ is one of the networks $\fInitial, \fAdd$, or $\fRemove$; 
 $\contextVect$ is a context vector, and $\bm{\beta}$ is a binary mask.
 
 Each of the three actions has a different context and mask.
-The add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, t)$ and remove step $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, t)$,
+The add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ and remove step $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, a_{t-1})$,
  have as context the node embedding of the atom selected at the previous step, $\contextVect_{a_{t-1}} = \nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
 For the initial step, this context vector $\contextVect_\mathrm{reagent}$ is an embedding of all the reagents present, computed %by summing graph embeddings for reagent, each computed using
 by a graph embedding function $\fEmbedGraphs_\mathrm{reagent}$.
@@ -255,7 +255,7 @@ simply by simulating from the conditional distributions until sampling a stop va
 We instead would like to find a ranked list of the top-$K$ predicted paths, and do so using a modified beam search,
 in which we roll out a beam of width $K$ until a maximum path length $T^\mathrm{max}$,
 while recording all paths which have terminated.
-This search procedure is described in detail in Algorithm 1 in the supplemental material.
+This search procedure is described in detail in Algorithm 1 in the Appendix.
 
 
 
