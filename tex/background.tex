@@ -4,7 +4,7 @@
 \begin{figure*}[t!]
 \centering
 \includegraphics[width=\textwidth]{reaction_diagram}
-\caption{\emph{(Left)} The reaction product prediction problem: Given the reactants and reagents, predict the structure of the product. \emph{(Right)} The reaction mechanism prediction problem: Given the reactants, reagents and products, predict how the reaction occurred to form the products.}
+\caption{\emph{(Left)} The reaction product prediction problem: Given the reactants and reagents, predict the structure of the product. \emph{(Right)} The reaction mechanism prediction problem: Given the reactants and reagents, predict how the reaction occurred to form the products.}
 \label{fig:task-overview}
 %\vspace{-1em}
 \end{figure*}
@@ -44,7 +44,7 @@ In this work, we will only consider reactions with linear topology that involve 
 
 \vspace{-0.15cm}
 \paragraph{Reactions as single electron paths.}
-If reactions satisfy the above assumptions, then a chemical reaction can be modeled as pairs of electrons moving in a \emph{single path} through the reactant atoms. 
+If reactions fall into this class, then a chemical reaction can be modeled as pairs of electrons moving in a \emph{single path} through the reactant atoms. 
 Further, this electron path will alternately remove existing bonds in molecules, and form new ones. We show this alternating structure in the right hand part of Figure \ref{fig:task-overview}. 
 The reaction formally starts by taking the pair of electrons between the Li and C atoms and moving them to the C atom (step 1); this is a remove bond step. 
 Next comes an add step where electrons are moved from the C atom to form a bond between the two reactant molecules (step 2).
