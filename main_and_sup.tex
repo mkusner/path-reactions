@@ -1,13 +1,13 @@
 \documentclass{article}
 
 % if you need to pass options to natbib, use, e.g.:
-\PassOptionsToPackage{numbers, compress}{natbib}
+%\PassOptionsToPackage{numbers, compress}{natbib}
 % before loading nips_2018
 %
 % to avoid loading the natbib package, add option nonatbib:
 % to compile a camera-ready version, add the [final] option, e.g.:
 % \usepackage[final]{nips_2018}
-\usepackage[preprint]{nips_2018}
+\usepackage[preprint,nonatbib]{nips_2018}
 % as described here: https://nips.cc/Conferences/2018/PaperInformation/StyleFiles
 
 
@@ -28,7 +28,7 @@
 \usepackage{amsmath}
 
 % For citations
-\usepackage{natbib}
+\usepackage[numbers, sort&compress]{natbib}
 
 % For figures
 \usepackage{graphicx} % more modern
@@ -222,7 +222,7 @@ Alan Turing Institute \\
 
 %\newpage
 \bibliography{bibliography}
-\bibliographystyle{plainnat}
+\bibliographystyle{naturemag}
 
 \appendix
 \vfill
