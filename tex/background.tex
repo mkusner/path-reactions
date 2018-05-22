@@ -51,11 +51,7 @@ However, there are a number of benefits of predicting electron paths over predic
 \item \textbf{Chemical constraints}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
 \item \textbf{Compositional}: Learning to combine lower-level abstractions of chemistry potentially allows us to generalize better.
 \end{itemize}
-The only other work we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning},
-all of which model a chemical reaction as an interaction between atoms which function as electron donors
-and those which function as electron acceptors.
-A machine learning algorithm identifies these likely electron sources and sinks, 
-and the reaction mechanism is then found by ranking the pairwise combinations.
-These approaches rely either on complex hand-coded rules and/or hand-curated datasets, 
-which are usually small and proprietary.
+The only other work we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning}. All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors. They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all pairwise combinations of them.
+%and the reaction mechanism is then found by ranking the pairwise combinations.
+These approaches rely either on complex hand-coded rules and/or hand-curated datasets, which are usually small and proprietary.
 
