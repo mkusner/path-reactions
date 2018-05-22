@@ -35,8 +35,7 @@ In this section we provide further details of our model architectures.
 
 Section 3 of the main paper discusses our model.
 In particular we are interested in computing three conditional probability terms: (1) $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
-(2) the conditional probability $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$ 
-%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
+(2) the conditional probability $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$  
 of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
 and (3) the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
 

@@ -3,9 +3,6 @@
 %\subsection{Data and preprocessing}
 
 Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database \citep{Lowe2017}.
-%\todo{which of these two citations?}.
-%\footnote{https://bitbucket.org/dan2097/patent-reaction-extraction/downloads/} 
-% \todo{not sure how to cite this} \info[]{JAB: I've put in a citation to his thesis, does this work?}\todo{MS: there is citable figshare link with DOI for the dataset, see change}
 We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits, 
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
 This data consists of, per reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
@@ -15,7 +12,7 @@ Before we can apply our method, we perform two data preprocessing tasks describe
 (using the open-source chemo-informatics software RDKit \citep{rdkit}).
 These steps automatically
 extract a subset of data appropriate for training our model of electron movement during a reaction. 
-% The remainder of this section describes those tasks.
+
 
 \subsection{Reactant and reagent separation}
 
@@ -24,8 +21,6 @@ Typically, reaction SMILES strings are split into three parts --- reactants, rea
 The reactant molecules are those which are consumed during the course of the chemical reaction to form the  product, 
 while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts),
 but do not explicitly take part in the reaction itself; we see this in the example in Figure~\ref{fig:task-overview}.
-%Each non-hydrogen atom in the USPTO dataset is assigned an atom map number, an integer which serves as an unique identifier for the atom and allows us to match particular atoms in the reactants with atoms in the products.
-%\todo{maybe this is not needed now that we describe atom maps in model}
 
 Unfortunately, the USPTO dataset as extracted does not differentiate between reagents and reactants.
 We elect to preprocess the entire USPTO dataset by separating out the reagents from the reactants using the process outlined in \citet{schwaller2017found}, where we classify as a reagent any molecule for which either 
@@ -40,7 +35,6 @@ Furthermore, not every reaction in the USPTO dataset has a linear electron topol
 such reactions (for example, multi-step reactions and cycloadditions) will not have a single unique path through the atoms 
 which describes the movement of the electrons.
 
-%Extracting the paths and filtering the dataset is a several-step process.
 The first step is to look at the bond changes present in a reaction. 
 Each atom on the ends of the path will be involved in exactly one bond change;
 the atoms in the middle will be involved in two. 
@@ -57,16 +51,13 @@ implying that this is the end of the path;
 vice-versa for the start of the path.
 However, sometimes the difference is not available in the USPTO data, as unfortunately only major products are recorded, and so details of what happens to some of the reactant molecules' atoms may be missing.
 In these cases we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
-%\todo{could say we just guess if they have equal electronegativity..?}{}
 
 The next step of filtering checks that the path alternates between add steps (+1) and remove steps (-1). 
 This is done by analyzing and comparing the bond changes on the path in the reactant and product molecules. 
 Reactions that involve greater than one change (for instance going from no bond between two atoms in the reactants to a double bond between the two in the products) can indicate multi-step 
 reactions with identical paths, and so are discarded.
-%\todo{I think we do have an example of this, which we could put in.}
 Finally, as a last sanity check, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants,
 to confirm that the final product that is produced by our extracted electron path is consistent with the major product SMILES in the USPTO dataset.
-% \todo{I want to say this is not needed with the other checks but not sure. Cant remember why I added it in except as an extra sanity check.}{}
 
 The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
 correspond to reactions of linear topology.
