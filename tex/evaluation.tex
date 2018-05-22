@@ -103,9 +103,8 @@ These product-level accuracies are reported in Table~\ref{table:prod-predict}.
 For product prediction we compare with the state-of-the-art graph-based method \cite{jin2017predicting};
 we use their evaluation code and pre-trained model\footnote{\url{https://github.com/wengong-jin/nips17-rexgen}},
 re-evaluated on our extracted test set. 
-We also trained a Seq2Seq baseline model following \cite{schwaller2017found};
-unfortunately, with the hyperparameter settings described in the paper we were not able to reproduce their results.
-As the authors have not released code or a trained model, we were unable to evaluate it on our test set, and instead quote their reported performance on a different USPTO test set for reference.
+We also compare against the Seq2Seq model proposed by \citep{schwaller2017found};
+unfortunately, however, we were unable to evaluate it on our test set, and instead quote their reported performance on a different USPTO test set for reference.
 Overall, \ourModelR outperforms all other approaches on this metric, with 87\% top-1 accuracy and 95.9\% top-5 accuracy.
 Omitting the reagents in \ourModelR degrades top-1 accuracy slightly, but maintains a high top-3 and top-5 accuracy,
 suggesting that reagent information is necessary to provide context in disambiguating plausible reaction paths.
