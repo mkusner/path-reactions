@@ -1,16 +1,16 @@
 \documentclass{article}
 
 % if you need to pass options to natbib, use, e.g.:
-%\PassOptionsToPackage{numbers, sort&compress}{natbib}
+\PassOptionsToPackage{numbers, compress}{natbib}
 % before loading nips_2018
 %
 % to avoid loading the natbib package, add option nonatbib:
 % to compile a camera-ready version, add the [final] option, e.g.:
 % \usepackage[final]{nips_2018}
-\usepackage[preprint,nonatbib]{nips_2018}
+\usepackage[preprint]{nips_2018}
 % as described here: https://nips.cc/Conferences/2018/PaperInformation/StyleFiles
 
-%%%%%\usepackage[final]{gen_report}
+
 
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
@@ -28,8 +28,7 @@
 \usepackage{amsmath}
 
 % For citations
-\usepackage[numbers,sort&compress]{natbib}
-
+\usepackage{natbib}
 
 % For figures
 \usepackage{graphicx} % more modern
@@ -119,13 +118,13 @@
 
 % for todos
 \usepackage{xargs}                      % Use more than one optional parameter in a new commands
-\usepackage[pdftex,dvipsnames]{xcolor}
-%todos -- remove at end
-\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
-\newcommand{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
-\newcommand{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
-\newcommand{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
-\newcommand{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
+\usepackage[dvipsnames]{xcolor}
+%%todos -- remove at end
+%\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+%\newcommand{\unsure}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+%\newcommand{\change}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+%\newcommand{\info}[2][1=]{\todo[linecolor=OliveGreen,backgroundcolor=OliveGreen!25,bordercolor=OliveGreen,#1]{#2}}
+%\newcommand{\improvement}[2][1=]{\todo[linecolor=Plum,backgroundcolor=Plum!25,bordercolor=Plum,#1]{#2}}
 
 % quick-and-dirty TKTKTK
 \newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
@@ -147,37 +146,33 @@
 
 
 
-%todo: fill in authors plus afflilitions
-% mine (John) is Cambridge and Max Planck Institute for Intelligent Systems, Tuebingen
-\author{
-  David S.~Hippocampus\thanks{Use footnote for providing further
-    information about author (webpage, alternative
-    address)---\emph{not} for acknowledging funding agencies.} \\
-  Department of Computer Science\\
-  Cranberry-Lemon University\\
-  Pittsburgh, PA 15213 \\
-  \texttt{hippo@cs.cranberry-lemon.edu} \\
-  %% examples of more authors
-  %% \And
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
-  %% \AND
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
-  %% \And
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
-  %% \And
-  %% Coauthor \\
-  %% Affiliation \\
-  %% Address \\
-  %% \texttt{email} \\
+
+\author{John Bradshaw \\ 
+University of Cambridge \\
+Max Planck Institute, T\"ubingen 
+\\
+\texttt{jab255@cam.ac.uk}
+\And
+Matt J. Kusner \\
+Alan Turing Institute \\
+University of Warwick 
+\\
+\texttt{mkusner@turing.ac.uk}
+\And
+Brooks Paige \\
+Alan Turing Institute \\
+University of Cambridge 
+\\
+\texttt{bpaige@turing.ac.uk}
+\AND
+Marwin H. S. Segler \\
+BenevolentAI \\
+\texttt{marwin.segler@benevolent.ai}
+\And
+Jos\'e Miguel Hern\'andez-Lobato \\
+University of Cambridge \\
+Alan Turing Institute \\
+\texttt{jmh233@cam.ac.uk}
 }
 
 \input{tex/notation}
@@ -193,18 +188,16 @@
 \input{tex/intro}
 
 
-%\vspace{-0.5em}
 \section{Background}
-%\vspace{-0.5em}
+
 \input{tex/background}
 
 
 
 
-% KEY: separate assumptions from data processing
-%\vspace{-0.5em}
+
 \section{Model}
-%\vspace{-0.5em}
+
 \label{sec:model}
 \input{tex/model}
 
@@ -218,20 +211,21 @@
 \section{Experiments and Evaluation}
 \input{tex/evaluation}
 
-\vspace{-0.5em}
+
 \input{tex/qualitative}
 
-\vspace{-0.5em}
+
 \section{Discussion}
-\vspace{-0.5em}
+
 \input{tex/discussion}
 
 
 %\newpage
 \bibliography{bibliography}
-\bibliographystyle{naturemag}
+\bibliographystyle{plainnat}
 
 \appendix
+\vfill
 \pagebreak
 \input{tex/sup_mat_contents}
 
