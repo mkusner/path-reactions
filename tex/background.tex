@@ -48,9 +48,9 @@ However, there are a number of benefits of predicting electron paths over predic
 \begin{itemize}
 \item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where, and possibly why, it goes wrong by comparing the steps of the path with the correct steps.
 \item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
-\item \textbf{Chemical constraints}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
-\item \textbf{Compositional}: Learning to combine lower-level abstractions of chemistry potentially allows us to generalize better.
+\item \textbf{Chemically consistent}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
+\item \textbf{Generalizable}: As reaction paths follow similar trends in different molecules, our model naturally generalizes to unseen reactions. %Learning to combine lower-level abstractions of chemistry potentially allows us to generalize better.
 \end{itemize}
-The only other work we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning, NIPS2011_4356}. All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors. They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all pairwise combinations of them.
+The only other works we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning, NIPS2011_4356}. All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors. They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all pairwise combinations of them.
 However, this pairwise enumeration can be a slow process and these methods have only so far been successfully trained on small hand-curated datasets.
 
