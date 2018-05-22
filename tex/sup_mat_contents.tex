@@ -93,17 +93,17 @@ For training we use reaction minibatch sizes of one, although these can consist 
 
 
 
-
-
-
-
-
-
 \section{Prediction using our model}
 
 At predict time, as discussed in the main text, we use beam search to find high probable chemically-valid paths from our model. Further details are given in Algorithm~\ref{algo:valid_path}.
 
 \input{tex/algorithm.tex}
+
+
+
+\newpage
+\quad
+\newpage
 
 \section{Further example of actions proposed by our model}
 
@@ -112,8 +112,16 @@ Figure \ref{fig:extra-textbook-example} shows the model's predictions for the me
 \begin{figure*}[h]
         \centering
         \includegraphics{imgs/textbook/reactants2}
-        \caption{Predicted mechanism of our model on reactant molecules. Green arrow shows preferred mechanism, whereas pink shows the model's second preferred choice. Here, the first-choice prediction is incorrect, but chemically reasonable. The second-choice prediction is correct.}
+        \caption{Predicted mechanism of our model on reactant molecules. Green arrow shows preferred mechanism, whereas pink shows the model's second preferred choice. Here, the first-choice prediction is incorrect, but chemically reasonable, as the Weinreb amide is typically used together in reactions with Magnesium species. The second-choice prediction is correct.}
         \label{fig:extra-textbook-example}
 \end{figure*}
+
+\begin{figure*}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{imgs/textbook/additionalexamples}
+        \caption{Additional typical selectivity examples: Here, the expected product is shown on the left. The blue arrows indicate the top ranked paths from our model, the red arrows indicate other possibly competing but incorrect steps, which the model does not predict to be of high probability. In all cases, our model predicted the correct products.}
+        \label{fig:extra-textbook-example2}
+\end{figure*}
+
 
 
