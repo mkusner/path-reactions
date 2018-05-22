@@ -104,7 +104,7 @@ For product prediction we compare with the state-of-the-art graph-based method \
 we use their evaluation code and pre-trained model\footnote{\url{https://github.com/wengong-jin/nips17-rexgen}},
 re-evaluated on our extracted test set. 
 We also compare against the Seq2Seq model proposed by \citep{schwaller2017found};
-unfortunately, however, we were unable to evaluate it on our test set, and instead quote their reported performance on a different USPTO test set for reference.
+unfortunately, however, we were unable to evaluate it on our extracted test set, and instead quote their reported performance on a different USPTO test set for reference.
 Overall, \ourModelR outperforms all other approaches on this metric, with 87\% top-1 accuracy and 95.9\% top-5 accuracy.
 Omitting the reagents in \ourModelR degrades top-1 accuracy slightly, but maintains a high top-3 and top-5 accuracy,
 suggesting that reagent information is necessary to provide context in disambiguating plausible reaction paths.
