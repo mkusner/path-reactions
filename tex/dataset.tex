@@ -3,7 +3,7 @@
 %\subsection{Data and preprocessing}
 
 Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database \citep{Lowe2017}.
-We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits, 
+We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits 
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
 This data consists of, per reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
 The bond changes indicate pairs of atoms which are connected differently in the reactants and products.
@@ -46,7 +46,7 @@ If we are unable to form such a path, for instance due to two paths being presen
 For training our model we want to find the ordering of our path, so that we know in which direction the electrons flow.
 To do this we examine the changes of the properties of the atoms at the two ends of our path. 
 In particular, we look at changes in charge and attached implicit hydrogen counts. 
-The gain of negative charge (or analogously the gain of hydrogen as H+ ions without changing charge) indicates that electrons have arrived at this atom, 
+The gain of negative charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge) indicates that electrons have arrived at this atom, 
 implying that this is the end of the path; 
 vice-versa for the start of the path.
 However, sometimes the difference is not available in the USPTO data, as unfortunately only major products are recorded, and so details of what happens to some of the reactant molecules' atoms may be missing.

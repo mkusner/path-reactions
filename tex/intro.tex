@@ -11,16 +11,18 @@ but it also provides insight into why the products are formed on an atomistic le
 Mechanisms can be treated at different levels of abstraction. 
 On the lowest level, quantum-mechanical simulations of the electronic structure can be performed, which is prohibitively computationally expensive for most systems of interest. 
 On the other end, chemical reactions can be treated as rules that ``rewrite'' reactant molecules to products, which abstracts away the individual electron redistribution steps into a single, global transformation step. 
-To combine the advantages of both approaches, chemists use a tremendously powerful intermediate model, which simplifies the stepwise electron shifts using sequences of arrows which indicate the path of electrons throughout molecular graphs \cite{herges1994organizing}. 
+To combine the advantages of both approaches, chemists use a tremendously powerful intermediate conceptual model, which simplifies the stepwise electron shifts using sequences of arrows which indicate the path of electrons throughout molecular graphs \cite{herges1994organizing}. 
 
 Recently, there have been a number of machine learning models proposed for directly predicting the products of chemical reactions \cite{coley2017prediction,jin2017predicting,schwaller2017found,neural-symbolic,segler2018planning,wei2016neural}, largely using graph-based or machine translation models. 
 The task of reaction product prediction is shown on the left-hand side of Figure~\ref{fig:task-overview}. 
 
-In this paper we propose a machine learning model to predict the reaction mechanism, as shown on the right-hand side of Figure~\ref{fig:task-overview}, of a particularly important subset of organic reactions.
-We argue that not only is our model more interpretable than product prediction models but it is easier to encode the constraints imposed by chemistry into it. 
+In this paper we propose a machine learning model to predict the reaction mechanism, as shown on the right-hand side of Figure~\ref{fig:task-overview}, for a particularly important subset of organic reactions.
+We argue that not only is our model more interpretable than product prediction models but it is easier to encode in it the constraints imposed by chemistry. 
 Proposed approaches to predicting reaction mechanisms have been based on combining hand-coded heuristics and quantum mechanics \cite{bergeler2015heuristics,kim2018efficient,rappoport2014complex,simm2017context,zimmerman2013automated}, 
 rather than machine learning.
-We call our model \ourModel, as it directly predicts the path of electrons through molecules (i.e., the reaction mechanism). To train the model we devise a general technique to obtain approximate reaction mechanisms purely from data about the reactants and products. This allows one to train our a model on large, unannotated reaction datasets such as USPTO \cite{lowe2012extraction}. We demonstrate that not only does our model achieve state-of-the-art results, it also surprisingly learns chemical properties it was not explicitly trained on.
+We call our model \ourModel, as it directly predicts the path of electrons through molecules (i.e., the reaction mechanism). 
+To train the model we devise a general technique to obtain approximate reaction mechanisms purely from data about the reactants and products. 
+This allows one to train our a model on large, unannotated reaction datasets such as USPTO \cite{lowe2012extraction}. We demonstrate that not only does our model achieve state-of-the-art results, surprisingly it also learns chemical properties it was not explicitly trained on.
 
 
 

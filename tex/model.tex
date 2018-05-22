@@ -9,7 +9,7 @@ We can associate an ordering over all the atoms in all the molecules in the set 
 an integer label assigned to each non-hydrogen atom in both the reactants and the products which 
 both permits easy matching between atoms before and after the reaction, and
 gives us a consistent way to index particular atoms.
-Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 1 of the Appendix.
+Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 3 of the appendix.
 Molecules input into the model are first put in a Kekul\'e form, a process which makes explicit the location of single and double bonds in aromatic structures;
 each bond $b \in \Bc$ is either a single, double, or triple bond.
 
@@ -98,10 +98,10 @@ The structure of these networks is described in the following section.
 \subsection{Computing atom and molecule features}
 
 
-We are left now with defining the functional form of our conditional distributions for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$.
+We are left now with defining the functional form of our conditional distributions for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t~|~\moleculeSet_t, a_{t-1}, t)$.
 However, before describing these modules we need to describe how we compute node embeddings and graph embeddings, as these  are  essential to each.
 Full architectural details (e.g.\ number of layers and hidden units) 
-and training settings are deferred to the Appendix.
+and training settings are deferred to the appendix.
 
 Node embeddings are representations of all the atoms in all the molecules present in $\moleculeSet_t$.
  We denote them by the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \mathbb{R}^{|\Ac|\times d}$.
@@ -114,8 +114,8 @@ we choose to use gated graph neural network (GGNN) message functions \citep{li20
 It is also useful to be able to calculate graph embeddings $\graphEmbeddings$, which are vectors that represent groups of nodes belonging to one or more graphs; i.e.\ an entire molecule or set of molecules.
  We define the function that maps node features belonging to each atom to their graph embedding by $\fEmbedGraphs$.
 These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
-Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any MLP but in practice we find that linear functions suffice.
-They are used to form the graph embedding, $\graphEmbeddings$, in the following way:
+Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
+They are used to form the graph embedding, $\graphEmbeddings$, as
 \begin{align}
 	\graphEmbeddings = \fEmbedGraphs(\nodeEmbeddings{\moleculeSet_t}) = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\nodeEmbeddings{\moleculeSet_t,v})\right) \fuj(\nodeEmbeddings{\moleculeSet_t, v})\right).
 	\label{eq:graph-embedding}
@@ -133,7 +133,7 @@ Having formed this embedding of the graphs, we project this down to a lower dime
 
 Having described how we compute node and graph embeddings, we are now ready to define each of our parameterized distributions over actions.
 The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
-This probability is computed from a graph embedding via the function $\fEmbedGraphs_{\textrm{stop}}$, which projects down to a single dimension. We then map this to the $[0,1]$ interval via the sigmoid function $\sigma$ which yields the following expression:
+This probability is computed from a graph embedding via the function $\fEmbedGraphs_{\textrm{stop}}$, which projects down to a single dimension. We then map this to the $[0,1]$ interval via the sigmoid function $\sigma$ which yields the overall expression
 \begin{align}
 %$
 p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t})).
