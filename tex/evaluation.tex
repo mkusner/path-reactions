@@ -1,6 +1,5 @@
 % !TEX root =  ../main.tex
 
-%\subsection{Results and Evaluation}
 
 \begin{table}[t]
  \begin{minipage}[l]{0.4\textwidth}
@@ -27,10 +26,6 @@ In our experiments we consider two variants of our model:
 the first model \ourModelR  is exactly as defined in Section\ \ref{sec:model}, including all reagent information;
 a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), 
 allowing us to gauge the importance of reagents in determining what reaction occurs. We now evaluate our model on the \emph{reaction mechanism prediction} and \emph{reaction product prediction} problems.
-
-% One challenge is in forming a precise definition of what it means for us to ``correctly'' predict the reaction outcome. 
-% Part of this relates to whether we are interested in  \emph{reaction mechanism prediction} or \emph{reaction product prediction}. 
-% In this section we evaluate our model in each of these regimes in turn.
 
 \subsection{Reaction Mechanism Prediction}
 

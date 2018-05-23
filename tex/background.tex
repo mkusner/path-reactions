@@ -49,22 +49,11 @@ However, there are a number of benefits of predicting electron paths over predic
 \item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where, and possibly why, it goes wrong by comparing the steps of the path with the correct steps.
 \item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
 \item \textbf{Chemically consistent}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
-\item \textbf{Generalizable}: As reaction paths follow similar trends in different molecules, our model naturally generalizes to unseen molecules. %Learning to combine lower-level abstractions of chemistry potentially allows us to generalize better.
+\item \textbf{Generalizable}: As reaction paths follow similar trends in different molecules, our model naturally generalizes to unseen molecules. 
 \end{itemize}
 The only other works we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning, NIPS2011_4356}.
 All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors.
  They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
 However, this combining and then ranking of electron sources and sinks can be a slow process, as many plausible reactions need to be considered (the number of subgraphs of $r$ reacting atoms, where single bonds are either added or removed is $2^{r(r-1)/2}$).
-% molecular graphs of $r$ reacting atoms with single, double, and triple bonds is $2^{3n(n-1)/2}$). % via: https://math.stackexchange.com/questions/154941/how-to-calculate-the-number-of-possible-connected-simple-graphs-with-n-labelle 
 These models also have only so far been successfully trained on small hand-curated datasets.
 
-%These works present interesting uses for reaction mechanism prediction, such as multistep pathway prediction \citep[\S3.3]{fooshee2018deep}\citep[p.2538]{kayala2012reactionpredictor}. 
-%This task involves working out which combination of multiple single reaction steps transforms a given set of reactants into a given set of products.  
-%Although not considered in this paper, applying our model to this task would make interesting future work.
-
-% NOTE: we can make a complexity argument if we like that involes:
-% T - number of reaction steps
-% N - number of total atoms
-% R - number of atoms involved in the reaction
-% ours: o(TN)
-% theirs: o(T 2^{3(R choose 2)}) (via here: https://math.stackexchange.com/questions/154941/how-to-calculate-the-number-of-possible-connected-simple-graphs-with-n-labelle)
