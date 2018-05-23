@@ -15,7 +15,7 @@
         %\caption{}
     \end{subfigure}
 %    \vspace{-1em}
-	\caption{(Left) 2nd-order nucleophilic substitutions $S_N 2$-reactions, (right) Suzuki-coupling (please note that in the ``real'' mechanism of the Suzuki coupling, the reaction would proceed via oxidative insertion, transmetallation and reductive elimination at a Palladium catalyst. As these mechanistic details are unavailable, we treat Palladium as a reagent). 
+	\caption{(Left) Nucleophilic substitutions $S_N 2$-reactions, (right) Suzuki-coupling (please note that in the ``real'' mechanism of the Suzuki coupling, the reaction would proceed via oxidative insertion, transmetallation and reductive elimination at a Palladium catalyst. As these mechanistic details are not contained in training data, we treat Palladium implicitly as a reagent). 
     In both cases, our model has correctly picked up the trend that halides lower in the period table usually react preferably ($I>Br>Cl$). }
 	\label{fig:qualitative}
 \vspace{-0.5em}
@@ -25,7 +25,7 @@
 
 \subsection{Qualitative Analysis}
 
-Complex molecules often feature several potentially reactive functional groups $\mathcal{F}=\{F_1,...,F_N\}$, which compete for reaction partners. 
+Complex molecules often feature several potentially reactive functional groups, which compete for reaction partners. 
 To predict the selectivity, that is which functional group will predominantly react in the presence of other groups, 
 students of chemistry learn heuristics and trends, 
 which have been established over the course of three centuries of experimental observation.
