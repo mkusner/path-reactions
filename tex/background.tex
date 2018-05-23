@@ -35,7 +35,7 @@ Reaction mechanisms can be classified by the topology of their "electron-pushing
 In this work, we will only consider reactions with linear topology that involve the movement of pairs of electrons.
 
 
-\vspace{-0.15cm}
+%\vspace{-0.15cm}
 \paragraph{Reactions as single electron paths.}
 If reactions fall into this class, then a chemical reaction can be modeled as pairs of electrons moving in a \emph{single path} through the reactant atoms. 
 Further, this electron path will alternately remove existing bonds in molecules, and form new ones. We show this alternating structure in the right hand part of Figure \ref{fig:task-overview}. 
@@ -51,9 +51,9 @@ However, there are a number of benefits of predicting electron paths over predic
 \item \textbf{Chemically consistent}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
 \item \textbf{Generalizable}: As reaction paths follow similar trends in different molecules, our model naturally generalizes to unseen molecules. 
 \end{itemize}
-The only other works we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning, NIPS2011_4356}.
+The only other work we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,NIPS2011_4356,kayala2011learning}.
 All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors.
  They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
-However, this combining and then ranking of electron sources and sinks can be a slow process, as many plausible reactions need to be considered (the number of subgraphs of $r$ reacting atoms, where single bonds are either added or removed is $2^{r(r-1)/2}$).
+However, this combining and then ranking of electron sources and sinks can be a slow process, as many plausible reactions need to be considered (the number of subgraphs of $n$ reacting atoms, where single bonds are either added or removed is $2^{n(n-1)/2}$).
 These models also have only so far been successfully trained on small hand-curated datasets.
 
