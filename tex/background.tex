@@ -30,7 +30,7 @@ Just as electrons describe the current structure of molecules,
 they also describe how molecules react with other molecules to produce new ones. All chemical reactions involve the stepwise movement of electrons along the atoms in a set of reactant molecules. 
 This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules \cite{herges1994coarctate}. 
 %
-Reaction mechanisms can be classified by the topology of their "electron-pushing arrows". Here, the class of reactions with linear electron flow topology is by far the most important, following by those with cyclic topology \citep{herges1994coarctate}.
+Reaction mechanisms can be classified by the topology of their "electron-pushing arrows". Here, the class of reactions with linear electron flow topology is by far the most important, followed by those with cyclic topology \citep{herges1994coarctate}.
 
 In this work, we will only consider reactions with linear topology that involve the movement of pairs of electrons.
 
@@ -51,6 +51,11 @@ However, there are a number of benefits of predicting electron paths over predic
 \item \textbf{Chemically consistent}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
 \item \textbf{Generalizable}: As reaction paths follow similar trends in different molecules, our model naturally generalizes to unseen reactions. %Learning to combine lower-level abstractions of chemistry potentially allows us to generalize better.
 \end{itemize}
-The only other works we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning, NIPS2011_4356}. All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors. They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all pairwise combinations of them.
-However, this pairwise enumeration can be a slow process and these methods have only so far been successfully trained on small hand-curated datasets.
+The only other works we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,kayala2011learning, NIPS2011_4356}.
+ All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors.
+ They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
+However, this combining and then ranking of electron sources and sinks can be a slow process, as many plausible reactions need to be considered. These models also have only so far been successfully trained on small hand-curated datasets.
 
+These works present interesting uses for reaction mechanism prediction, such as multistep pathway prediction \citep[\S3.3]{fooshee2018deep}\citep[p.2538]{kayala2012reactionpredictor}. 
+This task involves working out which combination of multiple single reaction steps transforms a given set of reactants into a given set of products.  
+Although not considered in this paper, applying our model to this task would make interesting future work.

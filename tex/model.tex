@@ -81,7 +81,7 @@ Given our reaction assumptions, then, as stated earlier, there are two types of 
 (ii) movement that \emph{adds a new bond}. 
 We define atoms with free electrons as having a self-bond.
 Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bonds;
-we can determine whether a particular step is an add step or remove step by inspecting $t$.
+we can determine whether a particular step is an add step or a remove step by inspecting $t$.
 Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not form or remove any bonds.
 Figure~\ref{fig:reaction_model} presents a simple example reaction which demonstrates all the critical features of the model;
 the subfigures show the sequence of intermediate products and the distributions over actions.
@@ -170,7 +170,7 @@ We can learn the parameters $\theta$ of all the parameterized functions, by maxi
 This is evaluated by using a known electron path $a_t^\star$ and intermediate products $\moleculeSet_t^\star$ extracted from training data,
 rather than on simulated values. 
 This allows us to train on all stages of the reaction at once, given electron path data.
-We train our models using ADAM \citep{kingma2014adam} and an initial learning rate of $10^{-4}$,
+We train our models using Adam \citep{kingma2014adam} and an initial learning rate of $10^{-4}$,
 with minibatches of size one, where minibatches often consist of multiple intermediate graphs.
 
 \paragraph{Prediction}
