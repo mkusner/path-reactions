@@ -11,8 +11,44 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+
 
 \begin{document}
 Thank you for taking the time to review our paper.
+
+\todo[]{started chucking experimental results down but need to work out how to phrase and present them}
+
+
+
+The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
+ For Electro we use a beam width of ten. 
+ Although the overall time is greater than the others, only 0.044 secs is used to compute the probabilities and the majority of the time (0.193 secs) is used using RDKIT to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams. 
+ Instead as the whole predict operation for Electro only takes 0.428 secs on a CPU we take advantage of the embarrassingly parallel nature of the task across different reaction predictions when running Electro on the test set.
+ If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes 0.007 secs on a GPU for Electro.
+ 
+ \todo[]{Can also add the fact we have less parameters.}
+ 
+ 
+
+\begin{table}[h]
+  \caption{Time taken in seconds to predict product from the initial reactant and reagent molecules.
+  These have been run on a NVIDIA 1080 GPU, with the mean time taken over the first 500 items of the test set.
+  * As no code is available for [14] we instead report the timings given in Section 6.2 of their paper.
+  }
+  \label{table:timings}
+  \centering
+  \begin{tabular}{llll}
+    \toprule
+    & Electro (Ours) & WLDN [5] & Seq2Seq [14]  \\
+    \midrule
+    Timing (secs) & 0.337   & 0.034 &  0.025*     \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\todo[inline]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
+
+
+
 
 \end{document}
