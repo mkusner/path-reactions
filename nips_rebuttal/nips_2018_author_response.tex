@@ -49,6 +49,11 @@ The timings of the models are given in Table \ref{table:timings}. We shall inclu
 \todo[inline]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
 
 
-
+The motivation of only including reagent context at the start is that this is often the most challenging decision, and that action steps after this have access to the previous atom as context, making it an easier task.
+Qualitatively, when running Electro-lite on the separate validation set we would see that the model often had the most errors on the first step, and that after picking this first step the next stages would often be correctly predicted.
+One of the nice features of the approach is that we can easily break down the loss (or equivalently the negative log likelihood) of each prediction our model makes. 
+Empirically we found that Elctro-lite on the first 500 items of the validation set obtained a median loss of 0.209 on predicting where to start, whereas the first add step (when applicable) would contribute a median loss of 0.002, highlighting the sometimes much poorer performance of this module.
+When testing Electro, its initial select module would get a median loss of 0.023, showing that the addition of reagents, greatly improves the prediction of this task.
+\todo[]{If manage to get the experiment tell the performance of the model where reagents get added everywhere}
 
 \end{document}
