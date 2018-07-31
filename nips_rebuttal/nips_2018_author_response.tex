@@ -102,53 +102,51 @@ For predicting products, using a beam search width of 10, \ourModel takes $0.337
 %% ============================================
 
 \paragraph{Reviewer 2}
-\emph{[Point i)]}
+\emph{[i]}
 The motivation of only including reagent context at the start is that this is often the most challenging decision, and that action steps after this have access to the previous atom as context, making it an easier task.
 %Qualitatively, when running Electro-lite on the separate validation set we would see that the model often had the most errors on the first step, and that after picking this first step the next stages would often be correctly predicted.
 We have tested a version of \ourModel where reagent information is fed in as context at each step. 
 On the mechanism prediction task (Table 1) this gets a slightly improved top-1 accuracy of $78.4\%$ but a similar top-5 accuracy of $94.6\%$.
  On the reaction product prediction task (Table 2) we get $87.5\%$, $94.4\%$ and $96.0\%$ top-1, 3 and 5 accuracies.
 
-\emph{[Point ii)]}
+\emph{[ii \& iv]}
 Thanks. We will add details on GGNNs in Figure~\ref{fig:new-diagram}, and move architecture choices from the supplementary.
 %One of the nice features of the approach is that we can easily break down the loss (or equivalently the negative log likelihood) of each prediction our model makes. 
 %Empirically we found that Elctro-lite on the first 500 items of the validation set obtained a median loss of 0.209 on predicting where to start, whereas the first add step (when applicable) would contribute a median loss of 0.002, highlighting the sometimes much poorer performance of this module.
 %When testing Electro, its initial select module would get a median loss of 0.023, showing that the addition of reagents, greatly improves the prediction of this task.
 
-\emph{[Point iii)]} 
+\emph{[iii]} 
 Sorry for the confusion here. In eq 4, $\mathbf{H}_m$ should be $\mathbf{H}_{\mathcal{M}_t}$. We apologize for this typo.
 In eq 2 $\mathcal{A}’$ is the set of all atoms in the graphs under consideration. For example, when forming the reagent context vector this will be only the reagents.
 The dependency on $a_{t-1}$ is due to the changes in the molecular graph, caused by action $a_{t-1}$. 
 To clarify this, we will add equations for each of our predictors: $f_\textrm{start}$, $f_\textrm{add}$, $f_\textrm{remove}$ (which is currently in the supplement).
 
-\emph{Point v)} 
+\emph{[v]} 
 We thought a lot about how to compare with [6].
  Ultimately we decided we were unable to compare with it (and also [7]) for the following reasons:
   1.These methods, as they currently stand, cannot run on our data as they currently can not run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to the (unknown) reaction conditions. 
  2. We cannot run our method on their data as the link to their data is missing atom information, and they did not respond to our emails asking for their code or data. 
 
-\emph{Point vi)} We have trained the WLDN [5] (using code from the authors) on our filtered training dataset.
+\emph{[vi]} We have trained the WLDN [5] (using code from the authors) on our filtered training dataset.
  We found it achieved top-1, top-3 and top-5 accuracies of $83.1\%$, $91.5\%$ and $92.7\%$, which is worse than \ourModel. 
  Thus the improved performance of \ourModel is not due to a more specialized training task.
   
-\emph{Point vii)}
+\emph{[vii]}
  We politely disagree here.
   We think it is completely surprising that the model is able to pick up subtle chemical trends (e.g., single atomic changes) without being explicitly trained on this task.
    We think an experiment like this may give additional confidence to a chemist %that our model has learned reaction prediction, 
    as this experiment resembles exam questions for organic chemistry students. \todo[]{could say we will motivate this reasoning better}
  
-\emph{Point viii)}
+\emph{[viii]}
 We believe this work advances two novel directions for future research: 1. We observe that reactions are essentially stepwise graph-editing procedures. 
  It’s fruitful to model it this way precisely because it sets the stage for models that work on more general types of chemical reactions.
 It also potentially can be applied on graph editing based applications outside the domain of chemistry.
-  2. More broadly, there is a significant amount of structure and powerful abstractions developed in chemistry that we as machine learning researchers can take advantage of. 
-Modeling using these existing abstractions aids interoperability and the interrogation of trained models.
-In \ourModel, we have a successful model that operates using the effective abstractions of reaction mechanism.
-We show how using mechanisms we have a model that does the same sorts of things that organic chemistry students learning reactions do, and is a model much easier to work with, criticize, and improve. 
+  2. More broadly, there is a significant amount of structure and powerful abstractions developed in chemistry, that we as ML researchers can take advantage of, to aid the interoperability, interrogation and the improvement of  models.
+\ourModel operates by using the powerful abstractions of reaction mechanisms
+and by visualizing these mechanisms we can show that it does the same sorts of things that organic chemistry students learning reactions do.
 We hope that this in turn encourages a direction of research in which existing useful abstractions and tools in application areas are harnessed when developing new ML algorithms.
 
  
-\emph{Point ii and iv)} Thanks for these comments, we hope these have been addressed by our discussion at the top.
 
 
 
