@@ -14,7 +14,7 @@
 \usepackage{bm}
 \usepackage{xspace}
 
-
+%\usepackage[subtle]{savetrees}
 
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 
@@ -25,6 +25,10 @@
 \newcommand{\ourModelIR}{\textsc{Electro-Lite}\xspace}
 \newcommand{\ourModelR}{\textsc{Electro}\xspace}
 
+\widowpenalty=100000000
+
+
+
 \begin{document}
 
 %% ============================================
@@ -34,10 +38,12 @@
 
 \begin{wrapfigure}{r}{0.6\textwidth}
 \centering
+\vspace{-12pt}
   \includegraphics[width=10cm]{graph_nn.pdf}
+  \vspace{-18pt}
  \caption{Thumbnail of new image we propose  putting in Section 3 of the paper. We hope that this (with the associated text) makes clearer the overall workflow for forming node and graph embeddings via a message passing framework (following the approaches in [9-10]).}
  \label{fig:new-diagram}
- \vspace{-4ex}
+ \vspace{-5ex}
 \end{wrapfigure}
 
 We would like to thank all reviewers for their thoughtful comments. 
@@ -53,7 +59,7 @@ Our responses:
 %% ========= Reviewer 1  ======================
 %% ============================================
 
-\vspace{-8pt}
+\vspace{-5pt}
 \paragraph{Reviewer 1}
 
 %\emph{(2) Why the present method is expected to perform better than WLDN in product prediction?}
@@ -61,16 +67,19 @@ Our responses:
 Thank you for this. We will make the following changes: add a step-by-step description of GGNNs as shown in Figure~\ref{fig:new-diagram}, bring out of the SM information on architecture choices and workflow. 
 
 \emph{[..(2) why better than WLDN?..]}
-We believe that as \ourModel is much closer to the underlying physical reality of reaction mechanisms (sequential electron redistribution steps), it provides the needed compositional and relational inductive biases, leading to better performance.
- Alongside this, we believe that (1) the interpretability provided by \ourModel by modelling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented ML pipeline of predict-then-rank steps are also advantageous.% features of our model.
+We believe that as \ourModel is much closer to the underlying physical reality of reaction mechanisms (sequential electron redistribution steps), it achieves better performance by encoding needed compositional and relational inductive biases, leading to better performance.
+% Alongside this, we believe that (1) the interpretability provided by \ourModel by modeling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented ML pipeline of predict-then-rank steps are also advantageous.% features of our model.
+We believe that the avoidance of having to set up a somewhat more fragmented ML pipeline of predict-then-rank steps is also advantageous.  % features of our model. 
+
 
 %\emph{(3) How the present model compares to WLDN and seqtoseq in terms of runtime.}
 \emph{[..(3) runtime comparison..]}
-For predicting products, using a beam search width of 10, \ourModel takes $0.337$ seconds. This compares to $0.034$s for WLDN [5] and $0.025$s\footnote{As no code is available for this paper we quote their stated time.} for the Seq2Seq model [14, \S6.2]. 
-\todo[]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
- However, the majority of the time for \ourModel ($0.193$s) is used within RDKit to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams; only $0.044$s is used given the features to compute the action probabilities.
+For predicting products %, using a beam search width of 10, 
+\ourModel takes $0.337$ seconds. This compares to $0.034$s for WLDN [5] and $0.025$s\footnote{As no code is available for this paper we quote their stated time.} for the Seq2Seq model [14, \S6.2]. 
+%\todo[]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
+ However, the majority of the time for \ourModel ($0.193$s) is used within RDKit to create intermediate molecules and their features, an operation that is not currently parallelized across the different beams; only $0.044$s is used given the features to compute the action probabilities.
   At test time we take advantage of the embarrassingly parallel nature of the task to parallelize across test inputs. 
-   If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes $0.007$s for \ourModel. \todo[]{Can also add the fact we have less parameters.}
+   If we are interested in only computing the log likelihood of a reaction (so have all the intermediate steps), this takes $0.007$s for \ourModel. %\todo[]{Can also add the fact we have less parameters.}
 
 
 %The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
@@ -100,7 +109,7 @@ For predicting products, using a beam search width of 10, \ourModel takes $0.337
 %% ============================================
 %% ========= Reviewer 2  ======================
 %% ============================================
-
+\vspace{-5pt}
 \paragraph{Reviewer 2}
 \emph{[i]}
 The motivation of only including reagent context at the start is that this is often the most challenging decision, and that action steps after this have access to the previous atom as context, making it an easier task.
@@ -122,9 +131,9 @@ The dependency on $a_{t-1}$ is due to the changes in the molecular graph, caused
 To clarify this, we will add equations for each of our predictors: $f_\textrm{start}$, $f_\textrm{add}$, $f_\textrm{remove}$ (which is currently in the supplement).
 
 \emph{[v]} 
-We thought a lot about how to compare with [6].
- Ultimately we decided we were unable to compare with it (and also [7]) for the following reasons:
-  1.These methods, as they currently stand, cannot run on our data as they currently can not run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to the (unknown) reaction conditions. 
+We thought a lot about how to compare with [6-7], but
+ ultimately we decided we were unable to because:
+  1.These methods, as they currently stand, cannot run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to the (unknown) reaction conditions. 
  2. We cannot run our method on their data as the link to their data is missing atom information, and they did not respond to our emails asking for their code or data. 
 
 \emph{[vi]} We have trained the WLDN [5] (using code from the authors) on our filtered training dataset.
@@ -135,17 +144,27 @@ We thought a lot about how to compare with [6].
  We politely disagree here.
   We think it is completely surprising that the model is able to pick up subtle chemical trends (e.g., single atomic changes) without being explicitly trained on this task.
    We think an experiment like this may give additional confidence to a chemist %that our model has learned reaction prediction, 
-   as this experiment resembles exam questions for organic chemistry students. \todo[]{could say we will motivate this reasoning better}
+   as this experiment resembles exam questions for organic chemistry students. %\todo[]{could say we will motivate this reasoning better}
  
 \emph{[viii]}
-We believe this work advances two novel directions for future research: 1. We observe that reactions are essentially stepwise graph-editing procedures. 
- It’s fruitful to model it this way precisely because it sets the stage for models that work on more general types of chemical reactions.
-It also potentially can be applied on graph editing based applications outside the domain of chemistry.
-  2. More broadly, there is a significant amount of structure and powerful abstractions developed in chemistry, that we as ML researchers can take advantage of, to aid the interoperability, interrogation and the improvement of  models.
-\ourModel operates by using the powerful abstractions of reaction mechanisms
-and by visualizing these mechanisms we can show that it does the same sorts of things that organic chemistry students learning reactions do.
-We hope that this in turn encourages a direction of research in which existing useful abstractions and tools in application areas are harnessed when developing new ML algorithms.
+We believe this work advances two novel directions for future research: 
+%1. We observe that reactions are essentially stepwise graph-editing procedures. 
+ %It’s fruitful to model it this way precisely because it sets the stage for models that work on more general types of chemical reactions.
+  1. We think that setting up reactions as stepwise graph-editing procedures can be extended with suitable changes to a broader class of reactions.
+%It also potentially can be applied on graph editing based applications outside the domain of chemistry.
+ 2. More broadly, there is a significant amount of structure and powerful abstractions developed in chemistry, that we as ML researchers can take advantage of, to aid the interoperability, interrogation and the improvement of  models;
+and we believe \ourModel is a motivating and successful example of how this can be done.
 
+%  2. More broadly, there is a significant amount of structure and powerful abstractions developed in chemistry, that we as ML researchers can take advantage of, to aid the interoperability, interrogation and the improvement of  models;
+%\ourModel is an example of such a model taking advantage of the powerful abstractions of reaction mechanisms.
+%%and by visualizing these mechanisms we can show that it does the same sorts of things that organic chemistry students learning reactions do.
+%We hope that this in turn encourages a direction of research in which existing useful abstractions and tools in application areas are harnessed when developing new ML algorithms.
+
+
+
+
+ 
+ 
  
 
 
@@ -153,17 +172,17 @@ We hope that this in turn encourages a direction of research in which existing u
 %% ============================================
 %% ========= Reviewer 3  ======================
 %% ============================================
-\paragraph{Reviewer 3}
+\vspace{-5pt}
+\subparagraph*{Reviewer 3}
 %\emph{"On one hand, theis paper includes several modelling ideas that might have the potential to indeed advance the field. On the other hand, from a chemical perspective the model is still rather limited, since only topological molecule descriptors are used, neglecting the influence of conformational changes."}
 %\emph{Point under EVALUATION, on significance)}
+\emph{[..on significance..]}
+Thank you for recognizing and commending our modelling ideas. We agree conformational change information is certainly useful and underused in work at ML venues for reaction prediction. We aim to consider this in future work.
+That said, in this work, our purely topological model is harnessing the extremely powerful arrow-pushing abstraction. 
+It allows chemists to make very quick, but accurate predictions without doing any quantum simulations, and to understand relations between reaction classes, which is not possible using quantum mechanics alone. \looseness=-1
+
 \emph{[..on clarity..]}
 Thanks, we will move architecture choices from the supplementary and will include Figure \ref{fig:new-diagram} to provide further detail.
-
-\emph{[..on significance..]}
-Thank you for recognizing and commending our modelling ideas. We agree conformational change information is certainly useful. 
-So far, work at ML venues has yet to make use of conformations for reaction prediction, but we aim to consider this in future work.
-That said, in this current work, our purely topological model is harnessing the extremely powerful arrow-pushing abstraction. 
-It allows chemists to make very quick, but tremendously accurate predictions without doing any quantum simulations, and to understand relations between reaction classes, which is not possible using quantum mechanics alone. 
 
 
 \end{document}
