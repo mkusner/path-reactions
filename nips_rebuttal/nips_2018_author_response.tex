@@ -37,13 +37,7 @@ We are grateful for your suggestions about improving the description of the mode
 In particular, we add a step-by-step description of the workflow and a new diagram, Figure \ref{fig:new-diagram}, to provide background on GGNNs and how these can be used to provide graph and node embeddings. 
 In addition we have brought out of the supplementary material some details on more specific architecture choices and to have space to do so, we are grateful to R2's suggestion to move the more technical details of section 4 into the appendix.
 
-
-
-
-
-
 To the more specific individual comments we respond to each reviewer below.
-
 
 %% ============================================
 %% ========= Reviewer 1  ======================
@@ -52,40 +46,39 @@ To the more specific individual comments we respond to each reviewer below.
 \paragraph{Reviewer 1}
 
 \emph{(2) Why the present method is expected to perform better than WLDN in product prediction?}
-\todo[]{grab more from google doc here}
-We believe that Electro is much closer to the underlying physical reality of reaction mechanisms being composed of sequential electron redistribution steps, it provides the needed compositional and relational inductive bias, leading to better performance.
-
-We add however, that aside from the improved product prediction performance, we believe that  (1) the interpretability provided by Electro by modelling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented machine learning pipeline of predict-then-rank steps are also advantageous features of our model.
+We believe that as Electro is much closer to the underlying physical reality of reaction mechanisms being composed of sequential electron redistribution steps, it provides the needed compositional and relational inductive bias, leading to better performance.
+ We add however, that aside from the improved product prediction performance, we believe that (1) the interpretability provided by Electro by modelling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented machine learning pipeline of predict-then-rank steps are also advantageous features of our model.
 
 \emph{(3) How the present model compares to WLDN and seqtoseq in terms of runtime.}
+For predicting products, using a Beam search width of 10, Electro takes 0.337 secs. This compares to 0.034secs for WLDN [5] and 0.025\footnote{As no code is available for this paper we quote their stated time.} for the Seq2Seq model [14, \S6.2]. 
+\todo[]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
+ However, the majority of the time for Electro (0.193 secs) is used within RDKit to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams; only 0.044 secs is used given the features to compute the action probabilities.
+  At test time we take advantage of the embarrassingly parallel nature of the task to parallelize across test inputs. 
+   If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes 0.007 secs on a GPU for Electro. \todo[]{Can also add the fact we have less parameters.}
 
 
-The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
- For Electro we use a beam width of ten. 
- Although the overall time is greater than the others, only 0.044 secs is used to compute the probabilities and the majority of the time (0.193 secs) is used using RDKIT to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams. 
- Instead as the whole predict operation for Electro only takes 0.428 secs on a CPU we take advantage of the embarrassingly parallel nature of the task across different reaction predictions when running Electro on the test set.
- If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes 0.007 secs on a GPU for Electro.
- 
- \todo[]{Can also add the fact we have less parameters.}
- 
- 
 
-\begin{table}[h]
-  \caption{Time taken in seconds to predict product from the initial reactant and reagent molecules.
-  These have been run on a NVIDIA 1080 GPU, with the mean time taken over the first 500 items of the test set.
-  * As no code is available for [14] we instead report the timings given in Section 6.2 of their paper.
-  }
-  \label{table:timings}
-  \centering
-  \begin{tabular}{llll}
-    \toprule
-    & Electro (Ours) & WLDN [5] & Seq2Seq [14]  \\
-    \midrule
-    Timing (secs) & 0.337   & 0.034 &  0.025*     \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-\todo[inline]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
+%The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
+% For Electro we use a beam width of ten. 
+% Although the overall time is greater than the others, only 0.044 secs is used to compute the probabilities and the majority of the time (0.193 secs) is used using RDKIT to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams. 
+% Instead as the whole predict operation for Electro only takes 0.428 secs on a CPU we take advantage of the embarrassingly parallel nature of the task across different reaction predictions when running Electro on the test set.
+% If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes 0.007 secs on a GPU for Electro.
+% 
+%\begin{table}[h]
+%  \caption{Time taken in seconds to predict product from the initial reactant and reagent molecules.
+%  These have been run on a NVIDIA 1080 GPU, with the mean time taken over the first 500 items of the test set.
+%  * As no code is available for [14] we instead report the timings given in Section 6.2 of their paper.
+%  }
+%  \label{table:timings}
+%  \centering
+%  \begin{tabular}{llll}
+%    \toprule
+%    & Electro (Ours) & WLDN [5] & Seq2Seq [14]  \\
+%    \midrule
+%    Timing (secs) & 0.337   & 0.034 &  0.025*     \\
+%    \bottomrule
+%  \end{tabular}
+%\end{table}
 
 
 
