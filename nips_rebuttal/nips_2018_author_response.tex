@@ -40,7 +40,7 @@
 \centering
 \vspace{-1pt}
   \includegraphics[width=10cm]{graph_nn.pdf}
-  \vspace{-20pt}
+  \vspace{-18pt}
  \caption{New image we propose putting in Section 3 of the paper to clarify the overall workflow for forming node and graph embeddings via a message passing framework (following the approaches in [9-10]).}
  \label{fig:new-diagram}
  \vspace{-5ex}
@@ -69,7 +69,7 @@ Thank you for this. We will make the following changes: add a step-by-step descr
 \emph{[..(2) why better than WLDN?..]}
 Our argument is that \ourModel is much closer to the underlying physical reality of reaction mechanisms (sequential electron redistribution steps), so it outperforms WLDN by encoding needed compositional inductive biases. 
 % Alongside this, we believe that (1) the interpretability provided by \ourModel by modeling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented ML pipeline of predict-then-rank steps are also advantageous.% features of our model.
-We believe that the avoidance of having to set up a somewhat more fragmented ML pipeline of predict-then-rank steps is also advantageous.  % features of our model. 
+We believe avoiding the more fragmented ML pipeline of predict-then-rank steps is also advantageous.  % features of our model. 
 
 
 %\emph{(3) How the present model compares to WLDN and seqtoseq in terms of runtime.}
@@ -183,7 +183,7 @@ That said, in this work, our purely topological model is harnessing the extremel
 It allows chemists to make very quick, but accurate predictions without doing any quantum simulations, and to understand relations between reaction classes, which is not possible using quantum mechanics alone. \looseness=-1
 
 \emph{[..on clarity..]}
-Thanks, we will move architecture choices from the supplementary and will include Figure \ref{fig:new-diagram} to provide further detail.
+Thanks, we will move architecture choices from the supplementary and include Figure \ref{fig:new-diagram} for more detail.
 
 
 \end{document}
