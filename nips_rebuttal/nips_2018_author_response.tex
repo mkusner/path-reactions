@@ -34,33 +34,38 @@
   \includegraphics[width=10cm]{graph_nn.pdf}
  \caption{Thumbnail of new image we propose  putting in Section 3 of the paper. We hope that this (with the associated text) makes the overall workflow for forming node and graph embeddings via a message passing framework (following the approaches in [9-10]) clearer.}
  \label{fig:new-diagram}
+ \vspace{-5ex}
 \end{wrapfigure}
 
-Thank you for taking the time to review our paper. 
-\todo[]{Some changes to fig: a. missing vectors for some atoms, b. make super explicit that A shared by changing sub index to single and double bond, c. use table to refer to explicitly refer to Table 1 in SM for more details, d. make it clear that boxes (2) and (3) happen multiple times; e. Change the sum to be over mathcal A'}
-
-We are grateful for your suggestions about improving the description of the model. We therefore have made a few changes to section 3 to improve clarity.
-In particular, we add a step-by-step description of the workflow and a new diagram, Figure \ref{fig:new-diagram}, to provide background on GGNNs and how these can be used to provide graph and node embeddings. 
-In addition we have brought out of the supplementary material some details on more specific architecture choices and to have space to do so, we are grateful to R2's suggestion to move the more technical details of section 4 into the appendix.
-
-To the more specific individual comments we respond to each reviewer below.
-
+We would like to thank all reviewers for their thoughtful comments. 
+%Thank you for taking the time to review our paper. 
+%\todo[]{Some changes to fig: a. missing vectors for some atoms, b. make super explicit that A shared by changing sub index to single and double bond, c. use table to refer to explicitly refer to Table 1 in SM for more details, d. make it clear that boxes (2) and (3) happen multiple times; e. Change the sum to be over mathcal A'}
+% We are grateful for your suggestions about improving the description of the model. We therefore have made a few changes to section 3 to improve clarity.
+% In particular, we add a step-by-step description of the workflow and a new diagram, Figure \ref{fig:new-diagram}, to provide background on GGNNs and how these can be used to provide graph and node embeddings. 
+% In addition we have brought out of the supplementary material some details on more specific architecture choices and to have space to do so, we are grateful to R2's suggestion to move the more technical details of section 4 into the appendix.
+%To the more specific individual comments we respond to each reviewer below.
+We respond to each reviewer below.
 %% ============================================
 %% ========= Reviewer 1  ======================
 %% ============================================
 
 \paragraph{Reviewer 1}
 
-\emph{(2) Why the present method is expected to perform better than WLDN in product prediction?}
-We believe that as Electro is much closer to the underlying physical reality of reaction mechanisms being composed of sequential electron redistribution steps, it provides the needed compositional and relational inductive bias, leading to better performance.
- We add however, that aside from the improved product prediction performance, we believe that (1) the interpretability provided by Electro by modelling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented machine learning pipeline of predict-then-rank steps are also advantageous features of our model.
+%\emph{(2) Why the present method is expected to perform better than WLDN in product prediction?}
+\emph{[..(1) workflow..]}
+Thank you for this. We will make the following changes: add a step-by-step description of GGNNs in Figure~\ref{fig:new-diagram}, bring out of the supplementary material information on architecture choices and workflow. 
 
-\emph{(3) How the present model compares to WLDN and seqtoseq in terms of runtime.}
-For predicting products, using a Beam search width of 10, Electro takes 0.337 secs. This compares to 0.034secs for WLDN [5] and 0.025\footnote{As no code is available for this paper we quote their stated time.} for the Seq2Seq model [14, \S6.2]. 
+\emph{[..(2) why better than WLDN?..]}
+We believe that as Electro is much closer to the underlying physical reality of reaction mechanisms (sequential electron redistribution steps), it provides the needed compositional and relational inductive bias, leading to better performance.
+ Alongside this, we believe that (1) the interpretability provided by Electro by modelling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented machine learning pipeline of predict-then-rank steps are also advantageous.% features of our model.
+
+%\emph{(3) How the present model compares to WLDN and seqtoseq in terms of runtime.}
+\emph{[..(3) runtime comparison..]}
+For predicting products, using a Beam search width of 10, Electro takes $0.337$ seconds. This compares to $0.034$s for WLDN [5] and $0.025$s\footnote{As no code is available for this paper we quote their stated time.} for the Seq2Seq model [14, \S6.2]. 
 \todo[]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
- However, the majority of the time for Electro (0.193 secs) is used within RDKit to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams; only 0.044 secs is used given the features to compute the action probabilities.
+ However, the majority of the time for Electro ($0.193$s) is used within RDKit to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams; only $0.044$s is used given the features to compute the action probabilities.
   At test time we take advantage of the embarrassingly parallel nature of the task to parallelize across test inputs. 
-   If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes 0.007 secs on a GPU for Electro. \todo[]{Can also add the fact we have less parameters.}
+   If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes $0.007$s secs on a GPU for Electro. \todo[]{Can also add the fact we have less parameters.}
 
 %The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
 % For Electro we use a beam width of ten. 
