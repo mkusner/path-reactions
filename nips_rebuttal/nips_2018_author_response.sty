@@ -232,6 +232,7 @@
   \ifnum\value{pagecount}>1\relax%
     % Do not output the page
     \PackageWarning{nips_author_response}{Only one page allowed! Discarding any extra output.}
+    \latex@outputpage%
   \else
     \latex@outputpage%
   \fi

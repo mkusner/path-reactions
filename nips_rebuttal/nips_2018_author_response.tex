@@ -11,6 +11,7 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage{wrapfig}
+\usepackage{bm}
 
 
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
@@ -56,8 +57,6 @@ For predicting products, using a Beam search width of 10, Electro takes 0.337 se
   At test time we take advantage of the embarrassingly parallel nature of the task to parallelize across test inputs. 
    If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes 0.007 secs on a GPU for Electro. \todo[]{Can also add the fact we have less parameters.}
 
-
-
 %The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
 % For Electro we use a beam width of ten. 
 % Although the overall time is greater than the others, only 0.044 secs is used to compute the probabilities and the majority of the time (0.193 secs) is used using RDKIT to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams. 
@@ -89,7 +88,7 @@ For predicting products, using a Beam search width of 10, Electro takes 0.337 se
 \paragraph{Reviewer 2}
 \emph{Point i)}
 The motivation of only including reagent context at the start is that this is often the most challenging decision, and that action steps after this have access to the previous atom as context, making it an easier task.
-Qualitatively, when running Electro-lite on the separate validation set we would see that the model often had the most errors on the first step, and that after picking this first step the next stages would often be correctly predicted.
+%Qualitatively, when running Electro-lite on the separate validation set we would see that the model often had the most errors on the first step, and that after picking this first step the next stages would often be correctly predicted.
 We have since tested a version of Electro where reagent information is fed in as context at each step. 
 On the mechanism prediction task (Table 1) this gets a slightly improved top-1 accuracy of 78.4\% but a similar top-5 accuracy of 94.6\%.
 
@@ -98,24 +97,33 @@ On the mechanism prediction task (Table 1) this gets a slightly improved top-1 a
 %When testing Electro, its initial select module would get a median loss of 0.023, showing that the addition of reagents, greatly improves the prediction of this task.
 
 \emph{Point iii)} 
-Sorry for the confusion here. $\mathcal{A}’$ is the set of all atoms in all molecules, and equation 2 is used only for $r_\textrm{stop}$.
+Sorry for the confusion here. In eq 4, $\bm{H}_m$ should be $\bm{H}_{\mathcal{M}_t}$. We apologize for this typo.
+In eq 2 $\mathcal{A}’$ is the set of all atoms in the graphs under consideration, so for instance when forming the reagent context vector this will be only the reagents.
 The dependency on $a_{t-1}$ comes about by the changes in the molecular graph, caused by action $a_{t-1}$. 
-To clarify this, we will add equations for each of our predictors: $f_\textrm{start}$, $f_\textrm{add}$, $f_\textrm{remove}$.
+To clarify this, we will add equations for each of our predictors: $f_\textrm{start}$, $f_\textrm{add}$, $f_\textrm{remove}$ (the structure of which are currently detailed in the SM).
 
 \emph{Point v)} 
-We thought a lot about how to compare with [6]. Ultimately we decided we were unable to compare with it (and also [7]) for the following reasons: 1.
- These methods, as they currently stand, cannot run on our data as they currently can not run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to reaction conditions. 
- Unfortunately we do not have access to this information. 2. We cannot run our method on their data as the link to their data is missing atom information, and they did not respond to our emails asking for their code or data. 
+We thought a lot about how to compare with [6].
+ Ultimately we decided we were unable to compare with it (and also [7]) for the following reasons:
+  1.These methods, as they currently stand, cannot run on our data as they currently can not run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to (the unknown) reaction conditions. 
+ 2. We cannot run our method on their data as the link to their data is missing atom information, and they did not respond to our emails asking for their code or data. 
 
 \emph{Point vi)} We have run the WLDN[5]'s code for the case where it is also trained on our filtered training dataset.
  We found it achieved top-1, top-3 and top-5 accuracies of 83.1\%, 91.5\% and 92.7\% respectively. 
  We hope that this rules out Electro having better performance due to a more specialized training task.
   
 \emph{Point vii)}
- We politely disagree here. We think it is completely surprising that the model is able to pick up subtle chemical trends (e.g., only single atomic changes) without being explicitly trained on this task. We think an experiment like this may give additional confidence to a chemist that our model has learned reaction prediction, as this experiment resembles exam questions for organic chemistry students. 
+ We politely disagree here.
+  We think it is completely surprising that the model is able to pick up subtle chemical trends (e.g., only single atomic changes) without being explicitly trained on this task.
+   We think an experiment like this may give additional confidence to a chemist that our model has learned reaction prediction, as this experiment resembles exam questions for organic chemistry students. \todo[]{could say we will motivate this reasoning better}
  
 \emph{Point viii)}
-We believe this work advances two novel directions for future research: 1. We observe that reactions are essentially stepwise graph-editing procedures. It’s fruitful to model it this way precisely because it sets the stage for models that work on more general types of chemical reactions. 2. More broadly, there is a significant amount of structure in chemistry that, if we as machine learning researchers ignore, chemists will likewise ignore it. Previous work that models reactions in one step are not easy to interrogate, and so are hard for chemists to trust. Models like ELECTRO, that do the same sorts of things that organic chemistry students learning reactions do, are much easier to work with, criticise, and improve.
+We believe this work advances two novel directions for future research:
+ 1. We observe that reactions are essentially stepwise graph-editing procedures. 
+ It’s fruitful to model it this way precisely because it sets the stage for models that work on more general types of chemical reactions.
+  2. More broadly, there is a significant amount of structure in chemistry that, if we as machine learning researchers ignore, chemists will likewise ignore it. 
+  Previous work that models reactions in one step are not easy to interrogate, and so are hard for chemists to trust.
+  Models like ELECTRO, that do the same sorts of things that organic chemistry students learning reactions do, are much easier to work with, criticize, and improve.
 
  
 \emph{Point ii and iv)} Thanks for these comments, we hope these have been addressed by our discussion at the top.
@@ -126,8 +134,8 @@ We believe this work advances two novel directions for future research: 1. We ob
 %% ========= Reviewer 3  ======================
 %% ============================================
 \paragraph{Reviewer 3}
-%\emph{"On one hand, theis paper includes several modelling ideas that might have the potential to indeed advance the field. On the other hand, from a chemical perspective the model is still rather limited, since only topological molecule descriptors are used, neglecting the influence of conformational changes."}
-\emph{Point under EVALUATION, on significance)}
+\emph{"On one hand, theis paper includes several modelling ideas that might have the potential to indeed advance the field. On the other hand, from a chemical perspective the model is still rather limited, since only topological molecule descriptors are used, neglecting the influence of conformational changes."}
+%\emph{Point under EVALUATION, on significance)}
 Thank you for recognizing and commending our modelling ideas. We agree conformational change information is certainly useful. So far, work at machine learning venues has yet to make use of these conformational change features for reaction prediction, but we aim to consider this in future work on more general reaction classes. That said, in this current work, our purely topological model is harnessing an extremely powerful arrow-pushing abstraction for chemists. It allows chemists to make very quick, but tremendously accurate predictions without doing any quantum simulations, and to understand relations between reaction classes, which is not possible using quantum mechanics alone. 
 
 
