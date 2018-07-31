@@ -18,9 +18,10 @@
 
 
 % Our model
-\newcommand{\ourModel}{\textsc{Electro}}
-\newcommand{\ourModelIR}{\textsc{Electro-Lite}}
-\newcommand{\ourModelR}{\textsc{Electro}}
+\usepackage{xspace}
+\newcommand{\ourModel}{\textsc{Electro}\xspace}
+\newcommand{\ourModelIR}{\textsc{Electro-Lite}\xspace}
+\newcommand{\ourModelR}{\textsc{Electro}\xspace}
 
 \begin{document}
 
@@ -56,16 +57,16 @@ We respond to each reviewer below.
 Thank you for this. We will make the following changes: add a step-by-step description of GGNNs in Figure~\ref{fig:new-diagram}, bring out of the supplementary material information on architecture choices and workflow. 
 
 \emph{[..(2) why better than WLDN?..]}
-We believe that as Electro is much closer to the underlying physical reality of reaction mechanisms (sequential electron redistribution steps), it provides the needed compositional and relational inductive bias, leading to better performance.
- Alongside this, we believe that (1) the interpretability provided by Electro by modelling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented machine learning pipeline of predict-then-rank steps are also advantageous.% features of our model.
+We believe that as \ourModel is much closer to the underlying physical reality of reaction mechanisms (sequential electron redistribution steps), it provides the needed compositional and relational inductive bias, leading to better performance.
+ Alongside this, we believe that (1) the interpretability provided by \ourModel by modelling the mechanism steps and (2) the avoidance of having to set up a somewhat more fragmented machine learning pipeline of predict-then-rank steps are also advantageous.% features of our model.
 
 %\emph{(3) How the present model compares to WLDN and seqtoseq in terms of runtime.}
 \emph{[..(3) runtime comparison..]}
-For predicting products, using a Beam search width of 10, Electro takes $0.337$ seconds. This compares to $0.034$s for WLDN [5] and $0.025$s\footnote{As no code is available for this paper we quote their stated time.} for the Seq2Seq model [14, \S6.2]. 
+For predicting products, using a Beam search width of 10, \ourModel takes $0.337$ seconds. This compares to $0.034$s for WLDN [5] and $0.025$s\footnote{As no code is available for this paper we quote their stated time.} for the Seq2Seq model [14, \S6.2]. 
 \todo[]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
- However, the majority of the time for Electro ($0.193$s) is used within RDKit to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams; only $0.044$s is used given the features to compute the action probabilities.
+ However, the majority of the time for \ourModel ($0.193$s) is used within RDKit to create intermediate molecules or derive features from them, an operation that is not currently parallelized across the different beams; only $0.044$s is used given the features to compute the action probabilities.
   At test time we take advantage of the embarrassingly parallel nature of the task to parallelize across test inputs. 
-   If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes $0.007$s secs on a GPU for Electro. \todo[]{Can also add the fact we have less parameters.}
+   If we are interested in only computing the log likelihood of a reaction (and so have access to all the intermediate steps), this takes $0.007$s secs on a GPU for \ourModel. \todo[]{Can also add the fact we have less parameters.}
 
 %The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
 % For Electro we use a beam width of ten. 
@@ -118,7 +119,7 @@ To clarify this, we will add equations for each of our predictors: $f_\textrm{st
 \emph{Point v)} 
 We thought a lot about how to compare with [6].
  Ultimately we decided we were unable to compare with it (and also [7]) for the following reasons:
-  1.These methods, as they currently stand, cannot run on our data as they currently can not run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to (the unknown) reaction conditions. 
+  1.These methods, as they currently stand, cannot run on our data as they currently can not run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to the (unknown) reaction conditions. 
  2. We cannot run our method on their data as the link to their data is missing atom information, and they did not respond to our emails asking for their code or data. 
 
 \emph{Point vi)} We have trained the WLDN [5] (using code from the authors) on our filtered training dataset.
@@ -152,7 +153,10 @@ We hope that this in turn encourages a direction of research in which existing u
 \paragraph{Reviewer 3}
 \emph{"On one hand, theis paper includes several modelling ideas that might have the potential to indeed advance the field. On the other hand, from a chemical perspective the model is still rather limited, since only topological molecule descriptors are used, neglecting the influence of conformational changes."}
 %\emph{Point under EVALUATION, on significance)}
-Thank you for recognizing and commending our modelling ideas. We agree conformational change information is certainly useful. So far, work at machine learning venues has yet to make use of these conformational change features for reaction prediction, but we aim to consider this in future work on more general reaction classes. That said, in this current work, our purely topological model is harnessing an extremely powerful arrow-pushing abstraction for chemists. It allows chemists to make very quick, but tremendously accurate predictions without doing any quantum simulations, and to understand relations between reaction classes, which is not possible using quantum mechanics alone. 
+Thank you for recognizing and commending our modelling ideas. We agree conformational change information is certainly useful. 
+So far, work at ML venues has yet to make use of conformations for reaction prediction, but we aim to consider this in future work.
+That said, in this current work, our purely topological model is harnessing the extremely powerful arrow-pushing abstraction. 
+It allows chemists to make very quick, but tremendously accurate predictions without doing any quantum simulations, and to understand relations between reaction classes, which is not possible using quantum mechanics alone. 
 
 
 \end{document}
