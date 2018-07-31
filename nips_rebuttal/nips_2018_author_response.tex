@@ -64,7 +64,7 @@ Our responses:
 
 %\emph{(2) Why the present method is expected to perform better than WLDN in product prediction?}
 \emph{[..(1) workflow..]}
-Thank you for this. We will make the following changes: add a step-by-step description of GGNNs as shown in Figure~\ref{fig:new-diagram}, bring out of the SM information on architecture choices and workflow. 
+Thank you for this. We will make the following changes: add a step-by-step description of GGNNs as shown in Figure~\ref{fig:new-diagram}, bring out of the appendix information on architectures and workflow. 
 
 \emph{[..(2) why better than WLDN?..]}
 Our argument is that \ourModel is much closer to the underlying physical reality of reaction mechanisms (sequential electron redistribution steps), so it outperforms WLDN by encoding needed compositional inductive biases. 
@@ -80,7 +80,7 @@ for the Seq2Seq model (quoting their stated time) [14, \S6.2].
 %\todo[]{Check wldn timings as they give 50ms in paper. Maybe they include the initial rdkit time.}
  However, the majority of the time for \ourModel ($0.193$s) is used within RDKit to create intermediate molecules and their features, an operation that is not currently parallelized across the different beams; only $0.044$s is used given the features to compute the action probabilities.
   At test time we take advantage of the embarrassingly parallel nature of the task to parallelize across test inputs. 
-   Finally, to compute log likelihood of a reaction (so have all the intermediate steps), it only takes takes $0.007$s for \ourModel. %\todo[]{Can also add the fact we have less parameters.}
+   Finally, to compute the log likelihood of a reaction (with access to the intermediate steps), it only takes $0.007$s for \ourModel. %\todo[]{Can also add the fact we have less parameters.}
 
 
 %The timings of the models are given in Table \ref{table:timings}. We shall include these in the paper.
