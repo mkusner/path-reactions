@@ -17,6 +17,11 @@
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 
 
+% Our model
+\newcommand{\ourModel}{\textsc{Electro}}
+\newcommand{\ourModelIR}{\textsc{Electro-Lite}}
+\newcommand{\ourModelR}{\textsc{Electro}}
+
 \begin{document}
 
 %% ============================================
@@ -89,7 +94,7 @@ For predicting products, using a Beam search width of 10, Electro takes 0.337 se
 \emph{Point i)}
 The motivation of only including reagent context at the start is that this is often the most challenging decision, and that action steps after this have access to the previous atom as context, making it an easier task.
 %Qualitatively, when running Electro-lite on the separate validation set we would see that the model often had the most errors on the first step, and that after picking this first step the next stages would often be correctly predicted.
-We have since tested a version of Electro where reagent information is fed in as context at each step. 
+We have since tested a version of \ourModel where reagent information is fed in as context at each step. 
 On the mechanism prediction task (Table 1) this gets a slightly improved top-1 accuracy of 78.4\% but a similar top-5 accuracy of 94.6\%.
 
 %One of the nice features of the approach is that we can easily break down the loss (or equivalently the negative log likelihood) of each prediction our model makes. 
@@ -110,7 +115,7 @@ We thought a lot about how to compare with [6].
 
 \emph{Point vi)} We have run the WLDN[5]'s code for the case where it is also trained on our filtered training dataset.
  We found it achieved top-1, top-3 and top-5 accuracies of 83.1\%, 91.5\% and 92.7\% respectively. 
- We hope that this rules out Electro having better performance due to a more specialized training task.
+ We hope that this rules out \ourModel having better performance due to a more specialized training task.
   
 \emph{Point vii)}
  We politely disagree here.
@@ -119,11 +124,16 @@ We thought a lot about how to compare with [6].
  
 \emph{Point viii)}
 We believe this work advances two novel directions for future research:
+
  1. We observe that reactions are essentially stepwise graph-editing procedures. 
  It’s fruitful to model it this way precisely because it sets the stage for models that work on more general types of chemical reactions.
-  2. More broadly, there is a significant amount of structure in chemistry that, if we as machine learning researchers ignore, chemists will likewise ignore it. 
-  Previous work that models reactions in one step are not easy to interrogate, and so are hard for chemists to trust.
-  Models like ELECTRO, that do the same sorts of things that organic chemistry students learning reactions do, are much easier to work with, criticize, and improve.
+It also potentially can be applied on graph editing based applications outside the domain of chemistry.
+
+  2. More broadly, there is a significant amount of structure and powerful abstractions developed in chemistry that we as machine learning researchers can take advantage of. 
+Modeling using these existing abstractions aids interoperability and the interrogation of trained models.
+In \ourModel, we have a successful model that operates using the effective abstractions of reaction mechanism.
+We show how using mechanisms we have a model that does the same sorts of things that organic chemistry students learning reactions do, and is a model much easier to work with, criticize, and improve. 
+We hope that this in turn encourages a direction of research in which existing useful abstractions and tools in application areas are harnessed when developing new ML algorithms.
 
  
 \emph{Point ii and iv)} Thanks for these comments, we hope these have been addressed by our discussion at the top.
