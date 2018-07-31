@@ -10,6 +10,8 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{wrapfig}
+
 
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 
@@ -21,12 +23,24 @@
 %% ============================================
 
 
-Thank you for taking the time to review our paper. \todo[]{started chucking experimental results down but need to work out how to phrase and present them}
+\begin{wrapfigure}{r}{0.6\textwidth}
+\centering
+  \includegraphics[width=10cm]{graph_nn.pdf}
+ \caption{Thumbnail of new image we propose  putting in Section 3 of the paper. We hope that this (with the associated text) makes the overall workflow for forming node and graph embeddings via a message passing framework (following the approaches in [9-10]) clearer.}
+ \label{fig:new-diagram}
+\end{wrapfigure}
 
+Thank you for taking the time to review our paper. 
+\todo[]{Some changes to fig: a. missing vectors for some atoms, b. make super explicit that A shared by changing sub index to single and double bond, c. use table to refer to explicitly refer to Table 1 in SM for more details, d. make it clear that boxes (2) and (3) happen multiple times; e. Change the sum to be over mathcal A'}
 
-We are grateful for your suggestions about improving the description of the model. We therefore have made a few changes to section 3.
-In particular, we add a step-by-step description of the workflow and a new diagram, figure XXX\todo[inline]{add in this figure!}, to provide background on GGNN and how these can be used to provide graph and node embeddings to make this section clearer. 
+We are grateful for your suggestions about improving the description of the model. We therefore have made a few changes to section 3 to improve clarity.
+In particular, we add a step-by-step description of the workflow and a new diagram, Figure \ref{fig:new-diagram}, to provide background on GGNNs and how these can be used to provide graph and node embeddings. 
 In addition we have brought out of the supplementary material some details on more specific architecture choices and to have space to do so, we are grateful to R2's suggestion to move the more technical details of section 4 into the appendix.
+
+
+
+
+
 
 To the more specific individual comments we respond to each reviewer below.
 
