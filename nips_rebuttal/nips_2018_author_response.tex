@@ -78,9 +78,23 @@ Sorry for the confusion here. $\mathcal{A}’$ is the set of all atoms in all mo
 The dependency on $a_{t-1}$ comes about by the changes in the molecular graph, caused by action $a_{t-1}$. 
 To clarify this, we will add equations for each of our predictors: $f_\textrm{start}$, $f_\textrm{add}$, $f_\textrm{remove}$.
 
-\emph{Point v)}  
+\emph{Point v)} 
+We thought a lot about how to compare with [6]. Ultimately we decided we were unable to compare with it (and also [7]) for the following reasons: 1.
+ These methods, as they currently stand, cannot run on our data as they currently can not run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to reaction conditions. 
+ Unfortunately we do not have access to this information. 2. We cannot run our method on their data as the link to their data is missing atom information, and they did not respond to our emails asking for their code or data. 
 
-\emph{Point ii and iv)} Thanks for these comments, we hope these have been addressed by our discussion at the top.} 
+\emph{Point vi)} We have run the WLDN[5]'s code for the case where it is also trained on our filtered training dataset.
+ We found it achieved top-1, top-3 and top-5 accuracies of 83.1\%, 91.5\% and 92.7\% respectively. 
+ We hope that this rules out Electro having better performance due to a more specialized training task.
+  
+\emph{Point vii)}
+ We politely disagree here. We think it is completely surprising that the model is able to pick up subtle chemical trends (e.g., only single atomic changes) without being explicitly trained on this task. We think an experiment like this may give additional confidence to a chemist that our model has learned reaction prediction, as this experiment resembles exam questions for organic chemistry students. 
+ 
+\emph{Point viii)}
+We believe this work advances two novel directions for future research: 1. We observe that reactions are essentially stepwise graph-editing procedures. It’s fruitful to model it this way precisely because it sets the stage for models that work on more general types of chemical reactions. 2. More broadly, there is a significant amount of structure in chemistry that, if we as machine learning researchers ignore, chemists will likewise ignore it. Previous work that models reactions in one step are not easy to interrogate, and so are hard for chemists to trust. Models like ELECTRO, that do the same sorts of things that organic chemistry students learning reactions do, are much easier to work with, criticise, and improve.
+
+ 
+\emph{Point ii and iv)} Thanks for these comments, we hope these have been addressed by our discussion at the top.
 
 
 
