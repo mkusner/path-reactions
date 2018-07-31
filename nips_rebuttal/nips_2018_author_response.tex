@@ -53,7 +53,8 @@ We would like to thank all reviewers for their thoughtful comments.
 % In addition we have brought out of the supplementary material some details on more specific architecture choices and to have space to do so, we are grateful to R2's suggestion to move the more technical details of section 4 into the appendix.
 %To the more specific individual comments we respond to each reviewer below.
 %We respond to each reviewer below.
-Our responses (sections with new experiments are given a $\dagger$):
+Our responses  (new experiments are marked \includegraphics[width=0.3cm]{testtube.png}
+):
 %% ============================================
 %% ========= Reviewer 1  ======================
 %% ============================================
@@ -72,7 +73,7 @@ We believe avoiding the more fragmented ML pipeline of predict-then-rank steps i
 
 
 %\emph{(3) How the present model compares to WLDN and seqtoseq in terms of runtime.}
-$\dagger$ \emph{[..(3) runtime comparison..]}
+\includegraphics[width=0.3cm]{testtube.png} \emph{[..(3) runtime comparison..]}
 For predicting products %, using a beam search width of 10, 
 \ourModel takes $0.337$ seconds, versus $0.034$s for WLDN [5] and $0.025$s %\footnote{As no code is available for this paper we quote their stated time.} 
 for the Seq2Seq model (quoting their stated time) [14, \S6.2]. 
@@ -111,7 +112,7 @@ for the Seq2Seq model (quoting their stated time) [14, \S6.2].
 %% ============================================
 \vspace{-5pt}
 \paragraph{Reviewer 2}
-$\dagger$ \emph{[i]}
+\includegraphics[width=0.3cm]{testtube.png} \emph{[i]}
 The motivation of only including reagent context at the start is that this is often the most challenging decision, and that action steps after this have access to the previous atom as context, making it an easier task.
 %Qualitatively, when running Electro-lite on the separate validation set we would see that the model often had the most errors on the first step, and that after picking this first step the next stages would often be correctly predicted.
 We have tested a version of \ourModel where reagent information is fed in as context at each step. 
@@ -136,7 +137,7 @@ We thought a lot about how to compare with [6-7], but
   1.These methods, as they currently stand, cannot run on all the elements present in USPTO [6, p.2528], [7, p.2214] and, furthermore, require access to the (unknown) reaction conditions. 
  2. We cannot run our method on their data as the link to their data is missing atom information, and they did not respond to our emails asking for their code or data. 
 
-$\dagger$ \emph{[vi]} We trained WLDN [5] (using code from the authors) on our filtered training dataset.
+\includegraphics[width=0.3cm]{testtube.png} \emph{[vi]} We trained WLDN [5] (using code from the authors) on our filtered training dataset.
  We found it achieved top-1, top-3 and top-5 accuracies of $83.1\%$, $91.5\%$ and $92.7\%$, which is worse than \ourModel. 
  Thus the improvements of \ourModel are not due to a more specialized training task.
   
