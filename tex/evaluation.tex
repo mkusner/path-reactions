@@ -44,13 +44,17 @@ is an exact match with the sequence of integers output by \ourModel; the top-1, 
 
 
 \begin{table}[t]
-\begin{minipage}[l]{0.42\textwidth}
+%\begin{minipage}[l]{0.42\textwidth}
+\begin{center}
+	
+
   \caption{Results when using \ourModel  for reaction product prediction, following the product matching procedure in Section~\ref{sec:product-prediction}. 
-The WLDN accuracy is computed using their evaluation code and pretrained model outputs on our test set.
-We were unable to evaluate the Seq2Seq model on our test set, instead quoting their reported numbers with an asterisk.}
+ For the baselines we compare against models trained on the full USPTO training set (marked FTS) and only tested on our subset of reactions with linear flow topology, and those that are also trained on the same subset as our model. 
+ We make use of the code and pre-trained models provided by \citet{jin2017predicting}, however, for evaluating the Seq2Seq approach as neither code or more fine grained results are available we train up the required models from scratch using the OpenNMT library \citep{2017opennmt}.
+}
   \label{table:prod-predict}
-  \end{minipage}\hfill
-  \begin{minipage}[r]{0.53\textwidth}
+  %\end{minipage}\hfill
+  %\begin{minipage}[r]{0.53\textwidth}
 %  \centering
   \begin{tabular}{lllll}
     \toprule
@@ -61,12 +65,15 @@ We were unable to evaluate the Seq2Seq model on our test set, instead quoting th
     \ourModelIR &  78.2 & 87.7 & 91.5 & 94.4   \\
     \ourModelR  &  {\bf 87.0} & {\bf 92.6} & {\bf 94.5} & {\bf 95.9}    \\
     \bottomrule \toprule
-    WLDN \citep{jin2017predicting} & 84.0  & 89.2 &  91.1 & 92.3 \\
-    Seq2Seq \citep{schwaller2017found} & 80.3$^\star$ & 84.7$^\star$ & 86.2$^\star$ & 87.5$^\star$ \\
+    WLDN FTS \citep{jin2017predicting} & 84.0  & 89.2 &  91.1 & 92.3 \\
+    WLDN \citep{jin2017predicting} & 83.1 & 89.3 & 91.5 & 92.7 \\
+    Seq2Seq FTS \citep{schwaller2017found} & 77.5 & 83.6 & 85.5  & 87.4 \\
+    Seq2Seq \citep{schwaller2017found} & 78.2 & 84.1 & 85.8  & 87.4  \\
     \bottomrule
   \end{tabular}
-  \end{minipage}
+  %\end{minipage}
     \vspace{-0.25cm}
+    \end{center}
 \end{table}
 
 
