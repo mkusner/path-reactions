@@ -25,29 +25,45 @@ Figure \ref{fig:symmetric-reaction-example} is an example of this.
     \label{fig:symmetric-reaction-example}
 \end{figure*}
 
+\section{Forming Node and Graph Embeddings}
 
-\section{More training details}
+In this section we briefly review existing work for forming node and graph embeddings, as well as describing more specific details relating to our particular implementation of these methods. 
+Figure \ref{fig:graph_nn} provides a visualization of these techniques.
 
-In this section we go through more specific model architecture details omitted from the main text. 
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{imgs/graph_nn}
+\caption{
+Visualization of how node embeddings and graph embeddings are formed. 
+Node embeddings are $d$-dimensional vectors, one for each node. 
+They are obtained using Gated Graph Neural Networks \citep{li2016gated}.
+These networks consist of a series of iterative steps where the embeddings for each node is updated using the node's previous embedding and a message from its neighbors.
+ Graph embeddings are $q$-dimensional vectors, representing a set of nodes, which could for instance be all the nodes in a particular graph \citep{li2018learning}.
+  They are formed by a weighted sum over node embeddings.
+}
+\label{fig:graph_nn}
+\end{figure*}
 
-\subsection{Model architectures}
-In this section we provide further details of our model architectures.
+ We start with Gated Graph Neural Networks \citep{li2016gated, gilmer2017neural}. 
+ We denote these as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we refer to the output as ``node embeddings'', $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$. 
+These networks form these node embeddings through a recurrent operation on messages, $\mb_v$, with $v \in \Ac$ so that there is one message associated with each node.
+At the first time step these messages, $\mb_v^{(0)}$, are initialized with the respective atom features shown in Table \ref{table:atom-features}. GGNNs then update these messages in a recursive nature:
 
-Section 3 of the main paper discusses our model.
-In particular we are interested in computing three conditional probability terms: (1) $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
-(2) the conditional probability $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$  
-of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
-and (3) the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
+\begin{align}
+	\mb_v^{(s)} = \textrm{GRU}\left( 
+					\mb_v^{(s - 1)},  
+						\sum_{i \in \neigh{1}(v)} f_\textrm{single}\left(\mb_i^{(s - 1)}\right) +
+						\sum_{j \in \neigh{2}(v)} f_\textrm{double}\left(\mb_j^{(s - 1)}\right) +
+						\sum_{k \in \neigh{3}(v)} f_\textrm{triple}\left(\mb_j^{(s - 1)}\right)
+					\right)
+\end{align}
 
-Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules, all introduced in the main text: $\fEmbed$, $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$, $\fAdd$, $\fRemove$ and $\fInitial$.
- In this section we shall go through each of these in turn.
-
-The function $\fEmbed$ computes node embeddings, $\nodeEmbeddings{\moleculeSet_t}$, which are used as input to all the other modules. For this we use Gated Graph Neural Networks (GGNN) \citep{li2016gated, gilmer2017neural}.
- We use 4 propagation steps. 
- The atom features we feed in are detailed in Table \ref{table:atom-features}. These are calculated using RDKit. In total there are 101 features and we maintain this dimensionality in the hidden layers during the propagation steps of the GGNN. Three edge labels are defined: single bonds, double bonds and triple bonds. RDKit is used to Kekulize the reactant molecules. 
+Where $\textrm{GRU}$ is a Gated Recurrent Unit \citep{Cho2014-xt}, the functions $\neigh{1}(v)$, $\neigh{2}(v)$, $\neigh{3}(v)$ index the nodes connected by single, double and triple bonds to node $v$ respectively and $f_\textrm{single}$, $f_\textrm{double}$ and $f_\textrm{triple}$ are linear transformations with learnable parameters.
+This process continues for $S$ steps (where we choose $S=4$), with all the messages and the hidden layer of the GRU maintaining the same dimensionality of 101 as the raw atom features.
+The node embeddings are set as the final message belonging to a node, so that indexing a row of the node embeddings matrix, $\nodeEmbeddings{\moleculeSet}$, gives a transpose of the final message vector, ie $[\nodeEmbeddings{\moleculeSet}]_v = \mb_v^{(S)t}$.
 
 \begin{table}
-  \caption{Atom features}
+  \caption{Atom features we sue as input to the GGNN. These are calculated using RDKit.}
   \label{table:atom-features}
   \centering
   \begin{tabular}{ll}
@@ -66,7 +82,49 @@ The function $\fEmbed$ computes node embeddings, $\nodeEmbeddings{\moleculeSet_t
   \end{tabular}
 \end{table}
 
-As mentioned in Section 3 of the main paper both $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$ consist of three
+
+Having formed node embeddings we can use these to form graph embeddings \citep{li2018learning,Johnson2017-pd}, which as described earlier are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
+ We define the function that maps node features belonging to each atom to their graph embedding by $\fEmbedGraphs$.
+These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
+Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
+They are used to form the graph embedding, as
+\begin{align}
+	\fEmbedGraphs(\nodeEmbeddings{\moleculeSet_t}) = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\nodeEmbeddings{\moleculeSet_t,v})\right) \fuj(\nodeEmbeddings{\moleculeSet_t, v})\right).
+	\label{eq:graph-embedding}
+\end{align}
+Where $\sigma$ is a sigmoid function.
+We can break this equation down into two stages.
+In stage (i), similar to \citet[\S B.1]{li2018learning}, we form an embedding of one or more molecules (with vertices $\Ac'$ and with $\Ac' \subseteq  \Ac$) by performing a gated sum over the node features. 
+In this manner the function $\fui$ is used to decide how much that node should contribute towards the embedding,
+ and $\fuj$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose this to be double the dimension of the node features.
+Having formed this embedding of the graphs, we project this down to a lower $q$-dimensional space in stage (ii), which is done by the function $\fuk$. 
+
+
+
+
+
+
+
+\section{More training details}
+
+In this section we go through more specific model architecture details omitted from the main text. 
+
+\subsection{Model architectures}
+In this section we provide further details of our model architectures.
+
+Section 3 of the main paper discusses our model.
+In particular we are interested in computing three conditional probability terms: (1) $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
+(2) the conditional probability $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$  
+of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
+and (3) the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
+
+Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules, all introduced in the main text: $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$, $\fAdd$, $\fRemove$ and $\fInitial$.
+ In this section we shall go through each of these in turn.
+
+
+
+
+As mentioned above  both $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$ consist of three
 linear functions. 
 For  both, the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
 Again for both, $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
@@ -93,17 +151,44 @@ For training we use reaction minibatch sizes of one, although these can consist 
 
 
 
+
+
+
+\section{Further details on identifying reactions with linear flow topology}
+\label{sect:electron_path_identify}
+
+This section provides further details on how we extract reactions with linear flow topology, complementing Figure \ref{fig:dataset_steps} in the main text.
+
+The first step is to look at the bond changes present in a reaction. 
+Each atom on the ends of the path will be involved in exactly one bond change;
+the atoms in the middle will be involved in two. 
+We can then line up bond change pairs so that neighboring pairs have one atom in common,
+ with this ordering forming a path.
+For instance, given the pairs "\texttt{11-13, 14-10, 10-13}" we form the unordered path "\texttt{14-10, 10-13, 13-11}".
+If we are unable to form such a path, for instance due to two paths being present as a result of multiple reaction stages, then we discard the reaction.
+
+For training our model we want to find the ordering of our path, so that we know in which direction the electrons flow.
+To do this we examine the changes of the properties of the atoms at the two ends of our path. 
+In particular, we look at changes in charge and attached implicit hydrogen counts. 
+The gain of negative charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge) indicates that electrons have arrived at this atom, 
+implying that this is the end of the path; 
+vice-versa for the start of the path.
+However, sometimes the difference is not available in the USPTO data, as unfortunately only major products are recorded, and so details of what happens to some of the reactant molecules' atoms may be missing.
+In these cases we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
+
+The next step of filtering checks that the path alternates between add steps (+1) and remove steps (-1). 
+This is done by analyzing and comparing the bond changes on the path in the reactant and product molecules. 
+Reactions that involve greater than one change (for instance going from no bond between two atoms in the reactants to a double bond between the two in the products) can indicate multi-step 
+reactions with identical paths, and so are discarded.
+Finally, as a last sanity check, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants,
+to confirm that the final product that is produced by our extracted electron path is consistent with the major product SMILES in the USPTO dataset.
+
 \section{Prediction using our model}
 
 At predict time, as discussed in the main text, we use beam search to find high probable chemically-valid paths from our model. Further details are given in Algorithm~\ref{algo:valid_path}.
 
 \input{tex/algorithm.tex}
 
-
-
-\newpage
-\quad
-\newpage
 
 \section{Further example of actions proposed by our model}
 
