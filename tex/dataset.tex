@@ -7,20 +7,18 @@ We take as our starting point the 479,035 reactions, along with the training, va
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
 This data consists of, per reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
 The bond changes indicate pairs of atoms which are connected differently in the reactants and products.
-The SMILES strings encode the molecules present in a text based format.
-Before we can apply our method, we perform two data preprocessing tasks described in the subsections below
-(using the open-source chemo-informatics software RDKit \citep{rdkit}).
-These steps automatically
-extract a subset of data appropriate for training our model of electron movement during a reaction. 
-
-
-\subsection{Reactant and reagent separation}
-
+The SMILES strings encode the molecules present in a text based format. Before we can apply our method, we perform two data preprocessing tasks described  below (using the open-source chemo-informatics software RDKit \citep{rdkit}). 
+These steps automatically extract a subset of data appropriate for training our of electron movement during a reaction.
+ 
+\paragraph{Reactant and Reagent Seperation}
 Typically, reaction SMILES strings are split into three parts --- reactants, reagents, and products.
-
 The reactant molecules are those which are consumed during the course of the chemical reaction to form the  product, 
 while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts),
 but do not explicitly take part in the reaction itself; we see this in the example in Figure~\ref{fig:task-overview}.
+
+
+
+
 
 Unfortunately, the USPTO dataset as extracted does not differentiate between reagents and reactants.
 We elect to preprocess the entire USPTO dataset by separating out the reagents from the reactants using the process outlined in \citet{schwaller2017found}, where we classify as a reagent any molecule for which either 
@@ -28,39 +26,37 @@ We elect to preprocess the entire USPTO dataset by separating out the reagents f
 (ii) the molecule appears in the product SMILES completely unchanged from the pre-reaction SMILES.
 This allows us to properly model molecules which are included in the dataset but do not materially contribute to the reaction.
 
-\subsection{Identifying reactions with linear electron topology}
+\paragraph{Identifying reactions with linear electron topology}
 
 To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings and bond changes.
 Furthermore, not every reaction in the USPTO dataset has a linear electron topology; 
 such reactions (for example, multi-step reactions and cycloadditions) will not have a single unique path through the atoms 
-which describes the movement of the electrons.
+which describes the movement of the electrons. 
+Figure \ref{fig:dataset_steps} shows the steps necessary to identify and extract the electron paths from reactions exhibiting electron flow topology. Further details are in Appendix \ref{sect:electron_path_identify}.
 
-The first step is to look at the bond changes present in a reaction. 
-Each atom on the ends of the path will be involved in exactly one bond change;
-the atoms in the middle will be involved in two. 
-We can then line up bond change pairs so that neighboring pairs have one atom in common,
- with this ordering forming a path.
-For instance, given the pairs "\texttt{11-13, 14-10, 10-13}" we form the unordered path "\texttt{14-10, 10-13, 13-11}".
-If we are unable to form such a path, for instance due to two paths being present as a result of multiple reaction stages, then we discard the reaction.
 
-For training our model we want to find the ordering of our path, so that we know in which direction the electrons flow.
-To do this we examine the changes of the properties of the atoms at the two ends of our path. 
-In particular, we look at changes in charge and attached implicit hydrogen counts. 
-The gain of negative charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge) indicates that electrons have arrived at this atom, 
-implying that this is the end of the path; 
-vice-versa for the start of the path.
-However, sometimes the difference is not available in the USPTO data, as unfortunately only major products are recorded, and so details of what happens to some of the reactant molecules' atoms may be missing.
-In these cases we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
-
-The next step of filtering checks that the path alternates between add steps (+1) and remove steps (-1). 
-This is done by analyzing and comparing the bond changes on the path in the reactant and product molecules. 
-Reactions that involve greater than one change (for instance going from no bond between two atoms in the reactants to a double bond between the two in the products) can indicate multi-step 
-reactions with identical paths, and so are discarded.
-Finally, as a last sanity check, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants,
-to confirm that the final product that is produced by our extracted electron path is consistent with the major product SMILES in the USPTO dataset.
+\begin{figure*}
+\centering
+\includegraphics[width=1.\textwidth]{imgs/dataset_steps}
+\caption{
+Example of how we turn SMILES reaction string into an ordered electron path, for which we can train \ourModel on. 
+This consists of a series of steps: 
+(1) Identify bonds that change by comparing bond triples (source node, end node, bond type) between the reactants and products. 
+(2) Line up the bond changes so that one of the atoms in consecutive bond changes overlap (for reactions which do not have linear electron flow topology, such as multi-step reactions, this will not be possible and so we discard these reactions).
+(3) Work out the direction of the path. A gain of charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge, such as in the example shown) indicates that the electrons have arrived at this atom; and vice-versa for the start of the path.
+When details about both ends of the path are missing from the SMILES string we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
+(4) The extracted electron path deterministically determines a series of intermediate molecules which can be used for training \ourModel. 
+Paths that do not consist of alternative add and removal steps and do not result in the final recorded product do not exhibit linear electron flow topology and so can be discarded.
+}
+\label{fig:dataset_steps}
+\end{figure*}
 
 The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
 correspond to reactions of linear topology.
 This comprises $73\%$ of the dataset, containing 349,898 total reactions, of which 29,360 form the held-out test set.
+
+
+
+
 
 

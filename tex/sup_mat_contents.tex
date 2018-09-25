@@ -151,17 +151,44 @@ For training we use reaction minibatch sizes of one, although these can consist 
 
 
 
+
+
+
+\section{Further details on identifying reactions with linear flow topology}
+\label{sect:electron_path_identify}
+
+This section provides further details on how we extract reactions with linear flow topology, complementing Figure \ref{fig:dataset_steps} in the main text.
+
+The first step is to look at the bond changes present in a reaction. 
+Each atom on the ends of the path will be involved in exactly one bond change;
+the atoms in the middle will be involved in two. 
+We can then line up bond change pairs so that neighboring pairs have one atom in common,
+ with this ordering forming a path.
+For instance, given the pairs "\texttt{11-13, 14-10, 10-13}" we form the unordered path "\texttt{14-10, 10-13, 13-11}".
+If we are unable to form such a path, for instance due to two paths being present as a result of multiple reaction stages, then we discard the reaction.
+
+For training our model we want to find the ordering of our path, so that we know in which direction the electrons flow.
+To do this we examine the changes of the properties of the atoms at the two ends of our path. 
+In particular, we look at changes in charge and attached implicit hydrogen counts. 
+The gain of negative charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge) indicates that electrons have arrived at this atom, 
+implying that this is the end of the path; 
+vice-versa for the start of the path.
+However, sometimes the difference is not available in the USPTO data, as unfortunately only major products are recorded, and so details of what happens to some of the reactant molecules' atoms may be missing.
+In these cases we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
+
+The next step of filtering checks that the path alternates between add steps (+1) and remove steps (-1). 
+This is done by analyzing and comparing the bond changes on the path in the reactant and product molecules. 
+Reactions that involve greater than one change (for instance going from no bond between two atoms in the reactants to a double bond between the two in the products) can indicate multi-step 
+reactions with identical paths, and so are discarded.
+Finally, as a last sanity check, we use RDKit to produce all the intermediate and final products induced by our path acting on the reactants,
+to confirm that the final product that is produced by our extracted electron path is consistent with the major product SMILES in the USPTO dataset.
+
 \section{Prediction using our model}
 
 At predict time, as discussed in the main text, we use beam search to find high probable chemically-valid paths from our model. Further details are given in Algorithm~\ref{algo:valid_path}.
 
 \input{tex/algorithm.tex}
 
-
-
-\newpage
-\quad
-\newpage
 
 \section{Further example of actions proposed by our model}
 
