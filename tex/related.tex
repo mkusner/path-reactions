@@ -31,12 +31,14 @@ We start by summarizing the related work on \emph{product prediction} and \emph{
 
 
 \paragraph{Product prediction.}
+
 % wei2016neural
-The earliest work we are aware of that uses deep learning to predict the products of reactions is \cite{wei2016neural}. Their idea was to approximate the operations of a molecular fingerprint so that all operations become continuously differentiable. They then learned parameters of this fingerprint to accurately predict product fingerprints end-to-end.
-% coley2017prediction
-% TODO
+% NOTE: Jennifer, David and Alan were not the first to apply deep learning to this problem, this was done Aires de Sousa's group already in 2005, using unsupervised pretraining.
+Recently, methods combining machine learning and global rewriting rules have been proposed [\cite{coley2017prediction,neural-symbolic,segler2018planning,wei2016neural,zhang2005structure}]. Here, a learned model is used to predict which rewrite rule to apply preferably. While these models are readily interpretable, they tend be brittle. 
+%The earliest work we are aware of that uses deep learning to predict the products of reactions is \cite{zhang2005structure}. Their idea was to approximate the operations of a molecular fingerprint so that all operations become continuously differentiable. They then learned parameters of this fingerprint to accurately predict product fingerprints end-to-end.
+
 % jin2017predicting
-Another graph-based technique is \cite{jin2017predicting} who construct a network based on the Weisfeiler-Lehman algorithm for testing graph isomorphism. They use this algorithm to select atoms that will be involved in a reaction. They then enumerate all chemically-valid bond changes involving these atoms and learn a separate network to rank the resulting potential products. This method is state-of-the-art on product prediction.
+Another class of models is the graph-based technique by \cite{jin2017predicting} who construct a network based on the Weisfeiler-Lehman algorithm for testing graph isomorphism. They use this algorithm to select atoms that will be involved in a reaction. They then enumerate all chemically-valid bond changes involving these atoms and learn a separate network to rank the resulting potential products. This method is state-of-the-art on product prediction.
 
 % schwaller2017found
 \cite{schwaller2017found} represents reactants as SMILES (CITE) strings and then used a sequence to sequence network (specifically, the work of (CITE)) to predict product SMILES. While this method is end-to-end trainable the SMILES representation is quite brittle as often single character changes will not correspond to a valid molecule.

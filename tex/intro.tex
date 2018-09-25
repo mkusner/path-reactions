@@ -1,4 +1,4 @@
-% !TEX root =  ../main.tex
+% !TEX root =  ../main_iclr.tex
 
 The ability to reliably predict the products of chemical reactions is of central importance to manufacture medicines, and materials and to understand many processes in molecular biology.
 Theoretically, all chemical reactions can be described by the stepwise rearrangement of electrons in molecules \cite{herges1994organizing}. 
@@ -9,9 +9,9 @@ but it also provides insight into why the products are formed on an atomistic le
 Mechanisms can be treated at different levels of abstraction. 
 On the lowest level, quantum-mechanical simulations of the electronic structure can be performed, which is prohibitively computationally expensive for most systems of interest. 
 On the other end, chemical reactions can be treated as rules that ``rewrite'' reactant molecules to products, which abstracts away the individual electron redistribution steps into a single, global transformation step. 
-To combine the advantages of both approaches, chemists use a tremendously powerful intermediate conceptual model, which simplifies the stepwise electron shifts using sequences of arrows which indicate the path of electrons throughout molecular graphs \cite{herges1994organizing}. 
+To combine the advantages of both approaches, chemists use a powerful qualitative model of quantum chemistry colloquially called ``arrow pushing'', which simplifies the stepwise electron shifts using sequences of arrows which indicate the path of electrons throughout molecular graphs [\cite{herges1994organizing}]. 
 
-Recently, there have been a number of machine learning models proposed for directly predicting the products of chemical reactions \cite{coley2017prediction,jin2017predicting,schwaller2017found,neural-symbolic,segler2018planning,wei2016neural}, largely using graph-based or machine translation models. 
+Recently, there have been a number of machine learning models proposed for directly predicting the products of chemical reactions [\cite{coley2017prediction,jin2017predicting,schwaller2017found,neural-symbolic,segler2018planning,wei2016neural}], largely using graph-based or machine translation models. 
 The task of reaction product prediction is shown on the left-hand side of Figure~\ref{fig:task-overview}. 
 
 In this paper we propose a machine learning model to predict the reaction mechanism, as shown on the right-hand side of Figure~\ref{fig:task-overview}, for a particularly important subset of organic reactions.
