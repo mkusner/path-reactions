@@ -8,10 +8,17 @@ each connected component of the graph defines an individual molecule.
 We can associate an ordering over all the atoms in all the molecules in the set using an {\em atom map} number:
 an integer label assigned to each non-hydrogen atom in both the reactants and the products which 
 both permits easy matching between atoms before and after the reaction, and
-gives us a consistent way to index particular atoms.
-Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 3 of the appendix.
-Molecules input into the model are first put in a Kekul\'e form, a process which makes explicit the location of single and double bonds in aromatic structures;
+gives us a consistent way to index particular atoms. Molecules input into the model are first put in a Kekul\'e form, a process which makes explicit the location of single and double bonds in aromatic structures;
 each bond $b \in \Bc$ is either a single, double, or triple bond.
+
+Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 3 of the appendix.
+ However, when learning functions that operate over these atoms we do not work with these raw features directly but instead with the atom, or equivalently, node embedding. 
+ These contain information about the atom of interest as well as its surrounding interest.
+ These can be computed using any model that is able to compute graph-isomorphic features, for instance usually via message-passing techniques \citep{gilmer2017neural}; we choose to use 4 layer gated graph neural network (GGNN) message functions \citep{li2016gated}, for which we include a short review of in the appendix. 
+ These produce a $d$-dimensional embedding of an atom and if we stack these vectors up as rows (using the atom mapping to define an order)  we have the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \mathbb{R}^{|\Ac|\times d}$, containing all the node embeddings for a particular molecule set, $\moleculeSet_t$.
+
+
+
 
 
 Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
@@ -28,8 +35,6 @@ that specifies $p_\theta$, before describing how to train the model's parameters
 
 
 \subsection{Generative process}
-
-
 
 
 \begin{figure*}
@@ -88,44 +93,17 @@ the subfigures show the sequence of intermediate products and the distributions 
 
 
 
-Each of the conditional probabilities in Eq.~\eqref{eq:jointprob} are parameterized by neural networks.
+We are left now with defining the functional form of our conditional distributions in  Eq.~\eqref{eq:jointprob} for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t~|~\moleculeSet_t, a_{t-1}, t)$, all of which are parameterized by neural networks.
 At each step of the electron path, the network takes the current intermediate graphs, 
 the previous action, and the reagents if relevant, 
 and computes a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
-The structure of these networks is described in the following section.
+The structure of these networks is described in the following section, although we defer full architectural details (e.g.\ number of layers and hidden units) 
+and training settings to the appendix.
 
 
-\subsection{Computing atom and molecule features}
 
 
-We are left now with defining the functional form of our conditional distributions for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t~|~\moleculeSet_t, a_{t-1}, t)$.
-However, before describing these modules we need to describe how we compute node embeddings and graph embeddings, as these  are  essential to each.
-Full architectural details (e.g.\ number of layers and hidden units) 
-and training settings are deferred to the appendix.
 
-Node embeddings are representations of all the atoms in all the molecules present in $\moleculeSet_t$.
- We denote them by the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \mathbb{R}^{|\Ac|\times d}$.
-Each row contains a $d$-dimensional embedding of an atom. 
-A natural ordering for the rows are the atom-map numbers assigned to each atom.
-We define the function $\fEmbed$ to map a set of graphs representing each molecule to these node embeddings.
-In general $\fEmbed$ could be any graph model that uses the graph structure of $\Mc_t$ to get graph-isomorphic node features, usually via message-passing techniques \citep{gilmer2017neural};
-we choose to use gated graph neural network (GGNN) message functions \citep{li2016gated}.
-
-It is also useful to be able to calculate graph embeddings $\graphEmbeddings$, which are vectors that represent groups of nodes belonging to one or more graphs; i.e.\ an entire molecule or set of molecules.
- We define the function that maps node features belonging to each atom to their graph embedding by $\fEmbedGraphs$.
-These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
-Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
-They are used to form the graph embedding, $\graphEmbeddings$, as
-\begin{align}
-	\graphEmbeddings = \fEmbedGraphs(\nodeEmbeddings{\moleculeSet_t}) = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\nodeEmbeddings{\moleculeSet_t,v})\right) \fuj(\nodeEmbeddings{\moleculeSet_t, v})\right).
-	\label{eq:graph-embedding}
-\end{align}
-Where $\sigma$ is a sigmoid function.
-We can break this equation down into two stages.
-In stage (i), similar to \citet[\S B.1]{li2018learning}, we form an embedding of one or more molecules (with vertices $\Ac'$ and with $\Ac' \subset  \Ac$) by performing a gated sum over the node features. 
-In this manner the function $\fui$ is used to decide how much that node should contribute towards the embedding,
- and $\fuj$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose this to be double the dimension of the node features.
-Having formed this embedding of the graphs, we project this down to a lower dimensional space in stage (ii), which is done by the function $\fuk$. 
 
 
 
