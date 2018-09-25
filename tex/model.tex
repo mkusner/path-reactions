@@ -1,4 +1,4 @@
-% !TEX root =  ../main.tex
+% !TEX root =  ../main_iclr.tex
 
 
 
@@ -53,6 +53,9 @@ Some actions are disallowed on certain steps, for instance you cannot remove a b
 
 
 
+
+
+
 First note that since our reactions are a single path of electrons through the reactants then, at any point, the next step in the path depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
 We make the simplifying assumption that the stop probability and the actions after the initial action $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
 \begin{align}
@@ -75,6 +78,71 @@ the conditional probability $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$
 of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
 and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
 
+
+\begin{algorithm}[t]
+  \caption{The generative steps of ELECTRO.}
+  {\bf Input:}~~Reactant molecules $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_r$, atom embedding function $\fEmbed(\cdot)$, graph embedding function $r(\cdot)$, time steps $T^\mathrm{max}$
+  
+  \begin{algorithmic}[1]
+  	\STATE $\nodeEmbeddings{\moleculeSet_0} = \fEmbed(\Mc_0)$ \COMMENT{atom embedding of reactants}
+  	\STATE $\contextVect_\mathrm{reagent} = r(\Mc_r)$ \COMMENT{graph embedding of reagents}
+  	%\STATE $\actionLogits = $
+  	\STATE $p_{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r) = \mbox{softmax}(\fInitial(\nodeEmbeddings{\moleculeSet_0}, \contextVect_\mathrm{reagent}))$ \COMMENT{probability $a_t$ starts the reaction}
+  	\STATE $a_{0} \sim p_{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r)$
+  	\FOR{$t = 1, \ldots, T^\mathrm{max}$}
+  		\STATE $\moleculeSet_t \leftarrow \moleculeSet_{0}, a_0, \ldots, a_{t-1}$ \COMMENT{modify molecules based on starting molecules and electron actions}
+  		%\STATE \mathbf{h}_
+  	\ENDFOR
+ %  	% Set up pool of completed paths to sort later
+ %  	\STATE $\outputPool = \{\left( \emptyset, \log (1 - \cProbCont(\Mc_0)) \right) \}$  \COMMENT{This set will store all completed paths.}
+ %  	\STATE $\removeFlag \!=\!1$ \COMMENT{Remove flag}
+  	
+ %  	% Pick the first action.\\
+ %  	\STATE
+	% \STATE $\hat{\Bc} = \emptyset$.  \COMMENT{This set will store all possible open paths. Cleared at start of each timestep.}	
+	% \FORALL{$v \in \Ac$} 
+	% 	\STATE $ \cPath = (v)$
+	% 	\STATE $ \lProb = \log \cProbCont(\Mc_0) + \log \cProbInitial(v, \moleculeSet_0, \moleculeSet_r)$
+	% 	\STATE $\hat{\Bc} = \hat{\Bc} \cup \{\left(\cPath, \lProb \right)\}$
+	% \ENDFOR
+	% \STATE  $\Bc_{0} = \texttt{pick\_topK\_actions}(\hat{\Bc})$ \COMMENT{We filter down to the top K most promising actions.}
+	
+	% % Then we evaluate the next stages.
+	% \STATE
+	% \FOR{t in $(1, \ldots, T^\mathrm{max})$}
+	% 	\STATE $\hat{\Bc} = \emptyset $ 
+				
+	% 	% We take all the previous top K open paths from the previous step...
+	% 	\FORALL{$(\cPath, \lProb) \in \Bc_{t-1}$} 
+			
+	% 		% We evaluate their stop probability at that point and add these stopped version to the completed pool.
+	% 		\STATE $\Mc_\cPath = \texttt{calc\_intermediate\_mol}(\Mc_0, \cPath)$
+	% 		\STATE $p_c = \cProbCont(\Mc_\cPath)$
+	% 		\STATE $\hat{\Pc} = \hat{\Pc} \cup \{(\cPath, \lProb + \log (1 - p_c))\}$
+			
+	% 		% We then see what would happen if we continued and picked another action.
+	% 		\FORALL{$v \in \Ac$}
+	% 			\STATE $\cPath' = \cPath^\frown (v)$ \COMMENT{New proposed path is concatenation of old path with new node.}
+
+	% 			\STATE $v_{t-1} = $ last element of $\cPath$
+	% 			\STATE $\hat{\Bc} = \hat{\Bc} \cup \{(\cPath' , \lProb + \log p_c + \log \cProbAct(v, \Mc_\cPath, v_{t-1}, \removeFlag) )\}$
+	% 		\ENDFOR
+	% 	\ENDFOR
+		
+	% 	% We next prune down the search space for next iteration to our beam width.
+	% 	\STATE  $\Bc_{t} = \texttt{pick\_topK\_actions}(\hat{\Bc})$ 
+		
+	% 	% We indicate that the next step will be opposite step:
+	% 	\STATE $\removeFlag = \removeFlag + 1 \mod 2$. \COMMENT{If on add step change to remove and vice versa.}
+	% \ENDFOR
+	
+ %  % Finally we sort the pool and we are done
+ %  \STATE
+ %  \STATE $\outputPool = \texttt{sort\_on\_prob}(\outputPool)$
+  \end{algorithmic}
+  {\bf Output:}~~Valid completed paths and their respective probabilities, sorted by the latter, 
+  \label{algo:valid_path}
+\end{algorithm}
 
 
 It is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
