@@ -41,8 +41,8 @@ Another graph-based technique is \cite{jin2017predicting} who construct a networ
 \paragraph{Mechanism prediction.}
 The only other work we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,NIPS2011_4356,kayala2011learning}.
 All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors. They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
-However, this combining and then ranking of electron sources and sinks can be a slow process, as many plausible reactions need to be considered (the number of subgraphs of $n$ reacting atoms, where single bonds are either added or removed is $2^{n(n-1)/2}$).
-These models also have only so far been successfully trained on small hand-curated datasets.
+However, this combining and then ranking of electron sources and sinks can be a slow process, as many plausible reactions need to be considered (the number of subgraphs of $n$ reacting atoms, where single bonds are either added or removed is $2^{n(n-1)/2}$). Furthermore, these models rely on expert-curated training sets, for which organic chemists have to hand-code every electron pushing step.
+%These models also have only so far been successfully trained on small hand-curated datasets.
 % kayala NIPS: NIPS2011_4356
 % kayala2011learning
 % kayala2012reactionpredictor
@@ -76,25 +76,27 @@ As a whole, this related work points to at least three main desirable characteri
 %\vspace{-4ex}
 %\begin{minipage}{0.75\textwidth}
 \begin{table*}[t]
-\begin{tabular}{c|cccc} 
-\hline
- \textbf{Prior Work} & \textbf{end-to-end} & \textbf{graph-based} & \textbf{mechanistic} &  \\ \hline \hline
-\cite{wei2016neural} & \checkmark & \checkmark & $-$   \\ \hline
-\cite{coley2017prediction} & $-$ & $-$ & $-$ \\ \hline
-\cite{jin2017predicting} &$-$ & \checkmark & $-$  \\ \hline
-\cite{schwaller2017found} & \checkmark & $-$ & $-$  \\ \hline
-\cite{segler2017modelling} & \checkmark & $-$ & $-$ \\ \hline 
-\cite{segler2018planning} & \checkmark & \checkmark & $-$  \\ \hline
+\begin{tabular}{lccc} 
+\toprule
+ \textbf{Prior Work} & \textbf{end-to-end}  & \textbf{mechanistic} &  \\ %\hline \hline
+\midrule
+Templates+ML & $-$  & $-$   \\ 
+%\cite{coley2017prediction} & $-$ & $-$ & $-$ \\ \hline
+WLDN [\cite{jin2017predicting}] &$-$ & $-$  \\ 
+Seq2Seq [\cite{schwaller2017found}] & \checkmark & $-$  \\ 
+%\cite{segler2017modelling} & \checkmark & $-$ & $-$ \\ \hline 
+%\cite{segler2018planning} & \checkmark & \checkmark & $-$  \\ \hline
 %\cite{NIPS2011_4356} &$-$ & $-$ & \checkmark  \\ \hline
 %\cite{kayala2011learning} & $-$ & $-$ & \checkmark \\ \hline
 %\cite{kayala2012reactionpredictor} &$-$ & $-$ &\checkmark  \\ \hline
-\cite{fooshee2018deep} & $-$ & $-$ & \checkmark \\ \hline
-\textbf{this work} & \checkmark & \checkmark & \checkmark \\
-\hline
+\cite{fooshee2018deep} & $-$ & \checkmark \\ 
+\midrule
+\textbf{this work} & \checkmark  & \checkmark \\
+\bottomrule
 %\bf{Method} & %\multicolumn{2}{c}{\bf Full} & \multicolumn{2}{c}{\bf Unaware} & \multicolumn{2}{c}{\bf Fair L2} & \multicolumn{2}{c}{\bf Fair L3} \\
 \end{tabular}
 \centering
-	\caption{Work on machine learning for reaction prediction, and whether they are (a) end-to-end trainable (b) use graph-based techniques, and (c) predict the reaction mechanism. \label{table.existing}}
+	\caption{Work on machine learning for reaction prediction, and whether they are end-to-end trainable, and predict the reaction mechanism. \label{table.existing}}
 \end{table*}
 %\end{minipage}
 %\vspace{-4ex}
