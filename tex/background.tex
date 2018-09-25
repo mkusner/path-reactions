@@ -1,7 +1,4 @@
 % !TEX root =  ../main_iclr.tex
-In this work we propose a novel generative model for modeling the reaction mechanism of a subset of reactions with \emph{linear electron flow}.
-
-
 \begin{figure*}[t!]
 \centering
 \includegraphics[width=\textwidth]{reaction_diagram.pdf}
@@ -9,47 +6,120 @@ In this work we propose a novel generative model for modeling the reaction mecha
 \label{fig:task-overview}
 
 \end{figure*}
-In Figure~\ref{fig:task-overview} we show the two challenges we tackle in this paper. 
-On the left is \emph{product prediction}, where the goal is to predict the reaction products, given a set of reactants and reagents. However, for this task we do not care {\em how} the reactants react. For this, we also consider the task of \emph{mechanism prediction}, shown on the right. In this section, we begin by describing related work on these two problems, and then describe how a subset of reactions can be modeling by a single linear flow of electrons. In Section 3, we describe our generative model for predicting these reactions.
+
+In this section, we begin with a chemistry background on molecules and chemical reactions. We then describe related work in machine learning on predicting chemical reactions. We then describe a particularly important subclass of chemical reactions, called \emph{linear electron flow (LEF)} reactions. Finally, we describe the contributions of this work.
 
 
 
-We argue that there are a number of benefits of predicting electron paths over predicting the outcomes of reactions directly (as is done in previous work \cite{jin2017predicting,schwaller2017found}):
-\begin{itemize}
-\item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where, and possibly why, it goes wrong by comparing the steps of the path with the correct steps.
-\item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
-\item \textbf{Chemically consistent}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
-\item \textbf{Generalizable}: As reaction paths follow similar trends in different molecules, our model naturally generalizes to unseen molecules. 
-\end{itemize}
+\subsection{Molecules and Chemical reactions.}
+Organic (carbon-based) molecules can be represented via a graph structure, where each node is an atom and each edge is a covalent bond (see example molecules in Figure~\ref{fig:task-overview}).
+Each edge (bond) represents two electrons that are shared between the atoms that the bond connects. 
+
+Electrons are particularly important for describing how molecules react with other molecules to produce new ones. All chemical reactions involve the stepwise movement of electrons along the atoms in a set of reactant molecules. 
+This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules \citep{herges1994coarctate}. For example, Figure~\ref{fig:task-overview} (\emph{Right}) shows how electron movement can break bonds (red arrows) and make new bonds (green arrows) to produce a new set of product molecules.
+
+\subsection{Related work}
+In general, work in machine learning on reaction prediction can be divided into two categories: 1. \emph{Product prediction}: where the goal is to predict the reaction products, given a set of reactants and reagents, shown in Figure~\ref{fig:task-overview} (\emph{Left}). However, for this task we do not care {\em how} the reactants react. 1. \emph{Mechanism prediction}: where the goal is to determine {\em how} the reactants react, i.e., the movement of electrons, shown in Figure~\ref{fig:task-overview} (\emph{Right}).
+
+
+\paragraph{Product prediction.}
+% wei2016neural
+The earliest work we are aware of that uses deep learning to predict the products of reactions is \cite{wei2016neural}. Their idea was to approximate the operations of a molecular fingerprint so that all operations become continuously differentiable. They then learned parameters of this fingerprint to accurately predict product fingerprints end-to-end.
+% coley2017prediction
+% TODO
+% jin2017predicting
+Another graph-based technique is \cite{jin2017predicting} who construct a network based on the Weisfeiler-Lehman algorithm for testing graph isomorphism. They use this algorithm to select atoms that will be involved in a reaction. They then enumerate all chemically-valid bond changes involving these atoms and learn a separate network to rank the resulting potential products. This method is state-of-the-art on product prediction.
+
+% schwaller2017found
+\cite{schwaller2017found} represents reactants as SMILES (CITE) strings and then used a sequence to sequence network (specifically, the work of (CITE)) to predict product SMILES. While this method is end-to-end trainable the SMILES representation is quite brittle as often single character changes will not correspond to a valid molecule.
+% segler2017modelling
+% TODO
+% segler2018planning
+% TODO
+
+\paragraph{Mechanism prediction.}
+The only other work we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,NIPS2011_4356,kayala2011learning}.
+All of these model a chemical reaction as an interaction between atoms which function as electron donors and those which function as electron acceptors. They predict the reaction mechanism via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
+However, this combining and then ranking of electron sources and sinks can be a slow process, as many plausible reactions need to be considered (the number of subgraphs of $n$ reacting atoms, where single bonds are either added or removed is $2^{n(n-1)/2}$).
+These models also have only so far been successfully trained on small hand-curated datasets.
+% kayala NIPS: NIPS2011_4356
+% kayala2011learning
+% kayala2012reactionpredictor
+% fooshee2018deep
+
+As a whole, this related work points to at least three main desirable characteristics for reaction prediction models: 
+\begin{enumerate}
+\item \emph{End-to-End}: There are many complex chemical constraints that limit the space of all possible reactions. How can we differentiate through a model subject to these constraints?
+\item \emph{Graph-Based}: Recent successes in deep learning models for graphs can embed similar graphs to similar vectors. How can we use such models to predict graphs?
+\item \emph{Mechanistic}: Learning the mechanism offers a number of benefits over learning the products directly including: interpretability, sparsity, and generalization.
+\end{enumerate}
+
+%In general, a model that predicts the reaction mechanism has a number of benefits over predicting the product of reaction directly: (a) \textbf{interpretability}: If the model makes a mistake, it is easy to see where, and possibly why, it goes wrong by comparing the steps of the mechanism with the correct steps. (b) \textbf{sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows one to exploit this sparsity. (c) \textbf{chemically constrained}: Learning a path allows one to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. (d) \textbf{generalizable}: As reaction paths follow similar trends in different molecules, mechanistic models naturally generalize to unseen molecules. 
 
 
 
+% We argue that there are a number of benefits of predicting electron paths over predicting the outcomes of reactions directly (as is done in previous work \cite{jin2017predicting,schwaller2017found}):
+% \begin{itemize}
+% \item \textbf{Easy to interpret}: If the model makes a mistake, it is easy to see where, and possibly why, it goes wrong by comparing the steps of the path with the correct steps.
+% \item \textbf{Sparse}: Reactions often only affect between 3 and 7 atoms out of anywhere from 10-50 reactant atoms. Modeling the reaction as a path allows us to exploit this sparsity.
+% \item \textbf{Chemically consistent}: Learning a path allows us to easily incorporate chemical constraints, such as the alternating removal and addition of bonds, among others. 
+% \item \textbf{Generalizable}: As reaction paths follow similar trends in different molecules, our model naturally generalizes to unseen molecules. 
+% \end{itemize}
+
+ 
 
 
-\vspace{-0.15cm}
-\paragraph{Molecules and Chemical reactions.}
+
+%\begin{wrapfigure}{R}{0.75\textwidth}
+%\scriptsize{
+%\vspace{-4ex}
+%\begin{minipage}{0.75\textwidth}
+\begin{table*}[t]
+\begin{tabular}{c|cccc} 
+\hline
+ \textbf{Prior Work} & \textbf{end-to-end} & \textbf{graph-based} & \textbf{mechanistic} &  \\ \hline \hline
+\cite{wei2016neural} & \checkmark & \checkmark & $-$   \\ \hline
+\cite{coley2017prediction} & $-$ & $-$ & $-$ \\ \hline
+\cite{jin2017predicting} &$-$ & \checkmark & $-$  \\ \hline
+\cite{schwaller2017found} & \checkmark & $-$ & $-$  \\ \hline
+\cite{segler2017modelling} & \checkmark & $-$ & $-$ \\ \hline 
+\cite{segler2018planning} & \checkmark & \checkmark & $-$  \\ \hline
+%\cite{NIPS2011_4356} &$-$ & $-$ & \checkmark  \\ \hline
+%\cite{kayala2011learning} & $-$ & $-$ & \checkmark \\ \hline
+%\cite{kayala2012reactionpredictor} &$-$ & $-$ &\checkmark  \\ \hline
+\cite{fooshee2018deep} & $-$ & $-$ & \checkmark \\ \hline
+\textbf{this work} & \checkmark & \checkmark & \checkmark \\
+\hline
+%\bf{Method} & %\multicolumn{2}{c}{\bf Full} & \multicolumn{2}{c}{\bf Unaware} & \multicolumn{2}{c}{\bf Fair L2} & \multicolumn{2}{c}{\bf Fair L3} \\
+\end{tabular}
+\centering
+	\caption{Work on machine learning for reaction prediction, and whether they are (a) end-to-end trainable (b) use graph-based techniques, and (c) predict the reaction mechanism. \label{table.existing}}
+\end{table*}
+%\end{minipage}
+%\vspace{-4ex}
+%}
+%\end{wrapfigure}
 
 
-Organic molecules (those involving predominantly carbon) can be modeled as a graph structure, where each node is an atom and each edge is a covalent bond.
-These covalent bonds represent the fact that 
-one or more pairs of electrons are shared between the atoms that the bond connects. 
+Table~\ref{table.existing} describes how the current work on reaction prediction satisfies these characteristics. In this work we propose to model a subset of reactions with \emph{linear electron flow} (LEF), described below.
 
-
-Just as electrons describe the current structure of molecules, 
-they also describe how molecules react with other molecules to produce new ones. All chemical reactions involve the stepwise movement of electrons along the atoms in a set of reactant molecules. 
-This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules \citep{herges1994coarctate}. 
+\subsection{Linear Electron Flow reactions} 
 %
-Reaction mechanisms can be classified by the topology of their "electron-pushing arrows". Here, the class of reactions with linear electron flow topology is by far the most important, followed by those with cyclic topology \citep{herges1994coarctate}. In this work, we will only consider reactions with linear topology that involve the movement of pairs of electrons.
+Reaction mechanisms can be classified by the topology of their ``electron-pushing arrows'' (the red and green arrows in Figure~\ref{fig:task-overview}). Here, the class of reactions with \emph{linear electron flow} (LEF) topology is by far the most important, followed by those with cyclic topology \citep{herges1994coarctate}. In this work, we will only consider LEF reactions that are \emph{heterolytic}, i.e., they involve pairs of electrons.
 
-
-%\vspace{-0.15cm}
-\paragraph{Reactions as single electron paths.}
 If reactions fall into this class, then a chemical reaction can be modeled as pairs of electrons moving in a \emph{single path} through the reactant atoms. 
-Further, this electron path will alternately remove existing bonds in molecules, and form new ones. We show this alternating structure in the right hand part of Figure \ref{fig:task-overview}. 
-The reaction formally starts by taking the pair of electrons between the Li and C atoms and moving them to the C atom (step 1); this is a remove bond step. 
-Next comes an add step where electrons are moved from the C atom to form a bond between the two reactant molecules (step 2).
-Then a pair of electrons are removed between the C and O atoms and moved to the O atom, giving rise to the products (step 3). 
+Further, this electron path will alternately remove existing bonds in molecules, and form new ones. We show this alternating structure in Figure \ref{fig:task-overview} (\emph{Right}). 
+The reaction formally starts by (step 1) taking the pair of electrons between the Li and C atoms and moving them to the C atom; this is a remove bond step. 
+Next (step 2) a bond is added when electrons are moved from the C atom in reactant 1 to a C atom in reactant 2.
+Then (step 3) a pair of electrons are removed between the C and O atoms and moved to the O atom, giving rise to the products. 
 Predicting the final product is thus a byproduct of predicting this series of electron steps.
 
+
+\paragraph{Contributions.} We propose a novel generative model for modeling the reaction mechanism of LEF reactions. Our contributions are as follows
+\begin{itemize}
+\item We propose an end-to-end generative model for predicting reaction mechanisms, \ourModelR, that is fully differentiable. It can modularly be used with any deep model on graphs.
+\item We design a technique to identify LEF reactions and their underlying mechanism from purely atom-mapped reactants and products.
+\item We demonstrate that our generative model learns chemical trends such as functional group selectivity.
+\end{itemize}
 
 
