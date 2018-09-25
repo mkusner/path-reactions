@@ -12,13 +12,15 @@ gives us a consistent way to index particular atoms. Molecules input into the mo
 each bond $b \in \Bc$ is either a single, double, or triple bond.
 
 Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 3 of the appendix.
- However, when learning functions that operate over these atoms we do not work with these raw features directly but instead with the atom, or equivalently, node embedding. 
- These contain information about the atom of interest as well as its surrounding interest.
- These can be computed using any model that is able to compute graph-isomorphic features, for instance usually via message-passing techniques \citep{gilmer2017neural}; we choose to use 4 layer gated graph neural network (GGNN) message functions \citep{li2016gated}, for which we include a short review of in the appendix. 
- These produce a $d$-dimensional embedding of an atom and if we stack these vectors up as rows (using the atom mapping to define an order)  we have the matrix $\nodeEmbeddings{\moleculeSet_t} \subseteq \mathbb{R}^{|\Ac|\times d}$, containing all the node embeddings for a particular molecule set, $\moleculeSet_t$.
+ However, when learning functions that operate over these atoms we do not work with these raw features directly but instead with the atom, or equivalently node, embedding. 
+ These contain information about the atom of interest as well as its surrounding neighborhood.
+ These can be computed using any model that is able to compute graph-isomorphic features, for instance usually via message-passing techniques \citep{gilmer2017neural}; we choose to use 4 layer gated graph neural network (GGNN) message functions \citep{li2016gated}, for which we include a short review in the appendix. 
+ These produce a $d$-dimensional embedding of an atom and if we stack these vectors up as rows (using the atom mapping to define an order)  we have the matrix $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$, containing all the node embeddings for a particular molecule set, $\moleculeSet$.
 
-
-
+Sometimes we wish to agglomerate the node embeddings belonging to a set of nodes $\Ac'$ (with $\Ac' \subseteq  \Ac$), to form a graph embedding \citet[\S B.1]{li2018learning}, that is a vector that represents multiple nodes but that is invariant to any particular node ordering. 
+These functions have also previously been referred to as aggregation graph transformations \citep[\S3]{Johnson2017-pd}.
+We denote these functions that map from $\nodeEmbeddings{\moleculeSet'}$ to a $q$-dimensional vector, $r: \mathbb{R}^{|\Ac'|\times d} \to \mathbb{R}^q$.
+They obtain their node order invariance by performing a weighted sum over the nodes.
 
 
 Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
@@ -177,7 +179,7 @@ and training settings to the appendix.
 
 \subsection{Computing probabilities over actions}
 
-Having described how we compute node and graph embeddings, we are now ready to define each of our parameterized distributions over actions.
+We now define each of our parameterized distributions over actions.
 The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
 This probability is computed from a graph embedding via the function $\fEmbedGraphs_{\textrm{stop}}$, which projects down to a single dimension. We then map this to the $[0,1]$ interval via the sigmoid function $\sigma$ which yields the overall expression
 \begin{align}
