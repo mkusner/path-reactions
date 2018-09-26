@@ -214,7 +214,7 @@ for the start step any action can be picked, so $\bm{\beta}$ is the all-ones vec
 For the remove step, $\bm{\beta}_\mathrm{remove}$ masks out (i.e.\ is set to zero for) any bonds that do not currently exist and thus cannot be removed (noting though that self-bonds are permitted in the first remove step).
 For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, preventing the model from stalling in the same state for multiple time-steps. 
 \paragraph{Training}
-We can learn the parameters $\theta$ of all the parameterized functions, by maximizing the log likelihood of a full path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$.
+We can learn the parameters $\theta$ of all the parameterized functions, including those producing node embeddings, by maximizing the log likelihood of a full path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$.
 This is evaluated by using a known electron path $a_t^\star$ and intermediate products $\moleculeSet_t^\star$ extracted from training data,
 rather than on simulated values. 
 This allows us to train on all stages of the reaction at once, given electron path data.
