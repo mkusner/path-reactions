@@ -89,14 +89,24 @@ and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction termin
   	\STATE $\nodeEmbeddings{\moleculeSet_0} = \fEmbed(\Mc_0)$ \COMMENT{atom embedding of reactants}
   	\STATE $\contextVect_\mathrm{reagent} = r(\Mc_r)$ \COMMENT{graph embedding of reagents}
   	%\STATE $\actionLogits = $
-  	\STATE $p_{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r) = \mbox{softmax}(\fInitial(\nodeEmbeddings{\moleculeSet_0}, \contextVect_\mathrm{reagent}))$ \COMMENT{probability $a_t$ starts the reaction}
-  	\STATE $a_{0} \sim p_{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r)$
+  	\STATE $p_\theta^{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r) \triangleq \mbox{softmax}(\fInitial(\nodeEmbeddings{\moleculeSet_0}, \contextVect_\mathrm{reagent}))$ \COMMENT{probability $a_t$ starts the reaction}
+  	\STATE $a_{0} \sim p_\theta^{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r)$
   	\FOR{$t = 1, \ldots, T^\mathrm{max}$}
-  		\STATE $\moleculeSet_t \leftarrow \moleculeSet_{t-1}, a_{t-1}, \ldots, a_{t-1}$ \COMMENT{modify molecules based on previous molecule and action}
-  		\IF{$t \mod 2 = 1$}
-  			\STATE a
+  		\STATE $\moleculeSet_t \leftarrow \moleculeSet_{t-1}, a_{t-1}$ \COMMENT{modify molecules based on previous molecule and action}
+  		\STATE $\nodeEmbeddings{\moleculeSet_t} = \fEmbed(\Mc_t)$ \COMMENT{atom embedding of new molecules}
+  		\IF{$t$ is odd}
+  			\STATE $p_\theta^{\mathrm{remove}} \triangleq \mbox{softmax}(\fRemove(\nodeEmbeddings{\moleculeSet_t}, [\nodeEmbeddings{\moleculeSet_t}]_{a_{t-1}}))$ 
+  			\STATE $a_t \sim p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1})$ \COMMENT{electrons remove bond between $a_t$ and $a_{t-1}$}
+  		\ELSE
+  		  	\STATE $p_\theta^{\mathrm{add}} \triangleq \mbox{softmax}(\fAdd(\nodeEmbeddings{\moleculeSet_t}, [\nodeEmbeddings{\moleculeSet_t}]_{a_{t-1}}))$
+  			\STATE  $a_t \sim p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1})$ \COMMENT{electrons add bond between $a_t$ and $a_{t-1}$}
   		\ENDIF
-  		\STATE a
+  		\STATE $\electronPath_t = \electronPath_{0:t-1} \cup a_t$
+  		\STATE $p_\theta(c_t \mid \moleculeSet_t) \triangleq \sigma(r_{\textrm{cont}}(\nodeEmbeddings{\moleculeSet_t}))$
+  		\STATE $c_t \sim p_\theta(c_t \mid \moleculeSet_t)$ \COMMENT{whether to continue reaction}
+  		\IF{$c_t = 0$}
+  			\STATE break
+  		\ENDIF
   		%\STATE \mathbf{h}_
   	\ENDFOR
  %  	% Set up pool of completed paths to sort later
@@ -146,8 +156,8 @@ and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction termin
  %  \STATE
  %  \STATE $\outputPool = \texttt{sort\_on\_prob}(\outputPool)$
   \end{algorithmic}
-  {\bf Output:}~~Valid completed paths and their respective probabilities, sorted by the latter, 
-  \label{algo:valid_path}
+  {\bf Output:}~~Electron path $\electronPath_{0:t}$
+  \label{algo:generative_model}
 \end{algorithm}
 
 
