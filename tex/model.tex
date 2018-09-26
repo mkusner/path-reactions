@@ -92,7 +92,11 @@ and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction termin
   	\STATE $p_{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r) = \mbox{softmax}(\fInitial(\nodeEmbeddings{\moleculeSet_0}, \contextVect_\mathrm{reagent}))$ \COMMENT{probability $a_t$ starts the reaction}
   	\STATE $a_{0} \sim p_{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r)$
   	\FOR{$t = 1, \ldots, T^\mathrm{max}$}
-  		\STATE $\moleculeSet_t \leftarrow \moleculeSet_{0}, a_0, \ldots, a_{t-1}$ \COMMENT{modify molecules based on starting molecules and electron actions}
+  		\STATE $\moleculeSet_t \leftarrow \moleculeSet_{t-1}, a_{t-1}, \ldots, a_{t-1}$ \COMMENT{modify molecules based on previous molecule and action}
+  		\IF{$t \mod 2 = 1$}
+  			\STATE a
+  		\ENDIF
+  		\STATE a
   		%\STATE \mathbf{h}_
   	\ENDFOR
  %  	% Set up pool of completed paths to sort later
