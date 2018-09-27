@@ -2,9 +2,42 @@
 
 
 
-In this section we define a probabilistic model that describes the movement of electrons that define linear topology reactions.
-We represent a set of molecules as a set of graphs $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges;
-each connected component of the graph defines an individual molecule.
+In this section we define a probabilistic model for electron movement in \emph{linear electron flow} (LEF) reactions.
+% model for reactions
+As described above all molecules can be thought of as graphs where nodes correspond to atoms and edges to bonds. All LEF reactions transform a set of reactant graphs, $\moleculeSet_0$ into a set of product graphs $\moleculeSet_T$ via a series of electron actions $\electronPath_{0:T-1} = (a_0, \dots, a_{T-1})$.  As described, these electron actions will alternately \emph{remove} and \emph{add} bonds (as shown in Figure~\ref{fig:task-overview} (\emph{Right})). This reaction sometimes includes additional reagent graphs, $\moleculeSet_e$, which help the reaction proceed, but do not change themselves.
+We propose to learn a distribution $p_\theta( \electronPath_{0:T-1} \mid \moleculeSet_0, \moleculeSet_e)$ over thsese electron movements. 
+We first detail the generative process %(i.e., the forward pass) 
+that specifies $p_\theta$, before describing how to train the model's parameters, $\theta$.
+
+
+\subsection{Generative process}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{reaction_model_blue}
+\caption{
+ This figure shows the sequence of actions in transforming the reactants in box 1 to the products in box 9.
+ The sequence of actions will result in a sequence of pairs of atoms, between which bonds will alternately be removed and created, creating a series of intermediate products. 
+At each step the model sees the current intermediate product graph (shown in the boxes) as well as the previous action, if applicable, shown by the grey circle. It uses this to decide on the next action.
+We represent the characteristic probabilities the model may have over these next actions as colored circles over each atom.
+Some actions are disallowed on certain steps, for instance you cannot remove a bond that does not exist; these blocked actions are shown as red crosses.
+}
+\label{fig:reaction_model}
+\end{figure*}
+
+
+
+
+
+
+%%%%%%%%%%%%%%% OLD
+%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%% 
+ s reactions involve sets of molecules, we represent 
+
+We represent any set of molecules as a set of (possibly disconnected) graphs, denoted $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges. 
+Each connected component in $\moleculeSet$ corresponds to an individual molecule.
 We can associate an ordering over all the atoms in all the molecules in the set using an {\em atom map} number:
 an integer label assigned to each non-hydrogen atom in both the reactants and the products which 
 both permits easy matching between atoms before and after the reaction, and
@@ -34,31 +67,13 @@ which correspond to the state of the graph after the first $t$ steps in the subs
 We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
 We first detail the generative process %(i.e., the forward pass) 
 that specifies $p_\theta$, before describing how to train the model's parameters, $\theta$.
+%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%
 
+% HERERE
 
-\subsection{Generative process}
-
-
-\begin{figure*}
-\centering
-\includegraphics[width=\textwidth]{reaction_model_blue}
-\caption{
- This figure shows the sequence of actions in transforming the reactants in box 1 to the products in box 9.
- The sequence of actions will result in a sequence of pairs of atoms, between which bonds will alternately be removed and created, creating a series of intermediate products. 
-At each step the model sees the current intermediate product graph (shown in the boxes) as well as the previous action, if applicable, shown by the grey circle. It uses this to decide on the next action.
-We represent the characteristic probabilities the model may have over these next actions as colored circles over each atom.
-Some actions are disallowed on certain steps, for instance you cannot remove a bond that does not exist; these blocked actions are shown as red crosses.
-}
-\label{fig:reaction_model}
-\end{figure*}
-
-
-
-
-
-
-
-First note that since our reactions are a single path of electrons through the reactants then, at any point, the next step in the path depends only on (i) the intermediate molecule formed by the action path up to that point, (ii) the previous action taken (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
+To define our generative model, we first note that since LEF reactions are a single path of electrons, at any step $t$, the next step $t+1$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
 We make the simplifying assumption that the stop probability and the actions after the initial action $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
 \begin{align}
 \label{eq:jointprob}
@@ -159,7 +174,7 @@ and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction termin
   {\bf Output:}~~Electron path $\electronPath_{0:t}$
   \label{algo:generative_model}
 \end{algorithm}
-
+% TODO: ADD MASKS!!!!!!!!!!
 
 It is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
 However, we restrict our model to not stop at step $t\!=\!1$, as it is necessary to pick up a complete electron pair. 
