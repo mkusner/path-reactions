@@ -131,7 +131,7 @@ All of these operate on node embeddings created by the same GGNN.
 
 
 
-As mentioned above (Eq. \ref{eq:graph-embedding}) both $\fCont$ and $\fReag$ (making up part of $\fContInclEm$ and $\fReagInclEm$ respectively) consist of three
+As mentioned above (Eq. \ref{eq:graph-embedding}) both $\fCont$ and $\fReag$ (which following the explanation in the previous section, make up part of $\fContInclEm$ and $\fReagInclEm$ respectively) consist of three
 linear functions. 
 For  both, the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
 Again for both, $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
@@ -148,7 +148,7 @@ The final function, $\fInitial$, is represented by an NN with hidden layers of 1
 When conditioning on reagents (ie for
  \ourModelR
  )
-  the reagent embeddings calculated by $\fReagEmbed$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network. In total \ourModelR has approximately 250,000 parameters and \ourModelIR has approximately 190,000.
+  the reagent embeddings calculated by $\fReag$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network. In total \ourModelR has approximately 250,000 parameters and \ourModelIR has approximately 190,000.
 
 \subsection{Training}
 
