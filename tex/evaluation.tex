@@ -10,6 +10,7 @@
 \captionof{figure}{
 An example of the paths suggested by \ourModelIR on one of the USPTO test examples. Its first choice in this instance is correct.
 }
+\label{fig:predicted-paths}
  \end{minipage}\hfill%
 \begin{minipage}[r]{0.53\textwidth}
   \caption{Results when using \ourModel  for reaction mechanism prediction. Here we count a prediction as correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.}
@@ -43,7 +44,7 @@ For instance, when forming a bond between two pairs of atoms we want to know whi
 The representation of the reaction mechanism produced by our model is a sequence of atoms, detailing the path taken by the electrons in a series of alternating steps in which bonds are broken and formed; using the atom mapping from the USPTO dataset this takes the form of a series of integers.
 
 The most straightforward approach then to evaluate our accuracy at predicting reaction mechanisms is to check whether the sequence of integers extracted from the raw data as described earlier
-is an exact match with the sequence of integers output by \ourModel; the top-1, top-2, top-3, and top-5 accuracies evaluated in this manner are reported in Table \ref{table:mech-predict}.
+is an exact match with the sequence of integers output by \ourModel; the top-1, top-2, top-3, and top-5 accuracies evaluated in this manner are reported in Table \ref{table:mech-predict}, with an example prediction shown in Figure \ref{fig:predicted-paths}.
 
 
 
@@ -59,7 +60,7 @@ is an exact match with the sequence of integers output by \ourModel; the top-1, 
 
   \caption{Results when using \ourModel  for reaction product prediction, following the product matching procedure in Section~\ref{sec:product-prediction}. 
  For the baselines we compare against models trained on the full USPTO training set (marked FTS) and only tested on our subset of reactions with linear flow topology, and those that are also trained on the same subset as our model. 
- We make use of the code and pre-trained models provided by \citet{jin2017predicting}, however, for evaluating the Seq2Seq approach as neither code or more fine grained results are available we train up the required models from scratch using the OpenNMT library \citep{2017opennmt}.
+ We make use of the code and pre-trained models provided by \citet{jin2017predicting}, however, for evaluating the Seq2Seq approach as neither code nor more fine grained results are available we train up the required models from scratch using the OpenNMT library \citep{2017opennmt}.
 }
   \label{table:prod-predict}
   %\end{minipage}\hfill
@@ -114,9 +115,11 @@ These product-level accuracies are reported in Table~\ref{table:prod-predict}.
 For product prediction we compare with the state-of-the-art graph-based method \cite{jin2017predicting};
 we use their evaluation code and pre-trained model\footnote{\url{https://github.com/wengong-jin/nips17-rexgen}},
 re-evaluated on our extracted test set. 
-We also compare against the Seq2Seq model proposed by \citep{schwaller2017found};
-unfortunately, however, we were unable to evaluate it on our extracted test set, and instead quote their reported performance on a different USPTO test set for reference.
-Overall, \ourModelR outperforms all other approaches on this metric, with 87\% top-1 accuracy and 95.9\% top-5 accuracy.
+We also use their code and re-train a model on our extracted training set, this is to ensure that any differences between our method and theirs is not due to a specialized training task.
+
+We also compare against the Seq2Seq model proposed by \citep{schwaller2017found}; 
+however, as no code is provided by \citet{schwaller2017found}, we run our own implementation of this method based on the OpenNMT library \citep{2017opennmt}.
+Overall, \ourModelR outperforms all other approaches on this task, with 87\% top-1 accuracy and 95.9\% top-5 accuracy.
 Omitting the reagents in \ourModelR degrades top-1 accuracy slightly, but maintains a high top-3 and top-5 accuracy,
 suggesting that reagent information is necessary to provide context in disambiguating plausible reaction paths.
 
