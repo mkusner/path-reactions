@@ -19,13 +19,14 @@ To define our generative model, we describe a factorization of $p_\theta( \elect
 \paragraph{Starting Location.}
 At the beginning the reaction needs to decide on what atom to start, $a_0$. This is based on (i) the initial set of reactants $\moleculeSet_0$ and possibly (ii) a set of reagents $\moleculeSet_e$. Thus we propose to learn the distribution $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$.
 
-To parameterize this distribution we propose to use any deep graph neural network, denoted $h_{\Ac}(\cdot)$, to learn graph-isomorphic features from the initial atom and bond features\footnote{The molecular features we use are described in Table 4 in Appendix B.} \citep{duvenaud2015convolutional,kipf2016semi,li2016gated,gilmer2017neural}. We choose to use a 4 layer Gated Graph Neural Network (GGNN) \citep{li2016gated}, for which we include a short review in the Appendix. %These produce a set of $d$-dimensional embedding for all atoms $\Ac$ in the molecule set $\moleculeSet$ to yield $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$.
+To parameterize this distribution we propose to use any deep graph neural network, denoted $h_{\Ac}(\cdot)$, to learn graph-isomorphic node features from the initial atom and bond features\footnote{The molecular features we use are described in Table 4 in Appendix B.} \citep{duvenaud2015convolutional,kipf2016semi,li2016gated,gilmer2017neural}. We choose to use a 4 layer Gated Graph Neural Network (GGNN) \citep{li2016gated}, for which we include a short review in the appendix. %These produce a set of $d$-dimensional embedding for all atoms $\Ac$ in the molecule set $\moleculeSet$ to yield $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$.
 
-Given these atom embeddings we compute a graph embedding \citet[\S B.1]{li2018learning} (also called an aggregation graph transformation \citep[\S3]{Johnson2017-pd}), which is a vector that represents the entire molecule set $\moleculeSet$ that is invariant to any particular node ordering. Any such function $g(\cdot)$. that computes this mapping can be used here, the particular graph embedding function is inspired by \cite{li2018learning} (described in detail in Appendix B). We can now parameterize $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$ as follows:
+Given these atom embeddings we compute a graph embedding \citet[\S B.1]{li2018learning} (also called an aggregation graph transformation \citep[\S3]{Johnson2017-pd}), which is a vector that represents the entire molecule set $\moleculeSet$ that is invariant to any particular node ordering. Any such function $g(\cdot)$ that computes this mapping can be used here, the particular graph embedding function we use is inspired by \cite{li2018learning} (described in detail in Appendix B). We can now parameterize $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$ as follows:
 \begin{align}
-p_\theta^{\mathrm{start}}(a_0 \mid  \moleculeSet_0, \moleculeSet_e) = \mbox{softmax}\Big[f^{\mathrm{start}}\big( h_{\Ac}(\moleculeSet_0), g^{\mathrm{reagent}}(\moleculeSet_e)\big)\Big], 
+p_\theta^{\mathrm{start}}(a_0 \mid  \moleculeSet_0, \moleculeSet_e) = \mbox{softmax}\Big[f^{\mathrm{start}}\big( h_{\Ac}(\moleculeSet_0), 
+g^{\mathrm{reagent}}\left(h_{\Ac}(\moleculeSet_e)\right)\big)\Big], 
 \end{align}
-where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ before the softmax function: $\mbox{softmax}[\mathbf{x}] = e^{-\mathbf{x}}/\sum_{i} e^{-x_i}$. %(details on $f^{\mathrm{start}}(\cdot)$ in Appendix B).
+where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ before the softmax function: $\mbox{softmax}[\mathbf{x}] = e^{\mathbf{x}}/\sum_{i} e^{x_i}$. %(details on $f^{\mathrm{start}}(\cdot)$ in Appendix B).
 
 % Sometimes we wish to agglomerate the node embeddings belonging to a set of nodes $\Ac'$ (with $\Ac' \subseteq  \Ac$), to form a graph embedding \citet[\S B.1]{li2018learning}, that is a vector that represents multiple nodes but that is invariant to any particular node ordering. 
 % These functions have also previously been referred to as aggregation graph transformations \citep[\S3]{Johnson2017-pd}.
@@ -36,12 +37,12 @@ where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ be
 \paragraph{Electron Movement.}
 Observe that since LEF reactions are a single path of electrons, at any step $t$, the next step $t+1$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are) and (iii) the point of time $t$ through the path, indicating whether we are on an add or remove bond step. Thus we will also learn the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$.
 
-Similar to the starting location distribution we again make use of a graph-isomorphic embedding function $h_{\Ac}(\moleculeSet)$. Differently, the above distribution can be split into two distributions depending on the parity of $t$:
+Similar to the starting location distribution we again make use of a graph-isomorphic node embedding function $h_{\Ac}(\moleculeSet)$. Differently, the above distribution can be split into two distributions depending on the parity of $t$:
 the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ when $t$ is odd, 
 and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ when $t$ is even. We parameterize the distributions as:
 \begin{align}
-p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1}) &= \bm{\beta}^\textrm{remove} \odot \mbox{softmax}\Big[f^\textrm{remove}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big], \\
-p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1}) &= \bm{\beta}^\textrm{add} \odot \mbox{softmax}\Big[f^\textrm{add}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big] \\
+p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1}) &\propto \bm{\beta}^\textrm{remove} \odot \mbox{softmax}\Big[f^\textrm{remove}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big], \\
+p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1}) &\propto \bm{\beta}^\textrm{add} \odot \mbox{softmax}\Big[f^\textrm{add}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big] \\
 p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t) &= 
 \begin{cases}
 p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1}) & \mbox{ if } t \mbox{ is odd} \\
@@ -62,10 +63,11 @@ Additionally, as we do not know the length of the reaction $T$, we introduce a l
 For this distribution we learn a different graph embedding function $g^{\textrm{cont}}(\cdot)$ to decide whether to continue or not:
 \begin{align}
 %$
-p_\theta^\textrm{cont}(c_t \mid \moleculeSet_t) = \sigma(g^{\textrm{cont}}(\moleculeSet_t)).
+p_\theta^\textrm{cont}(c_t \mid \moleculeSet_t) = \sigma(g^{\textrm{cont}}(h_{\Ac}(\moleculeSet_t))).
 %$
 \end{align}
 where $\sigma$ is the sigmoid function $\sigma(a) = 1/(1+e^{-a})$.
+ However, we do not allow the reaction to stop until until it has picked up an entire pair (ie $c_1=1$).
 
 
 % We now define each of our parameterized distributions over actions.
@@ -192,28 +194,31 @@ Figure~\ref{fig:reaction_model} gives a graphical depiction of the generative pr
 
 \begin{algorithm}[t]
   \caption{The generative steps of ELECTRO.}
-  {\bf Input:}~~Reactant molecules $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_e$, atom embedding function $\fEmbed(\cdot)$, graph embedding functions $g^\mathrm{reagent}(\cdot),g^\mathrm{cont}(\cdot)$, additional logit functions $f^\mathrm{start}(\cdot),f^\mathrm{remove}(\cdot),f^\mathrm{add}(\cdot)$, time steps $T^\mathrm{max}$
+  {\bf Input:}~~Reactant molecules $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_e$, atom embedding function $h_{\Ac}(\cdot)$, graph embedding functions $g^\mathrm{reagent}(\cdot),g^\mathrm{cont}(\cdot)$, additional logit functions $f^\mathrm{start}(\cdot),f^\mathrm{remove}(\cdot),f^\mathrm{add}(\cdot)$, time steps $T^\mathrm{max}$
   
   \begin{algorithmic}[1]
   	%\STATE $\nodeEmbeddings{\moleculeSet_0} = \fEmbed(\Mc_0)$ \COMMENT{atom embedding of reactants}
   	%\STATE $\contextVect_\mathrm{reagent} = r(\Mc_e)$ \COMMENT{graph embedding of reagents}
   	%\STATE $\actionLogits = $
-  	\STATE $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e) \triangleq \mbox{softmax}\Big[f^{\mathrm{start}}\big(h_{\Ac}(\moleculeSet_0), g^\mathrm{reagent}(\Mc_e)\big)\Big]$ \COMMENT{prob $a$ starts reaction}
+  	\STATE $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e) \triangleq \mbox{softmax}\Big[f^{\mathrm{start}}\big(h_{\Ac}(\moleculeSet_0), g^\mathrm{reagent}(h_{\Ac}(\Mc_e))\big)\Big]$ \COMMENT{$a$ starts reaction}
   	\STATE $a_{0} \sim p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e)$
+  	\STATE $\moleculeSet_{1} \leftarrow \moleculeSet_{0}$ \COMMENT{The molecule does not change until complete pair picked up}
+  	  \STATE $c_1 \triangleq 1 $ \COMMENT{You cannot stop until picked up complete pair}
   	\FOR{$t = 1, \ldots, T^\mathrm{max}$}
-  		\STATE $\moleculeSet_t \leftarrow \moleculeSet_{t-1}, a_{t-1}$ \COMMENT{modify molecules based on previous molecule and action}
+
   		%\STATE $\nodeEmbeddings{\moleculeSet_t} = \fEmbed(\Mc_t)$ \COMMENT{atom embedding of new molecules}
   		\IF{$t$ is odd}
-  			\STATE $p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1}) \triangleq \mbox{softmax}\Big[f^{\mathrm{remove}}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big]$ 
+  			\STATE $p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1}) \propto \bm{\beta}^\textrm{remove} \mbox{softmax}\Big[f^{\mathrm{remove}}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big]$ 
   			\STATE $a_t \sim p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1})$ \COMMENT{electrons remove bond between $a_t$ and $a_{t-1}$}
   		\ELSE
-  		  	\STATE $p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1}) \triangleq \mbox{softmax}\Big[f^{\mathrm{add}}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big]$
+  		  	\STATE $p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1}) \propto \bm{\beta}^\textrm{add} \mbox{softmax}\Big[f^{\mathrm{add}}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big]$
   			\STATE  $a_t \sim p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1})$ \COMMENT{electrons add bond between $a_t$ and $a_{t-1}$}
   		\ENDIF
   		\STATE $\electronPath_t = \electronPath_{0:t-1} \cup a_t$
-  		\STATE $p_\theta^{\textrm{cont}}(c_t \mid \moleculeSet_t) \triangleq \sigma(g^{\textrm{cont}}(\moleculeSet_t))$
-  		\STATE $c_t \sim p_\theta^{\textrm{cont}}(c_t \mid \moleculeSet_t)$ \COMMENT{whether to continue reaction}
-  		\IF{$c_t = 0$}
+  		\STATE $\moleculeSet_{t+1} \leftarrow \moleculeSet_{t}, a_{t}$ \COMMENT{modify molecules based on previous molecule and action}
+  		\STATE $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1}) \triangleq \sigma(g^{\textrm{cont}}( h_{\Ac}(\moleculeSet_{t+1})))$
+  		\STATE $c_{t+1} \sim p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$ \COMMENT{whether to continue reaction}
+  		\IF{$c_{t+1} = 0$}
   			\STATE break
   		\ENDIF
   		%\STATE \mathbf{h}_
@@ -352,7 +357,7 @@ simply by simulating from the conditional distributions until sampling a stop va
 We instead would like to find a ranked list of the top-$K$ predicted paths, and do so using a modified beam search,
 in which we roll out a beam of width $K$ until a maximum path length $T^\mathrm{max}$,
 while recording all paths which have terminated.
-This search procedure is described in detail in Algorithm 1 in the Appendix.
+This search procedure is described in detail in Algorithm \ref{alg:beam_search} in the appendix.
 
 
 
