@@ -28,18 +28,26 @@
 % The model definitions
 \newcommand{\electronPath}{\Pc}
 \newcommand{\moleculeSet}{\Mc}
-\newcommand{\initialAndReactants}{\Mc_0, \Mc_r}
+\newcommand{\initialAndReactants}{\Mc_0, \Mc_e}
 
 \newcommand{\contextVect}{\bm{c}}
 % Then the modules!
-\newcommand{\fEmbed}{g_{\Ac}} % for nodes
+\newcommand{\fEmbed}{h_{\Ac}} % for nodes
 \newcommand{\fEmbedGraphs}{r} % for nodes
+\newcommand{\fEmbedGraphsInclFEmbed}{g}
 
 
-\newcommand{\fAdd}{f_{\textrm{add}}}
-\newcommand{\fRemove}{f_{\textrm{remove}}}
-\newcommand{\fInitial}{f_{\textrm{start}}}
+\newcommand{\fAdd}{f^{\textrm{add}}}
+\newcommand{\fRemove}{f^{\textrm{remove}}}
+\newcommand{\fInitial}{f^{\textrm{start}}}
 \newcommand{\fStop}{f_{\textrm{stop}}}
+\newcommand{\fCont}{\fEmbedGraphs^{\textrm{cont}}}
+\newcommand{\fReag}{\fEmbedGraphs^{\textrm{reagent}}}
+
+\newcommand{\fContInclEm}{\fEmbedGraphsInclFEmbed^{\textrm{cont}}}
+\newcommand{\fReagInclEm}{\fEmbedGraphsInclFEmbed^{\textrm{reagent}}}
+
+
 \newcommand{\fReagEmbed}{f_{\textrm{reagent}}}
 \newcommand{\fModules}{\fEmbed, \fAdd, \fRemove, \fInitial,\fStop, \fReagEmbed}
 \newcommand{\fui}{f_\textrm{gate}}
@@ -58,3 +66,7 @@
 
 
 \newcommand{\neigh}[1]{\mathcal{N}_{e#1}}
+
+
+
+

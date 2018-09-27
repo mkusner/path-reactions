@@ -16,7 +16,7 @@
 \begin{algorithm}[H]
   \caption{Predicting electron paths at test time.}
   \label{alg:beam_search}
-  {\bf Input:}~~Molecule $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_r$ , beam width $K$, time steps $T^\mathrm{max}$
+  {\bf Input:}~~Molecule $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_e$ , beam width $K$, time steps $T^\mathrm{max}$
   
   \begin{algorithmic}[1]
   	% Set up pool of completed paths to sort later
@@ -28,7 +28,7 @@
 	\STATE $\hat{\Bc} = \emptyset$.  \COMMENT{This set will store all possible open paths. Cleared at start of each timestep.}	
 	\FORALL{$v \in \Ac$} 
 		\STATE $ \cPath = (v)$
-		\STATE $ \lProb = \log \cProbCont(\Mc_0) + \log \cProbInitial(v, \moleculeSet_0, \moleculeSet_r)$
+		\STATE $ \lProb = \log \cProbCont(\Mc_0) + \log \cProbInitial(v, \moleculeSet_0, \moleculeSet_e)$
 		\STATE $\hat{\Bc} = \hat{\Bc} \cup \{\left(\cPath, \lProb \right)\}$
 	\ENDFOR
 	\STATE  $\Bc_{0} = \texttt{pick\_topK\_actions}(\hat{\Bc})$ \COMMENT{We filter down to the top K most promising actions.}

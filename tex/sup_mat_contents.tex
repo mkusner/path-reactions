@@ -27,8 +27,9 @@ Figure \ref{fig:symmetric-reaction-example} is an example of this.
 
 \section{Forming Node and Graph Embeddings}
 
-In this section we briefly review existing work for forming node and graph embeddings, as well as describing more specific details relating to our particular implementation of these methods. 
-Figure \ref{fig:graph_nn} provides a visualization of these techniques.
+In this section we briefly review existing work for forming node and graph embeddings, as well as describing more specific details relating to our particular implementation of these methods. Figure \ref{fig:graph_nn} provides a visualization of these techniques. 
+We follow the main text by denoting a set of molecules as $\moleculeSet$, and refer to the atoms in these molecules (which are represented as nodes in a graph) as $\Ac$.
+
 
 \begin{figure*}
 \centering
@@ -44,9 +45,11 @@ These networks consist of a series of iterative steps where the embeddings for e
 \label{fig:graph_nn}
 \end{figure*}
 
- We start with Gated Graph Neural Networks \citep{li2016gated, gilmer2017neural}. 
- We denote these as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we refer to the output as ``node embeddings'', $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$. 
-These networks form these node embeddings through a recurrent operation on messages, $\mb_v$, with $v \in \Ac$, so that there is one message associated with each node.
+
+ We start with Gated Graph Neural Networks (GGNN) \citep{li2016gated, gilmer2017neural}, which we use for embedding nodes in a graph.
+ We denote these as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we will refer to the output as ``node embeddings'', $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$. 
+Each row of this node embedding matrix represents the embedding of a particular atom; the rows are ordered by atom-mapped number, a unique number assigned to each atom in a SMILES string.
+The GGNN form these node embeddings through a recurrent operation on messages, $\mb_v$, with $v \in \Ac$, so that there is one message associated with each node.
 At the first time step these messages, $\mb_v^{(0)}$, are initialized with the respective atom features shown in Table \ref{table:atom-features}. GGNNs then update these messages in a recursive nature:
 
 \begin{align}
@@ -83,9 +86,12 @@ The node embeddings are set as the final message belonging to a node, so that in
 \end{table}
 
 
-Having formed node embeddings we can use these to form graph embeddings \citep{li2018learning,Johnson2017-pd}, which, as described in the main text, are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
- We define the function that maps a set of node features to a graph embedding by $\fEmbedGraphs$.
-These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
+One can represent entire graphs with graph embeddings \citep{li2018learning,Johnson2017-pd}, which, as described in the main text, are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
+These are defined as $\fEmbedGraphsInclFEmbed: \moleculeSet \to \mathbb{R}^{q}$. 
+In practice the function we use consists of the composition of two functions (including the function that computes node embeddings introduced earlier): $\fEmbedGraphsInclFEmbed(\cdot) = (r \circ \fEmbed)(\cdot)$.
+
+
+The function that maps a set of node features to  graph embeddings, $\fEmbedGraphs: \mathbb{R}^{|\Ac|\times d} \to \mathbb{R}^{q}$, is similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
 Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
 They are used to form the graph embedding, as
 \begin{align}
@@ -113,23 +119,24 @@ In this section we go through more specific model architecture and training deta
 In this section we provide further details of our model architectures.
 
 Section 3 of the main paper discusses our model.
-In particular we are interested in computing three conditional probability terms: (1) $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
+In particular we are interested in computing three conditional probability terms: (1) $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$, the probability of the initial state $a_0$ given the reactants and reagents; 
 (2) the conditional probability $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$  
 of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
-and (3) the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
+and (3) the probability $p_\theta^{\mathrm{cont}}(c_{t} \mid \moleculeSet_{t})$ that the reaction continues at step $t$.
 
-Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules, all introduced in the main text: $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$, $\fAdd$, $\fRemove$ and $\fInitial$.
- In this section we shall go through each of these in turn.
+Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules: $\fCont$, $\fReag$, $\fAdd$, $\fRemove$ and $\fInitial$. 
+All of these operate on node embeddings created by the same GGNN.
+ In this section we shall go through each of these modules in turn.
 
 
 
 
-As mentioned above (Eq. \ref{eq:graph-embedding}) both $\fEmbedGraphs_{\textrm{stop}}$ and $\fEmbedGraphs_\mathrm{reagent}$ consist of three
+As mentioned above (Eq. \ref{eq:graph-embedding}) both $\fCont$ and $\fReag$ (making up part of $\fContInclEm$ and $\fReagInclEm$ respectively) consist of three
 linear functions. 
 For  both, the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
 Again for both, $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
 This is double the dimension of the node features, and similar to the approach taken by \citet[\S B.1]{li2018learning}.
-Finally, $\fuk$ differs between the two modules, as for $\fEmbedGraphs_{\textrm{stop}}$ it projects down to one dimension (ie $q=1$) (to later go through a sigmoid function and compute a stop probability), whereas for  $\fEmbedGraphs_\mathrm{reagent}$, $\fuk$ projects  to a dimensionality of 100 (ie $q=100$) to form the reagent embedding.
+Finally, $\fuk$ differs between the two modules, as for $\fCont$ it projects down to one dimension (ie $q=1$) (to later go through a sigmoid function and compute a stop probability), whereas for  $\fReag$, $\fuk$ projects  to a dimensionality of 100 (ie $q=100$) to form the reagent embedding.
 
 
 The modules for $\fAdd$ and $\fRemove$, that operate on each node to produce a action logit, are both NNs consisting of one hidden layer of 100 units. 
