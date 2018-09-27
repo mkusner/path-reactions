@@ -115,16 +115,13 @@ and (d) convert the product graph to a canonical SMILES string representation in
 %We then strip all atom map numbers from the graph.
 %We can use RDKit to express the molecule in a canonical SMILES string format 
 %(predicted electron paths which yield chemically infeasible products are considered failures).
-We can then evaluate whether a predicted electron path matches the ground truth by a string comparison. This procedure is inspired by the evaluation of \citet{schwaller2017found}.
-
-To obtain a ranked list of products for our model, we compute this canonicalized product SMILES for each of the predictions found by beam search over electron paths, removing duplicates along the way. 
+We can then evaluate whether a predicted electron path matches the ground truth by a string comparison. This procedure is inspired by the evaluation of \citet{schwaller2017found}. To obtain a ranked list of products for our model, we compute this canonicalized product SMILES for each of the predictions found by beam search over electron paths, removing duplicates along the way. 
 These product-level accuracies are reported in Table~\ref{table:prod-predict}.
-For product prediction we compare with the state-of-the-art graph-based method \cite{jin2017predicting};
+
+We compare with the state-of-the-art graph-based method \cite{jin2017predicting};
 we use their evaluation code and pre-trained model\footnote{\url{https://github.com/wengong-jin/nips17-rexgen}},
 re-evaluated on our extracted test set. 
-We also use their code and re-train a model on our extracted training set, this is to ensure that any differences between our method and theirs is not due to a specialized training task.
-
-We also compare against the Seq2Seq model proposed by \citep{schwaller2017found}; 
+We also use their code and re-train a model on our extracted training set, to ensure that any differences between our method and theirs is not due to a specialized training task. We also compare against the Seq2Seq model proposed by \citep{schwaller2017found}; 
 however, as no code is provided by \citet{schwaller2017found}, we run our own implementation of this method based on the OpenNMT library \citep{2017opennmt}.
 Overall, \ourModelR outperforms all other approaches on this task, with 87\% top-1 accuracy and 95.9\% top-5 accuracy.
 Omitting the reagents in \ourModelR degrades top-1 accuracy slightly, but maintains a high top-3 and top-5 accuracy,
@@ -132,9 +129,9 @@ suggesting that reagent information is necessary to provide context in disambigu
 
 
 
-If the ultimate desired goal is to predict the product molecule rather than the reaction mechanism,
-a benefit of our approach is the predicted electron paths can then serve as an explanation. 
-In this manner, when showing predicted products, we can list, alongside the maximum likelihood path, any other candidate paths that result in the same product. 
+% If the ultimate desired goal is to predict the product molecule rather than the reaction mechanism,
+% a benefit of our approach is the predicted electron paths can then serve as an explanation. 
+% In this manner, when showing predicted products, we can list, alongside the maximum likelihood path, any other candidate paths that result in the same product. 
 
 
 
