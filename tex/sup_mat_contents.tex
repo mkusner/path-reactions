@@ -46,8 +46,8 @@ These networks consist of a series of iterative steps where the embeddings for e
 \end{figure*}
 
 
- We start with Gated Graph Neural Networks (GGNN) \citep{li2016gated, gilmer2017neural}, which we use for embedding nodes in a graph.
- We denote these as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we will refer to the output as ``node embeddings'', $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$. 
+ We start with Gated Graph Neural Networks (GGNNs) \citep{li2016gated, gilmer2017neural}, which we use for finding node embeddings.
+ We denote these functions as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we will refer to the output as the node embedding matrix, $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$. 
 Each row of this node embedding matrix represents the embedding of a particular atom; the rows are ordered by atom-mapped number, a unique number assigned to each atom in a SMILES string.
 The GGNN form these node embeddings through a recurrent operation on messages, $\mb_v$, with $v \in \Ac$, so that there is one message associated with each node.
 At the first time step these messages, $\mb_v^{(0)}$, are initialized with the respective atom features shown in Table \ref{table:atom-features}. GGNNs then update these messages in a recursive nature:
@@ -86,12 +86,12 @@ The node embeddings are set as the final message belonging to a node, so that in
 \end{table}
 
 
-One can represent entire graphs with graph embeddings \citep{li2018learning,Johnson2017-pd}, which, as described in the main text, are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
+One can represent entire graphs with graph embeddings \citep{li2018learning,Johnson2017-pd}, which are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
 These are defined as $\fEmbedGraphsInclFEmbed: \moleculeSet \to \mathbb{R}^{q}$. 
-In practice the function we use consists of the composition of two functions (including the function that computes node embeddings introduced earlier): $\fEmbedGraphsInclFEmbed(\cdot) = (r \circ \fEmbed)(\cdot)$.
+In practice the function we use consists of the composition of two functions: $\fEmbedGraphsInclFEmbed(\cdot) = (r \circ \fEmbed)(\cdot)$.
 
-
-The function that maps a set of node features to  graph embeddings, $\fEmbedGraphs: \mathbb{R}^{|\Ac|\times d} \to \mathbb{R}^{q}$, is similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
+Having already introduced the function $\fEmbed(\cdot)$, we now introduce the function $r(\cdot)$.
+This function, that maps a set of node features to  graph embeddings, $\fEmbedGraphs: \mathbb{R}^{|\Ac|\times d} \to \mathbb{R}^{q}$, is similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
 Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
 They are used to form the graph embedding, as
 \begin{align}
