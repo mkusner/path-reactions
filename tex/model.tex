@@ -10,7 +10,7 @@ We first detail the generative process %(i.e., the forward pass)
 that specifies $p_\theta$, before describing how to train the model's parameters, $\theta$.
 
 
-\subsection{Generative process}
+%\subsection{Generative process}
 
 % HERERE
 
@@ -38,7 +38,7 @@ Observe that since LEF reactions are a single path of electrons, at any step $t$
 
 Similar to the starting location distribution we again make use of a graph-isomorphic embedding function $h_{\Ac}(\moleculeSet)$. Differently, the above distribution can be split into two distributions depending on the parity of $t$:
 the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ when $t$ is odd, 
-and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ when $t$ is even. We parameterize the distributions as follows
+and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ when $t$ is even. We parameterize the distributions as:
 \begin{align}
 p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1}) &= \bm{\beta}^\textrm{remove} \odot \mbox{softmax}\Big[f^\textrm{remove}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big], \\
 p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1}) &= \bm{\beta}^\textrm{add} \odot \mbox{softmax}\Big[f^\textrm{add}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big] \\
