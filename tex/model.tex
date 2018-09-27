@@ -14,7 +14,7 @@ that specifies $p_\theta$, before describing how to train the model's parameters
 
 % HERERE
 
-To define our generative model, we describe a factorization of $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$ into three components: 1. the starting location distribution $p^\textrm{remove}_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_e)$; 2. the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$; and 3.  the reaction continuation distribution $p^\textrm{cont}_\theta(c_{t} \mid \moleculeSet_{t})$. We define each of these in turn and then describe the factorization (we leave all architectural details of functions introduced to Appendix B for the curious reader).
+To define our generative model, we describe a factorization of $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$ into three components: 1. the starting location distribution $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$; 2. the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$; and 3.  the reaction continuation distribution $p^\textrm{cont}_\theta(c_{t} \mid \moleculeSet_{t})$. We define each of these in turn and then describe the factorization (we leave all architectural details of functions introduced to Appendix B for the curious reader).
 
 \paragraph{Starting Location.}
 At the beginning the reaction needs to decide on what atom to start, $a_0$. This is based on (i) the initial set of reactants $\moleculeSet_0$ and possibly (ii) a set of reagents $\moleculeSet_e$. Thus we propose to learn the distribution $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$.
