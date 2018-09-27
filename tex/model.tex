@@ -4,14 +4,88 @@
 
 In this section we define a probabilistic model for electron movement in \emph{linear electron flow} (LEF) reactions.
 % model for reactions
-As described above all molecules can be thought of as graphs where nodes correspond to atoms and edges to bonds. All LEF reactions transform a set of reactant graphs, $\moleculeSet_0$ into a set of product graphs $\moleculeSet_T$ via a series of electron actions $\electronPath_{0:T-1} = (a_0, \dots, a_{T-1})$.  As described, these electron actions will alternately \emph{remove} and \emph{add} bonds (as shown in Figure~\ref{fig:task-overview} (\emph{Right})). This reaction sometimes includes additional reagent graphs, $\moleculeSet_e$, which help the reaction proceed, but do not change themselves.
-We propose to learn a distribution $p_\theta( \electronPath_{0:T-1} \mid \moleculeSet_0, \moleculeSet_e)$ over thsese electron movements. 
+As described above all molecules can be thought of as graphs where nodes correspond to atoms and edges to bonds. All LEF reactions transform a set of reactant graphs, $\moleculeSet_0$ into a set of product graphs $\moleculeSet_{T+1}$ via a series of electron actions $\electronPath_{0:T} = (a_0, \dots, a_{T})$.  As described, these electron actions will alternately \emph{remove} and \emph{add} bonds (as shown in Figure~\ref{fig:task-overview} (\emph{Right})). This reaction sometimes includes additional reagent graphs, $\moleculeSet_e$, which help the reaction proceed, but do not change themselves.
+We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$ over thsese electron movements. 
 We first detail the generative process %(i.e., the forward pass) 
 that specifies $p_\theta$, before describing how to train the model's parameters, $\theta$.
 
 
 \subsection{Generative process}
 
+% HERERE
+
+To define our generative model, we describe a factorization of $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$ into three components: 1. the starting location distribution $p^\textrm{remove}_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_e)$; 2. the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$; and 3.  the reaction continuation distribution $p^\textrm{cont}_\theta(c_{t} \mid \moleculeSet_{t})$. We define each of these in turn and then describe the factorization (we leave all architectural details of functions introduced to Appendix B for the curious reader).
+
+\paragraph{Starting Location.}
+At the beginning the reaction needs to decide on what atom to start, $a_0$. This is based on (i) the initial set of reactants $\moleculeSet_0$ and possibly (ii) a set of reagents $\moleculeSet_e$. Thus we propose to learn the distribution $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$.
+
+To parameterize this distribution we propose to use any deep graph neural network, denoted $h_{\Ac}(\cdot)$, to learn graph-isomorphic features from the initial atom and bond features\footnote{The molecular features we use are described in Table 4 in Appendix B.} \citep{duvenaud2015convolutional,kipf2016semi,li2016gated,gilmer2017neural}. We choose to use a 4 layer Gated Graph Neural Network (GGNN) \citep{li2016gated}, for which we include a short review in the Appendix. %These produce a set of $d$-dimensional embedding for all atoms $\Ac$ in the molecule set $\moleculeSet$ to yield $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$.
+
+Given these atom embeddings we compute a graph embedding \citet[\S B.1]{li2018learning} (also called an aggregation graph transformation \citep[\S3]{Johnson2017-pd}), which is a vector that represents the entire molecule set $\moleculeSet$ that is invariant to any particular node ordering. Any such function $g(\cdot)$. that computes this mapping can be used here, the particular graph embedding function is inspired by \cite{li2018learning} (described in detail in Appendix B). We can now parameterize $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$ as follows:
+\begin{align}
+p_\theta^{\mathrm{start}}(a_0 \mid  \moleculeSet_0, \moleculeSet_e) = \mbox{softmax}\Big[f^{\mathrm{start}}\big( h_{\Ac}(\moleculeSet_0), g^{\mathrm{reagent}}(\moleculeSet_e)\big)\Big], 
+\end{align}
+where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ before the softmax function: $\mbox{softmax}[\mathbf{x}] = e^{-\mathbf{x}}/\sum_{i} e^{-x_i}$. %(details on $f^{\mathrm{start}}(\cdot)$ in Appendix B).
+
+% Sometimes we wish to agglomerate the node embeddings belonging to a set of nodes $\Ac'$ (with $\Ac' \subseteq  \Ac$), to form a graph embedding \citet[\S B.1]{li2018learning}, that is a vector that represents multiple nodes but that is invariant to any particular node ordering. 
+% These functions have also previously been referred to as aggregation graph transformations \citep[\S3]{Johnson2017-pd}.
+% We denote these functions that map from $\nodeEmbeddings{\moleculeSet'}$ to a $q$-dimensional vector, $r: \mathbb{R}^{|\Ac'|\times d} \to \mathbb{R}^q$.
+% They obtain their node order invariance by performing a weighted sum over the nodes.
+
+
+\paragraph{Electron Movement.}
+Observe that since LEF reactions are a single path of electrons, at any step $t$, the next step $t+1$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are) and (iii) the point of time $t$ through the path, indicating whether we are on an add or remove bond step. Thus we will also learn the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$.
+
+Similar to the starting location distribution we again make use of a graph-isomorphic embedding function $h_{\Ac}(\moleculeSet)$. Differently, the above distribution can be split into two distributions depending on the parity of $t$:
+the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ when $t$ is odd, 
+and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ when $t$ is even. We parameterize the distributions as follows
+\begin{align}
+p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1}) &= \bm{\beta}^\textrm{remove} \odot \mbox{softmax}\Big[f^\textrm{remove}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big], \\
+p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1}) &= \bm{\beta}^\textrm{add} \odot \mbox{softmax}\Big[f^\textrm{add}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big] \\
+p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t) &= 
+\begin{cases}
+p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1}) & \mbox{ if } t \mbox{ is odd} \\
+p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1}) & \mbox{ otherwise }
+\end{cases}
+\end{align}
+The vectors $\bm{\beta}^\textrm{remove},\bm{\beta}^\textrm{add}$ are masks that zero-out the probability of certain atoms being selected. Specifically, $\bm{\beta}^\mathrm{remove}$ sets the probability of any atoms $a_t$ to 0 if there is not a bond between it and the previous atom $a_{t-1}$\footnote{One subtle point is if a reaction begins with a lone-pair of electrons then we say that this reaction starts by removing a \emph{self-bond}. Thus, in the first remove step $\bm{\beta}^\mathrm{remove}$ it is possible to select $a_1 \!=\! a_0$. But this is not allowed via the mask vector in later steps.}. The other mask vector $\bm{\beta}^\textrm{add}$ masks out the previous action, preventing the model from stalling in the same state for multiple time-steps. %(details on $f^{\mathrm{add}}(\cdot), f^{\mathrm{remove}}(\cdot)$ in Appendix B).
+
+
+
+
+
+
+
+\paragraph{Reaction Continuation.}
+Additionally, as we do not know the length of the reaction $T$, we introduce a latent variable $c_t \in \{0, 1\}$ at each step $t$ which describes whether the reaction continues ($c_t\!=\!1$) or not ($c_t\!=\!0$). We also define an upper bound on reaction steps $T^{\mathrm{max}}$. The final distribution we learn is the continuation distribution $p_\theta^\textrm{cont}(c_t \mid \moleculeSet_{t})$.
+
+For this distribution we learn a different graph embedding function $g^{\textrm{cont}}(\cdot)$ to decide whether to continue or not:
+\begin{align}
+%$
+p_\theta^\textrm{cont}(c_t \mid \moleculeSet_t) = \sigma(g^{\textrm{cont}}(\moleculeSet_t)).
+%$
+\end{align}
+where $\sigma$ is the sigmoid function $\sigma(a) = 1/(1+e^{-a})$.
+
+
+% We now define each of our parameterized distributions over actions.
+% The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
+% This probability is computed from a graph embedding via the function $\fEmbedGraphs_{\textrm{stop}}$, which projects down to a single dimension. We then map this to the $[0,1]$ interval via the sigmoid function $\sigma$ which yields the overall expression
+
+
+% These three modules each have the same overall functional form
+% \begin{align}
+% \actionLogits &= f(\nodeEmbeddings{\moleculeSet_t}, \contextVect), \\
+% p_\theta(a_t \mid \cdots) &\propto \bm{\beta} \odot \mbox{softmax}(\bm{\actionLogits})
+% \end{align}
+% where $f$ is one of the networks $\fInitial, \fAdd$, or $\fRemove$; 
+% $\contextVect$ is a context vector, and $\bm{\beta}$ is a binary mask.
+
+% Each of the three actions has a different context and mask.
+% The add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ and remove step $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, a_{t-1})$,
+%  have as context the node embedding of the atom selected at the previous step, $\contextVect_{a_{t-1}} = \nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
+% For the initial step, this context vector $\contextVect_\mathrm{reagent}$ is an embedding of all the reagents present, computed 
+% by a graph embedding function $\fEmbedGraphs_\mathrm{reagent}$.
 
 \begin{figure*}
 \centering
@@ -31,94 +105,114 @@ Some actions are disallowed on certain steps, for instance you cannot remove a b
 
 
 
+
+\paragraph{Factorization.}
+Given these distributions we can factorize the path distribution $p_\theta( \electronPath_{0:T^{\mathrm{max}}} \mid \moleculeSet_0, \moleculeSet_e)$ as:
+\begin{align}
+\label{eq:jointprob}
+p_\theta(\electronPath_{0:T^{\mathrm{max}}} &\mid \moleculeSet_0, \moleculeSet_e) 
+=
+	p_\theta^\textrm{cont}(c_0 \mid \moleculeSet_0)
+	p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)\\ \nonumber 
+	& \times
+	\left[\prod_{t=1}^{T^{\mathrm{max}}}
+		p_\theta^{\mathrm{cont}}(c_{t} \mid \moleculeSet_{t})
+		p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
+	\right]
+	\big(1- p_\theta^{\mathrm{cont}}(c_{T^{\mathrm{max}+1}} \mid \moleculeSet_{T^{\mathrm{max}+1}})\big)
+	,
+\end{align}
+Figure~\ref{fig:reaction_model} gives a graphical depiction of the generative process on a simple example reaction. Algorithm~\ref{algo:generative_model} gives a more detailed description.
+
+% Figure~\ref{fig:reaction_model}  a simple example reaction which demonstrates all the critical features of the model;
+% the subfigures show the sequence of intermediate products and the distributions over actions.
+
+
+%where we have defined $p_\theta(s'_t \mid \moleculeSet_t) \equiv 1 - p_\theta(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
+%The other terms include $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
+%the conditional probability $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$ 
+%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
+%of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
+%and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
+
+
+
+
+
+
 %%%%%%%%%%%%%%% OLD
 %%%%%%%%%%%%%%% 
 %%%%%%%%%%%%%%% 
- s reactions involve sets of molecules, we represent 
+% We represent any set of molecules as a set of (possibly disconnected) graphs, denoted $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges. 
+% Each connected component in $\moleculeSet$ corresponds to an individual molecule.
+% We can associate an ordering over all the atoms in all the molecules in the set using an {\em atom map} number:
+% an integer label assigned to each non-hydrogen atom in both the reactants and the products which 
+% both permits easy matching between atoms before and after the reaction, and
+% gives us a consistent way to index particular atoms. Molecules input into the model are first put in a Kekul\'e form, a process which makes explicit the location of single and double bonds in aromatic structures;
+% each bond $b \in \Bc$ is either a single, double, or triple bond.
 
-We represent any set of molecules as a set of (possibly disconnected) graphs, denoted $\moleculeSet$, with atoms $\Ac$ as vertices and bonds $\Bc$ as edges. 
-Each connected component in $\moleculeSet$ corresponds to an individual molecule.
-We can associate an ordering over all the atoms in all the molecules in the set using an {\em atom map} number:
-an integer label assigned to each non-hydrogen atom in both the reactants and the products which 
-both permits easy matching between atoms before and after the reaction, and
-gives us a consistent way to index particular atoms. Molecules input into the model are first put in a Kekul\'e form, a process which makes explicit the location of single and double bonds in aromatic structures;
-each bond $b \in \Bc$ is either a single, double, or triple bond.
+% Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 3 of the appendix.
+%  However, when learning functions that operate over these atoms we do not work with these raw features directly but instead with the atom, or equivalently node, embedding. 
+%  These contain information about the atom of interest as well as its surrounding neighborhood.
+%  These can be computed using any model that is able to compute graph-isomorphic features, for instance usually via message-passing techniques \citep{gilmer2017neural}; we choose to use 4 layer gated graph neural network (GGNN) message functions \citep{li2016gated}, for which we include a short review in the appendix. 
+%  These produce a $d$-dimensional embedding of an atom and if we stack these vectors up as rows (using the atom mapping to define an order)  we have the matrix $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$, containing all the node embeddings for a particular molecule set, $\moleculeSet$.
 
-Each atom $v \in \Ac$ includes a set of features, such as its atom type (e.g. carbon, oxygen, \dots); the full list of input atom features can be found in Table 3 of the appendix.
- However, when learning functions that operate over these atoms we do not work with these raw features directly but instead with the atom, or equivalently node, embedding. 
- These contain information about the atom of interest as well as its surrounding neighborhood.
- These can be computed using any model that is able to compute graph-isomorphic features, for instance usually via message-passing techniques \citep{gilmer2017neural}; we choose to use 4 layer gated graph neural network (GGNN) message functions \citep{li2016gated}, for which we include a short review in the appendix. 
- These produce a $d$-dimensional embedding of an atom and if we stack these vectors up as rows (using the atom mapping to define an order)  we have the matrix $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$, containing all the node embeddings for a particular molecule set, $\moleculeSet$.
-
-Sometimes we wish to agglomerate the node embeddings belonging to a set of nodes $\Ac'$ (with $\Ac' \subseteq  \Ac$), to form a graph embedding \citet[\S B.1]{li2018learning}, that is a vector that represents multiple nodes but that is invariant to any particular node ordering. 
-These functions have also previously been referred to as aggregation graph transformations \citep[\S3]{Johnson2017-pd}.
-We denote these functions that map from $\nodeEmbeddings{\moleculeSet'}$ to a $q$-dimensional vector, $r: \mathbb{R}^{|\Ac'|\times d} \to \mathbb{R}^q$.
-They obtain their node order invariance by performing a weighted sum over the nodes.
+% Sometimes we wish to agglomerate the node embeddings belonging to a set of nodes $\Ac'$ (with $\Ac' \subseteq  \Ac$), to form a graph embedding \citet[\S B.1]{li2018learning}, that is a vector that represents multiple nodes but that is invariant to any particular node ordering. 
+% These functions have also previously been referred to as aggregation graph transformations \citep[\S3]{Johnson2017-pd}.
+% We denote these functions that map from $\nodeEmbeddings{\moleculeSet'}$ to a $q$-dimensional vector, $r: \mathbb{R}^{|\Ac'|\times d} \to \mathbb{R}^q$.
+% They obtain their node order invariance by performing a weighted sum over the nodes.
 
 
-Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
-our model defines a conditional distribution over a sequence of atoms (which we also refer to as actions) $\electronPath_{0:T} = (a_0, a_1, \ldots, a_T)$,
-which fully characterizes the electron path.
-This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
-denoting the outcome of the reaction,
-as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T$,
-which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_0$. We also define a stopping sequence $\mathcal{S}_t = (s_0, \ldots, s_{T+1})$ which indicates if the reaction should stop (i.e, $s_t\!=\!1$ if the reaction should stop and is $0$ otherwise). 
+% Given an initial set of reactant molecules $\moleculeSet_0$ and a set of reagent molecules $\moleculeSet_r$, 
+% our model defines a conditional distribution over a sequence of atoms (which we also refer to as actions) $\electronPath_{0:T} = (a_0, a_1, \ldots, a_T)$,
+% which fully characterizes the electron path.
+% This electron path in turn deterministically defines both a final product $\moleculeSet_{T+1}$, 
+% denoting the outcome of the reaction,
+% as well as a sequence of intermediate products $\moleculeSet_t$, for $t = 1,\dots,T$,
+% which correspond to the state of the graph after the first $t$ steps in the subsequence $\electronPath_{0:t} = (a_0, \dots, a_t)$ are applied to the initial $\moleculeSet_0$. We also define a stopping sequence $\mathcal{S}_t = (s_0, \ldots, s_{T+1})$ which indicates if the reaction should stop (i.e, $s_t\!=\!1$ if the reaction should stop and is $0$ otherwise). 
 
-We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$ over electron movements. 
-We first detail the generative process %(i.e., the forward pass) 
-that specifies $p_\theta$, before describing how to train the model's parameters, $\theta$.
+% We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$ over electron movements. 
+% We first detail the generative process %(i.e., the forward pass) 
+% that specifies $p_\theta$, before describing how to train the model's parameters, $\theta$.
 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%
 
-% HERERE
 
-To define our generative model, we first note that since LEF reactions are a single path of electrons, at any step $t$, the next step $t+1$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are) and (iii) the point of time through the path, indicating whether we are on an add or remove bond step. 
-We make the simplifying assumption that the stop probability and the actions after the initial action $a_0$ do not depend on the reagents. This leads to a parameterized model with dependency structure:
-\begin{align}
-\label{eq:jointprob}
-p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r) 
-&=
-	p_\theta(s'_0 \mid \moleculeSet_0)
-	p_\theta(a_0 \mid \moleculeSet_0, \moleculeSet_r)\\ \nonumber &\quad \times
-	\left[\prod_{t=1}^{T}
-		p_\theta(s_{t}' \mid \moleculeSet_{t})
-		p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
-	\right]
-	p_\theta(s_{T+1} \mid \moleculeSet_{T+1})
-	,
-\end{align}
-where we have defined $p_\theta(s'_t \mid \moleculeSet_t) \equiv 1 - p_\theta(s_t \mid \moleculeSet_t)$ to be the probability of {\em continuing} a reaction given the current molecule set $\moleculeSet_t$.
-The other terms include $p_\theta(a_0 \mid \initialAndReactants)$, the probability of the initial state $a_0$ given the reactants and reagents; 
-the conditional probability $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$ 
-%\todo[]{maybe somehow refer to "bond type" instead of $t$?} 
-of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
-and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction terminates with final product $\moleculeSet_{t}$.
+
+
+
+
+
+
+
+
+
 
 
 \begin{algorithm}[t]
   \caption{The generative steps of ELECTRO.}
-  {\bf Input:}~~Reactant molecules $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_r$, atom embedding function $\fEmbed(\cdot)$, graph embedding function $r(\cdot)$, time steps $T^\mathrm{max}$
+  {\bf Input:}~~Reactant molecules $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_e$, atom embedding function $\fEmbed(\cdot)$, graph embedding functions $g^\mathrm{reagent}(\cdot),g^\mathrm{cont}(\cdot)$, additional logit functions $f^\mathrm{start}(\cdot),f^\mathrm{remove}(\cdot),f^\mathrm{add}(\cdot)$, time steps $T^\mathrm{max}$
   
   \begin{algorithmic}[1]
-  	\STATE $\nodeEmbeddings{\moleculeSet_0} = \fEmbed(\Mc_0)$ \COMMENT{atom embedding of reactants}
-  	\STATE $\contextVect_\mathrm{reagent} = r(\Mc_r)$ \COMMENT{graph embedding of reagents}
+  	%\STATE $\nodeEmbeddings{\moleculeSet_0} = \fEmbed(\Mc_0)$ \COMMENT{atom embedding of reactants}
+  	%\STATE $\contextVect_\mathrm{reagent} = r(\Mc_e)$ \COMMENT{graph embedding of reagents}
   	%\STATE $\actionLogits = $
-  	\STATE $p_\theta^{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r) \triangleq \mbox{softmax}(\fInitial(\nodeEmbeddings{\moleculeSet_0}, \contextVect_\mathrm{reagent}))$ \COMMENT{probability $a_t$ starts the reaction}
-  	\STATE $a_{0} \sim p_\theta^{\mathrm{start}}(a_t \mid \moleculeSet_0, \moleculeSet_r)$
+  	\STATE $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e) \triangleq \mbox{softmax}\Big[f^{\mathrm{start}}\big(h_{\Ac}(\moleculeSet_0), g^\mathrm{reagent}(\Mc_e)\big)\Big]$ \COMMENT{prob $a$ starts reaction}
+  	\STATE $a_{0} \sim p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e)$
   	\FOR{$t = 1, \ldots, T^\mathrm{max}$}
   		\STATE $\moleculeSet_t \leftarrow \moleculeSet_{t-1}, a_{t-1}$ \COMMENT{modify molecules based on previous molecule and action}
-  		\STATE $\nodeEmbeddings{\moleculeSet_t} = \fEmbed(\Mc_t)$ \COMMENT{atom embedding of new molecules}
+  		%\STATE $\nodeEmbeddings{\moleculeSet_t} = \fEmbed(\Mc_t)$ \COMMENT{atom embedding of new molecules}
   		\IF{$t$ is odd}
-  			\STATE $p_\theta^{\mathrm{remove}} \triangleq \mbox{softmax}(\fRemove(\nodeEmbeddings{\moleculeSet_t}, [\nodeEmbeddings{\moleculeSet_t}]_{a_{t-1}}))$ 
+  			\STATE $p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1}) \triangleq \mbox{softmax}\Big[f^{\mathrm{remove}}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big]$ 
   			\STATE $a_t \sim p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1})$ \COMMENT{electrons remove bond between $a_t$ and $a_{t-1}$}
   		\ELSE
-  		  	\STATE $p_\theta^{\mathrm{add}} \triangleq \mbox{softmax}(\fAdd(\nodeEmbeddings{\moleculeSet_t}, [\nodeEmbeddings{\moleculeSet_t}]_{a_{t-1}}))$
+  		  	\STATE $p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1}) \triangleq \mbox{softmax}\Big[f^{\mathrm{add}}\big(h_{\Ac}(\moleculeSet_t), a_{t-1}\big)\Big]$
   			\STATE  $a_t \sim p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1})$ \COMMENT{electrons add bond between $a_t$ and $a_{t-1}$}
   		\ENDIF
   		\STATE $\electronPath_t = \electronPath_{0:t-1} \cup a_t$
-  		\STATE $p_\theta(c_t \mid \moleculeSet_t) \triangleq \sigma(r_{\textrm{cont}}(\nodeEmbeddings{\moleculeSet_t}))$
-  		\STATE $c_t \sim p_\theta(c_t \mid \moleculeSet_t)$ \COMMENT{whether to continue reaction}
+  		\STATE $p_\theta^{\textrm{cont}}(c_t \mid \moleculeSet_t) \triangleq \sigma(g^{\textrm{cont}}(\moleculeSet_t))$
+  		\STATE $c_t \sim p_\theta^{\textrm{cont}}(c_t \mid \moleculeSet_t)$ \COMMENT{whether to continue reaction}
   		\IF{$c_t = 0$}
   			\STATE break
   		\ENDIF
@@ -176,74 +270,76 @@ and the probability $p_\theta(s_t \mid \moleculeSet_t)$ that the reaction termin
 \end{algorithm}
 % TODO: ADD MASKS!!!!!!!!!!
 
-It is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
-However, we restrict our model to not stop at step $t\!=\!1$, as it is necessary to pick up a complete electron pair. 
-Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
+% It is possible to stop prior to selecting a first atom $a_0$, indicating that no reaction would take place.
+% However, we restrict our model to not stop at step $t\!=\!1$, as it is necessary to pick up a complete electron pair. 
+% Given any particular selected atom $a_t$ which extends the reaction path, we can deterministically update the previous molecular graph $\moleculeSet_{t}$ to produce the next set of (intermediate) products $\moleculeSet_{t+1}$.
 
-Given our reaction assumptions, then, as stated earlier, there are two types of electron movements that alternate: 
-(i) movement that \emph{removes an existing bond}, and 
-(ii) movement that \emph{adds a new bond}. 
-We define atoms with free electrons as having a self-bond.
-Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bonds;
-we can determine whether a particular step is an add step or a remove step by inspecting $t$.
-Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not form or remove any bonds.
-Figure~\ref{fig:reaction_model} presents a simple example reaction which demonstrates all the critical features of the model;
-the subfigures show the sequence of intermediate products and the distributions over actions.
-
-
-
-We are left now with defining the functional form of our conditional distributions in  Eq.~\eqref{eq:jointprob} for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t~|~\moleculeSet_t, a_{t-1}, t)$, all of which are parameterized by neural networks.
-At each step of the electron path, the network takes the current intermediate graphs, 
-the previous action, and the reagents if relevant, 
-and computes a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
-The structure of these networks is described in the following section, although we defer full architectural details (e.g.\ number of layers and hidden units) 
-and training settings to the appendix.
+% Given our reaction assumptions, then, as stated earlier, there are two types of electron movements that alternate: 
+% (i) movement that \emph{removes an existing bond}, and 
+% (ii) movement that \emph{adds a new bond}. 
+% We define atoms with free electrons as having a self-bond.
+% Thus, all reactions start by first selecting an atom, removing a bond (between two different atoms, or a self-bond), and then alternately adding and removing bonds;
+% we can determine whether a particular step is an add step or a remove step by inspecting $t$.
+% Note that $\moleculeSet_1 = \moleculeSet_0$, as the initial action of selecting $a_0$ does not form or remove any bonds.
+% Figure~\ref{fig:reaction_model} presents a simple example reaction which demonstrates all the critical features of the model;
+% the subfigures show the sequence of intermediate products and the distributions over actions.
 
 
+
+% We are left now with defining the functional form of our conditional distributions in  Eq.~\eqref{eq:jointprob} for continuing $p_\theta(s'_t \mid \moleculeSet_t)$, picking the initial action $p_\theta(a_0 \mid \initialAndReactants)$, and picking subsequent actions $p_\theta(a_t~|~\moleculeSet_t, a_{t-1}, t)$, all of which are parameterized by neural networks.
+% At each step of the electron path, the network takes the current intermediate graphs, 
+% the previous action, and the reagents if relevant, 
+% and computes a probability distribution over next possible actions (i.e., selecting a particular atom, or stopping).
+% The structure of these networks is described in the following section, although we defer full architectural details (e.g.\ number of layers and hidden units) 
+% and training settings to the appendix.
 
 
 
 
 
 
-\subsection{Computing probabilities over actions}
 
-We now define each of our parameterized distributions over actions.
-The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
-This probability is computed from a graph embedding via the function $\fEmbedGraphs_{\textrm{stop}}$, which projects down to a single dimension. We then map this to the $[0,1]$ interval via the sigmoid function $\sigma$ which yields the overall expression
-\begin{align}
-%$
-p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t})).
-%$
-\end{align}
-Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, each defining a probability vector over actions.
-The transition distribution $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$ 
-which selects the next atom in the sequence $\electronPath$
-can be split into two distributions depending on the parity of $t$:
-the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ is used when $t$ is odd, 
-and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is used when $t$ is even. 
 
-These three modules each have the same overall functional form
-\begin{align}
-\actionLogits &= f(\nodeEmbeddings{\moleculeSet_t}, \contextVect), \\
-p_\theta(a_t \mid \cdots) &\propto \bm{\beta} \odot \mbox{softmax}(\bm{\actionLogits})
-\end{align}
-where $f$ is one of the networks $\fInitial, \fAdd$, or $\fRemove$; 
-$\contextVect$ is a context vector, and $\bm{\beta}$ is a binary mask.
+% \subsection{Computing probabilities over actions}
 
-Each of the three actions has a different context and mask.
-The add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ and remove step $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, a_{t-1})$,
- have as context the node embedding of the atom selected at the previous step, $\contextVect_{a_{t-1}} = \nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
-For the initial step, this context vector $\contextVect_\mathrm{reagent}$ is an embedding of all the reagents present, computed 
-by a graph embedding function $\fEmbedGraphs_\mathrm{reagent}$.
-When computing the output probabilities,
-we use the binary vector $\bm{\beta}$ to mask out specific actions known to be impossible.
-The value of this differs for the {\em start}, {\em add} and {\em remove} steps;
-for the start step any action can be picked, so $\bm{\beta}$ is the all-ones vector.
-For the remove step, $\bm{\beta}_\mathrm{remove}$ masks out (i.e.\ is set to zero for) any bonds that do not currently exist and thus cannot be removed (noting though that self-bonds are permitted in the first remove step).
-For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, preventing the model from stalling in the same state for multiple time-steps. 
+% We now define each of our parameterized distributions over actions.
+% The simplest of these is $p_\theta(s'_t \mid \moleculeSet_t)$, which is the probability of continuing given the set of intermediate products at time $t$. 
+% This probability is computed from a graph embedding via the function $\fEmbedGraphs_{\textrm{stop}}$, which projects down to a single dimension. We then map this to the $[0,1]$ interval via the sigmoid function $\sigma$ which yields the overall expression
+% \begin{align}
+% %$
+% p_\theta(s'_t \mid \moleculeSet_t) = \sigma(\fEmbedGraphs_{\textrm{stop}}(\nodeEmbeddings{\moleculeSet_t})).
+% %$
+% \end{align}
+% Each of the three parameterized conditional probability distributions for the {\em start}, {\em add} and {\em remove} steps have similar forms, each defining a probability vector over actions.
+% The transition distribution $p_\theta(a_t \mid  \moleculeSet_t, a_{t-1}, t)$ 
+% which selects the next atom in the sequence $\electronPath$
+% can be split into two distributions depending on the parity of $t$:
+% the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ is used when $t$ is odd, 
+% and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ is used when $t$ is even. 
+
+% These three modules each have the same overall functional form
+% \begin{align}
+% \actionLogits &= f(\nodeEmbeddings{\moleculeSet_t}, \contextVect), \\
+% p_\theta(a_t \mid \cdots) &\propto \bm{\beta} \odot \mbox{softmax}(\bm{\actionLogits})
+% \end{align}
+% where $f$ is one of the networks $\fInitial, \fAdd$, or $\fRemove$; 
+% $\contextVect$ is a context vector, and $\bm{\beta}$ is a binary mask.
+
+% Each of the three actions has a different context and mask.
+% The add step $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ and remove step $p_\theta^\textrm{remove}(a_t \mid \moleculeSet_t, a_{t-1})$,
+%  have as context the node embedding of the atom selected at the previous step, $\contextVect_{a_{t-1}} = \nodeEmbeddings{\moleculeSet_t, a_{t-1}}$. 
+% For the initial step, this context vector $\contextVect_\mathrm{reagent}$ is an embedding of all the reagents present, computed 
+% by a graph embedding function $\fEmbedGraphs_\mathrm{reagent}$.
+% When computing the output probabilities,
+% we use the binary vector $\bm{\beta}$ to mask out specific actions known to be impossible.
+% The value of this differs for the {\em start}, {\em add} and {\em remove} steps;
+% for the start step any action can be picked, so $\bm{\beta}$ is the all-ones vector.
+% For the remove step, $\bm{\beta}_\mathrm{remove}$ masks out (i.e.\ is set to zero for) any bonds that do not currently exist and thus cannot be removed (noting though that self-bonds are permitted in the first remove step).
+% For the add step, $\bm{\beta}_\textrm{add}$ only masks out the previous action, preventing the model from stalling in the same state for multiple time-steps. 
+
+
 \paragraph{Training}
-We can learn the parameters $\theta$ of all the parameterized functions, including those producing node embeddings, by maximizing the log likelihood of a full path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_r)$.
+We can learn the parameters $\theta$ of all the parameterized functions, including those producing node embeddings, by maximizing the log likelihood of a full path $\log p_\theta(\electronPath_{0:T^{\mathrm{max}}} \mid \moleculeSet_0, \moleculeSet_e)$.
 This is evaluated by using a known electron path $a_t^\star$ and intermediate products $\moleculeSet_t^\star$ extracted from training data,
 rather than on simulated values. 
 This allows us to train on all stages of the reaction at once, given electron path data.
@@ -251,7 +347,7 @@ We train our models using Adam \citep{kingma2014adam} and an initial learning ra
 with minibatches of size one, where minibatches often consist of multiple intermediate graphs.
 
 \paragraph{Prediction}
-Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_r$, 
+Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_e$, 
 simply by simulating from the conditional distributions until sampling a stop value $s_t$.
 We instead would like to find a ranked list of the top-$K$ predicted paths, and do so using a modified beam search,
 in which we roll out a beam of width $K$ until a maximum path length $T^\mathrm{max}$,
