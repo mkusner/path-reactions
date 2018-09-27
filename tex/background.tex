@@ -8,10 +8,11 @@
 
 \end{figure*}
 
-In this section, we begin with a chemistry background on molecules and chemical reactions.
-We then review related work in machine learning on predicting chemical reactions. 
-We then describe a particularly important subclass of chemical reactions, called \emph{linear electron flow (LEF)} reactions.
-Finally, we summarize the contributions of this work.
+We begin with brief background from chemistry on molecules and chemical reactions, and
+then review related work in machine learning on predicting reaction outcomes. 
+We then describe a particularly important subclass of chemical reactions, called \emph{linear electron flow} (LEF) reactions,
+and summarize the contributions of this work.
+%Finally, we summarize the contributions of this work.
 
 
 
@@ -23,7 +24,7 @@ Electrons are particularly important for describing how molecules react with oth
 This movement causes the formation and breaking of chemical bonds that changes the reactants into a new set of product molecules \citep{herges1994coarctate}. For example, Figure~\ref{fig:task-overview} (\emph{Right}) shows how electron movement can break bonds (red arrows) and make new bonds (green arrows) to produce a new set of product molecules.
 
 \subsection{Related work}
-In general, work in machine learning on reaction prediction can be divided into two categories: 1. \emph{Product prediction}: where the goal is to predict the reaction products, given a set of reactants and reagents, shown in Figure~\ref{fig:task-overview} (\emph{Left}). 2. \emph{Mechanism prediction}: where the goal is to determine {\em how} the reactants react, i.e., the movement of electrons, shown in Figure~\ref{fig:task-overview} (\emph{Right}).
+In general, work in machine learning on reaction prediction can be divided into two categories: (1) \emph{Product prediction}, where the goal is to predict the reaction products, given a set of reactants and reagents, shown in the left half of Figure~\ref{fig:task-overview}; and (2) \emph{Mechanism prediction}, where the goal is to determine {\em how} the reactants react, i.e., the movement of electrons, shown in the right of Figure~\ref{fig:task-overview}.
 
 
 \paragraph{Product prediction.}
@@ -45,7 +46,7 @@ Another approach, introduced by \cite{jin2017predicting}, constructs a neural ne
 % TODO
 
 \paragraph{Mechanism prediction.}
-The only other works we are aware of to use machine learning to predict reaction mechanisms are \cite{fooshee2018deep,kayala2012reactionpredictor,NIPS2011_4356,kayala2011learning}. All of these model a chemical reaction as an interaction between atoms as electron donors and as electron acceptors. They predict the reaction mechanisms via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
+The only other works we are aware of to use machine learning to predict reaction mechanisms are \citet{fooshee2018deep,NIPS2011_4356,kayala2012reactionpredictor,kayala2011learning}. All of these model a chemical reaction as an interaction between atoms as electron donors and as electron acceptors. They predict the reaction mechanisms via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
 These works are complementary to ours as they require expert-curated training sets, for which organic chemists have to hand-code every electron pushing step. %, and is thus designed for small-scale well-known textbook reactions. 
 This is in contrast to our work which aims to learn reactions from noisy large-scale reaction datasets. As the above methods cannot use such datasets, we cannot compare directly against them, and we leave a detailed discussion of the pros and cons of each method for future work.
 %we leave a detailed comparison of the pros and cons of both methods for future work.
@@ -102,7 +103,7 @@ Seq2Seq [\cite{schwaller2017found}] & \checkmark & $-$  \\
 %\cite{kayala2012reactionpredictor} &$-$ & $-$ &\checkmark  \\ \hline
 Source/Sink (expert-curated data) & $-$ & \checkmark \\ 
 \midrule
-\textbf{this work} & \checkmark  & \checkmark \\
+\textbf{This work} & \checkmark  & \checkmark \\
 \bottomrule
 %\bf{Method} & %\multicolumn{2}{c}{\bf Full} & \multicolumn{2}{c}{\bf Unaware} & \multicolumn{2}{c}{\bf Fair L2} & \multicolumn{2}{c}{\bf Fair L3} \\
 \end{tabular}
@@ -115,14 +116,14 @@ Source/Sink (expert-curated data) & $-$ & \checkmark \\
 %\end{wrapfigure}
 
 
-Table~\ref{table.existing} describes how the current work on reaction prediction satisfies these characteristics. In this work we propose to model a subset of mechanisms with \emph{linear electron flow} (LEF), described below.
+Table~\ref{table.existing} describes how the current work on reaction prediction satisfies these characteristics. In this work we propose to model a subset of mechanisms with \emph{linear electron flow}, described below.
 
 \subsection{Linear Electron Flow reactions} 
 %
 Reaction mechanisms can be classified by the topology of their ``electron-pushing arrows'' (the red and green arrows in Figure~\ref{fig:task-overview}). Here, the class of reactions with \emph{linear electron flow} (LEF) topology is by far the most important, followed by those with cyclic topology \citep{herges1994coarctate}. In this work, we will only consider LEF reactions that are \emph{heterolytic}, i.e., they involve pairs of electrons.
 
 If reactions fall into this class, then a chemical reaction can be modeled as pairs of electrons moving in a \emph{single path} through the reactant atoms. 
-Further, this electron path will alternately remove existing bonds and form new ones. We show this alternating structure in Figure \ref{fig:task-overview} (\emph{Right}). 
+Further, this electron path will alternately remove existing bonds and form new ones. We show this alternating structure in the right of Figure \ref{fig:task-overview}. 
 The reaction formally starts by (step 1) taking the pair of electrons between the Li and C atoms and moving them to the C atom; this is a remove bond step. 
 Next (step 2) a bond is added when electrons are moved from the C atom in reactant 1 to a C atom in reactant 2.
 Then (step 3) a pair of electrons are removed between the C and O atoms and moved to the O atom, giving rise to the products. 
