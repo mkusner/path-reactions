@@ -113,21 +113,36 @@ Some actions are disallowed on certain steps, for instance you cannot remove a b
 
 
 \paragraph{Path Distribution Factorization.}
-Given these distributions we can define the full path distribution $p_\theta( \electronPath_{0:T^{\mathrm{max}}} \mid \moleculeSet_0, \moleculeSet_e)$ as
+Given these distributions we can define the probability of a path $\electronPath_{0:T}$
+% $p_\theta( \electronPath_{0:T^{\mathrm{max}}} \mid \moleculeSet_0, \moleculeSet_e)$ as
+with the distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$, which factorizes as
 \begin{align}
 \label{eq:jointprob}
-p_\theta(\electronPath_{0:T^{\mathrm{max}}} &\mid \moleculeSet_0, \moleculeSet_e) 
+p_\theta(\electronPath_{0:T} &\mid \moleculeSet_0, \moleculeSet_e) 
 =
 	p_\theta^\textrm{cont}(c_0 \mid \moleculeSet_0)
 	p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)\\ \nonumber 
 	& \times
-	\left[\prod_{t=1}^{T^{\mathrm{max}}}
+	\left[\prod_{t=1}^{T}
 		p_\theta^{\mathrm{cont}}(c_{t} \mid \moleculeSet_{t})
 		p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
 	\right]
-	\big(1- p_\theta^{\mathrm{cont}}(c_{T^{\mathrm{max}+1}} \mid \moleculeSet_{T^{\mathrm{max}+1}})\big)
+	\big(1- p_\theta^{\mathrm{cont}}(c_{T+1} \mid \moleculeSet_{T+1})\big)
 	,
 \end{align}
+%\label{eq:jointprob}
+%p_\theta(\electronPath_{0:T^{\mathrm{max}}} &\mid \moleculeSet_0, \moleculeSet_e) 
+%=
+%	p_\theta^\textrm{cont}(c_0 \mid \moleculeSet_0)
+%	p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)\\ \nonumber 
+%	& \times
+%	\left[\prod_{t=1}^{T^{\mathrm{max}}}
+%		p_\theta^{\mathrm{cont}}(c_{t} \mid \moleculeSet_{t})
+%		p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)
+%	\right]
+%	\big(1- p_\theta^{\mathrm{cont}}(c_{T^{\mathrm{max}+1}} \mid \moleculeSet_{T^{\mathrm{max}+1}})\big)
+%	,
+%\end{align}
 Figure~\ref{fig:reaction_model} gives a graphical depiction of the generative process on a simple example reaction. Algorithm~\ref{algo:generative_model} gives a more detailed description.
 
 % Figure~\ref{fig:reaction_model}  a simple example reaction which demonstrates all the critical features of the model;
