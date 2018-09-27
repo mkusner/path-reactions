@@ -1,23 +1,23 @@
-% !TEX root =  ../main.tex
+% !TEX root =  ../main_iclr.tex
 
 %\subsection{Data and preprocessing}
 
-Our dataset for evaluating our model is a collection of chemical reactions extracted from the US patent database \citep{Lowe2017}.
+To evaluate our model, we use a collection of chemical reactions extracted from the US patent database \citep{Lowe2017}.
 We take as our starting point the 479,035 reactions, along with the training, validation, and testing splits 
 which were used by \citet{jin2017predicting}, referred to as the USPTO dataset.
-This data consists of, per reaction, a group of bond changes and reaction SMILES strings \citep{weininger1988smiles}.
-The bond changes indicate pairs of atoms which are connected differently in the reactants and products.
-The SMILES strings encode the molecules present in a text based format. Before we can apply our method, we perform two data preprocessing tasks described  below (using the open-source chemo-informatics software RDKit \citep{rdkit}). 
-These steps automatically extract a subset of data appropriate for training our of electron movement during a reaction.
+This data consists of a list of reactions. Each reaction is a reaction SMILES string \citep{weininger1988smiles} and a list of bond changes.
+SMILES is a text format for molecules that lists the molecule as a sequence of atoms and bonds.
+The bond change list tells us which pairs of atoms have different bonds in the the reactants versus the products (note that this can be directly determined from the SMILES string).
+Below, we describe two data processing techniques that allow us to indentify reagents, reactions with LEF topology, and extract an underlying electron path. Each of these steps can be easily implemented with the open-source chemo-informatics software RDKit \citep{rdkit}.
+
+%Before we can apply our method, we perform two data preprocessing tasks described  below (using the open-source chemo-informatics software RDKit \citep{rdkit}). 
+%These steps automatically extract a subset of data appropriate for training our of electron movement during a reaction.
  
 \paragraph{Reactant and Reagent Seperation}
 Typically, reaction SMILES strings are split into three parts --- reactants, reagents, and products.
-The reactant molecules are those which are consumed during the course of the chemical reaction to form the  product, 
+The reactant molecules are those which are consumed during the course of the chemical reaction to form the product, 
 while the {\em reagents} are any additional molecules which provide context under which the reaction occurs (for example, catalysts),
-but do not explicitly take part in the reaction itself; we see this in the example in Figure~\ref{fig:task-overview}.
-
-
-
+but do not explicitly take part in the reaction itself; an example of a reagent is shown in Figure~\ref{fig:task-overview}.
 
 
 Unfortunately, the USPTO dataset as extracted does not differentiate between reagents and reactants.
@@ -27,12 +27,12 @@ We elect to preprocess the entire USPTO dataset by separating out the reagents f
 This allows us to properly model molecules which are included in the dataset but do not materially contribute to the reaction.
 
 \paragraph{Identifying reactions with linear electron topology}
-
-To train our model, it is necessary to extract a ground-truth representation of the electron paths from the SMILES strings and bond changes.
-Furthermore, not every reaction in the USPTO dataset has a linear electron topology; 
-such reactions (for example, multi-step reactions and cycloadditions) will not have a single unique path through the atoms 
-which describes the movement of the electrons. 
-Figure \ref{fig:dataset_steps} shows the steps necessary to identify and extract the electron paths from reactions exhibiting LEF topology. Further details are in Appendix \ref{sect:electron_path_identify}.
+To train our model, we need to (i) identify reactions in the USPTO dataset with LEF topology, and (ii) have access to an electron path for each reaction. 
+% from the SMILES strings and bond changes.
+%Furthermore, not every reaction in the USPTO dataset has a linear electron topology; 
+%such reactions (for example, multi-step reactions and cycloadditions) will not have a single unique path through the atoms 
+%which describes the movement of the electrons. 
+Figure \ref{fig:dataset_steps} shows the steps necessary to identify and extract the electron paths from reactions exhibiting LEF topology. We provide further details in Appendix \ref{sect:electron_path_identify}.
 
 
 \begin{figure*}
@@ -51,9 +51,12 @@ Paths that do not consist of alternative add and removal steps and do not result
 \label{fig:dataset_steps}
 \end{figure*}
 
-The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
-correspond to reactions of linear topology.
-This comprises $73\%$ of the dataset, containing 349,898 total reactions, of which 29,360 form the held-out test set.
+Applying these steps, we discover that $73\%$ of the USPTO dataset consists of LEF reactions (349,898 total reactions, of which 29,360 form the held-out test set).
+
+% give us 349,898 total 
+% The end result of this is extracted reaction paths for those entries in the USPTO dataset which 
+% correspond to reactions of linear topology.
+% This comprises $73\%$ of the dataset, containing 349,898 total reactions, of which 29,360 form the held-out test set.
 
 
 
