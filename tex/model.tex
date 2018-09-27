@@ -24,7 +24,7 @@ To parameterize this distribution we propose to use any deep graph neural networ
 Given these atom embeddings we compute a graph embedding \citet[\S B.1]{li2018learning} (also called an aggregation graph transformation \citep[\S3]{Johnson2017-pd}), which is a vector that represents the entire molecule set $\moleculeSet$ that is invariant to any particular node ordering. Any such function $g(\cdot)$ that computes this mapping can be used here, the particular graph embedding function we use is inspired by \cite{li2018learning} (described in detail in Appendix B). We can now parameterize $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$ as follows:
 \begin{align}
 p_\theta^{\mathrm{start}}(a_0 \mid  \moleculeSet_0, \moleculeSet_e) = \mbox{softmax}\Big[f^{\mathrm{start}}\big( h_{\Ac}(\moleculeSet_0), 
-g^{\mathrm{reagent}}\left(h_{\Ac}(\moleculeSet_e)\right)\big)\Big], 
+g^{\mathrm{reagent}}\left(\moleculeSet_e\right)\big)\Big], 
 \end{align}
 where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ before the softmax function: $\mbox{softmax}[\mathbf{x}] = e^{\mathbf{x}}/\sum_{i} e^{x_i}$. %(details on $f^{\mathrm{start}}(\cdot)$ in Appendix B).
 
@@ -63,7 +63,7 @@ Additionally, as we do not know the length of the reaction $T$, we introduce a l
 For this distribution we learn a different graph embedding function $g^{\textrm{cont}}(\cdot)$ to decide whether to continue or not:
 \begin{align}
 %$
-p_\theta^\textrm{cont}(c_t \mid \moleculeSet_t) = \sigma(g^{\textrm{cont}}(h_{\Ac}(\moleculeSet_t))).
+p_\theta^\textrm{cont}(c_t \mid \moleculeSet_t) = \sigma(g^{\textrm{cont}}(\moleculeSet_t)).
 %$
 \end{align}
 where $\sigma$ is the sigmoid function $\sigma(a) = 1/(1+e^{-a})$.
@@ -200,7 +200,7 @@ Figure~\ref{fig:reaction_model} gives a graphical depiction of the generative pr
   	%\STATE $\nodeEmbeddings{\moleculeSet_0} = \fEmbed(\Mc_0)$ \COMMENT{atom embedding of reactants}
   	%\STATE $\contextVect_\mathrm{reagent} = r(\Mc_e)$ \COMMENT{graph embedding of reagents}
   	%\STATE $\actionLogits = $
-  	\STATE $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e) \triangleq \mbox{softmax}\Big[f^{\mathrm{start}}\big(h_{\Ac}(\moleculeSet_0), g^\mathrm{reagent}(h_{\Ac}(\Mc_e))\big)\Big]$ \COMMENT{$a$ starts reaction}
+  	\STATE $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e) \triangleq \mbox{softmax}\Big[f^{\mathrm{start}}\big(h_{\Ac}(\moleculeSet_0), g^\mathrm{reagent}(\Mc_e)\big)\Big]$ \COMMENT{$a$ starts reaction}
   	\STATE $a_{0} \sim p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e)$
   	\STATE $\moleculeSet_{1} \leftarrow \moleculeSet_{0}$ \COMMENT{The molecule does not change until complete pair picked up}
   	  \STATE $c_1 \triangleq 1 $ \COMMENT{You cannot stop until picked up complete pair}
@@ -216,7 +216,7 @@ Figure~\ref{fig:reaction_model} gives a graphical depiction of the generative pr
   		\ENDIF
   		\STATE $\electronPath_t = \electronPath_{0:t-1} \cup a_t$
   		\STATE $\moleculeSet_{t+1} \leftarrow \moleculeSet_{t}, a_{t}$ \COMMENT{modify molecules based on previous molecule and action}
-  		\STATE $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1}) \triangleq \sigma(g^{\textrm{cont}}( h_{\Ac}(\moleculeSet_{t+1})))$
+  		\STATE $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1}) \triangleq \sigma(g^{\textrm{cont}}( \moleculeSet_{t+1}))$
   		\STATE $c_{t+1} \sim p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$ \COMMENT{whether to continue reaction}
   		\IF{$c_{t+1} = 0$}
   			\STATE break
