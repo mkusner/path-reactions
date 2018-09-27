@@ -37,16 +37,16 @@ Figure \ref{fig:graph_nn} provides a visualization of these techniques.
 Visualization of how node embeddings and graph embeddings are formed. 
 Node embeddings are $d$-dimensional vectors, one for each node. 
 They are obtained using Gated Graph Neural Networks \citep{li2016gated}.
-These networks consist of a series of iterative steps where the embeddings for each node is updated using the node's previous embedding and a message from its neighbors.
+These networks consist of a series of iterative steps where the embeddings for each node are updated using the node's previous embedding and a message from its neighbors.
  Graph embeddings are $q$-dimensional vectors, representing a set of nodes, which could for instance be all the nodes in a particular graph \citep{li2018learning}.
-  They are formed by a weighted sum over node embeddings.
+  They are formed using a function on the weighted sum of node embeddings.
 }
 \label{fig:graph_nn}
 \end{figure*}
 
  We start with Gated Graph Neural Networks \citep{li2016gated, gilmer2017neural}. 
  We denote these as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we refer to the output as ``node embeddings'', $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$. 
-These networks form these node embeddings through a recurrent operation on messages, $\mb_v$, with $v \in \Ac$ so that there is one message associated with each node.
+These networks form these node embeddings through a recurrent operation on messages, $\mb_v$, with $v \in \Ac$, so that there is one message associated with each node.
 At the first time step these messages, $\mb_v^{(0)}$, are initialized with the respective atom features shown in Table \ref{table:atom-features}. GGNNs then update these messages in a recursive nature:
 
 \begin{align}
@@ -59,11 +59,11 @@ At the first time step these messages, $\mb_v^{(0)}$, are initialized with the r
 \end{align}
 
 Where $\textrm{GRU}$ is a Gated Recurrent Unit \citep{Cho2014-xt}, the functions $\neigh{1}(v)$, $\neigh{2}(v)$, $\neigh{3}(v)$ index the nodes connected by single, double and triple bonds to node $v$ respectively and $f_\textrm{single}$, $f_\textrm{double}$ and $f_\textrm{triple}$ are linear transformations with learnable parameters.
-This process continues for $S$ steps (where we choose $S=4$), with all the messages and the hidden layer of the GRU maintaining the same dimensionality of 101 as the raw atom features.
+This process continues for $S$ steps (where we choose $S=4$). In our implementation, messages and the hidden layer of the GRU have a dimensionality of 101, which is the same as the dimension of the raw atom features.
 The node embeddings are set as the final message belonging to a node, so that indexing a row of the node embeddings matrix, $\nodeEmbeddings{\moleculeSet}$, gives a transpose of the final message vector, ie $[\nodeEmbeddings{\moleculeSet}]_v = \mb_v^{(S)t}$.
 
 \begin{table}
-  \caption{Atom features we sue as input to the GGNN. These are calculated using RDKit.}
+  \caption{Atom features we use as input to the GGNN. These are calculated using RDKit.}
   \label{table:atom-features}
   \centering
   \begin{tabular}{ll}
@@ -83,8 +83,8 @@ The node embeddings are set as the final message belonging to a node, so that in
 \end{table}
 
 
-Having formed node embeddings we can use these to form graph embeddings \citep{li2018learning,Johnson2017-pd}, which as described earlier are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
- We define the function that maps node features belonging to each atom to their graph embedding by $\fEmbedGraphs$.
+Having formed node embeddings we can use these to form graph embeddings \citep{li2018learning,Johnson2017-pd}, which, as described in the main text, are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
+ We define the function that maps a set of node features to a graph embedding by $\fEmbedGraphs$.
 These are similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
 Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
 They are used to form the graph embedding, as
@@ -107,7 +107,7 @@ Having formed this embedding of the graphs, we project this down to a lower $q$-
 
 \section{More training details}
 
-In this section we go through more specific model architecture details omitted from the main text. 
+In this section we go through more specific model architecture and training details omitted from the main text. 
 
 \subsection{Model architectures}
 In this section we provide further details of our model architectures.
@@ -124,12 +124,12 @@ Each of these is parametrized by NNs. We can split up the components of these NN
 
 
 
-As mentioned above  both $\fEmbedGraphs_{\textrm{stop}}$, $\fEmbedGraphs_\mathrm{reagent}$ consist of three
+As mentioned above (Eq. \ref{eq:graph-embedding}) both $\fEmbedGraphs_{\textrm{stop}}$ and $\fEmbedGraphs_\mathrm{reagent}$ consist of three
 linear functions. 
 For  both, the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
 Again for both, $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
 This is double the dimension of the node features, and similar to the approach taken by \citet[\S B.1]{li2018learning}.
-Finally, $\fuk$ differs between the two modules, as for $\fEmbedGraphs_{\textrm{stop}}$ it projects down to one dimension (to later go through a sigmoid function and compute a stop probability), whereas for  $\fEmbedGraphs_\mathrm{reagent}$, $\fuk$ projects  to a dimensionality of 100 to form the reagent embedding.
+Finally, $\fuk$ differs between the two modules, as for $\fEmbedGraphs_{\textrm{stop}}$ it projects down to one dimension (ie $q=1$) (to later go through a sigmoid function and compute a stop probability), whereas for  $\fEmbedGraphs_\mathrm{reagent}$, $\fuk$ projects  to a dimensionality of 100 (ie $q=100$) to form the reagent embedding.
 
 
 The modules for $\fAdd$ and $\fRemove$, that operate on each node to produce a action logit, are both NNs consisting of one hidden layer of 100 units. 
@@ -157,7 +157,8 @@ For training we use reaction minibatch sizes of one, although these can consist 
 \section{Further details on identifying reactions with linear flow topology}
 \label{sect:electron_path_identify}
 
-This section provides further details on how we extract reactions with linear flow topology, complementing Figure \ref{fig:dataset_steps} in the main text.
+This section provides further details on how we extract reactions with linear flow topology, complementing Figure \ref{fig:dataset_steps} in the main text. 
+We start from the USPTO SMILES reaction string and bond changes and wish to find the electron path.
 
 The first step is to look at the bond changes present in a reaction. 
 Each atom on the ends of the path will be involved in exactly one bond change;
@@ -185,14 +186,21 @@ to confirm that the final product that is produced by our extracted electron pat
 
 \section{Prediction using our model}
 
-At predict time, as discussed in the main text, we use beam search to find high probable chemically-valid paths from our model. Further details are given in Algorithm~\ref{algo:valid_path}.
+At predict time, as discussed in the main text, we use beam search to find high probable chemically-valid paths from our model. Further details are given in Algorithm~\ref{algo:valid_path}. 
+For \ourModel this operation takes 0.337s per reaction, although we do not parallelize the molecule manipulation across the different beams, and so the majority of this time (0.193s) is used within RDKit to make intermediate molecules and extract their features.
+At test time we take advantage of the embarrassingly parallel nature of the task to parallelize across test inputs. 
+To compute the log likelihood of a reaction (with access to intermediate steps) it takes \ourModel 0.007s.
 
 \input{tex/algorithm.tex}
 
 
+\FloatBarrier
 \section{Further example of actions proposed by our model}
 
-Figure \ref{fig:extra-textbook-example} shows the model's predictions for the mechanism of how two molecules will react. 
+This section provides further examples of the paths predicted by our model.
+In Figures  \ref{fig:extra-textbook-example} and \ref{fig:extra-textbook-example2}, we wish to show how the model has learnt chemical trends by testing it on textbook reactions.
+In Figure \ref{fig:appendix_examples} we show further examples taken from the USPTO dataset.
+
 
 \begin{figure*}[h]
         \centering
@@ -206,6 +214,16 @@ Figure \ref{fig:extra-textbook-example} shows the model's predictions for the me
         \includegraphics[width=0.7\textwidth]{imgs/textbook/additionalexamples.eps}
         \caption{Additional typical selectivity examples: Here, the expected product is shown on the right. The blue arrows indicate the top ranked paths from our model, the red arrows indicate other possibly competing but incorrect steps, which the model does not predict to be of high probability. In all cases, our model predicted the correct products. In b) and c), our model correctly recovers the regioselectivity expected in electrophilic aromatic substitutions.}
         \label{fig:extra-textbook-example2}
+\end{figure*}
+
+
+
+
+\begin{figure*}[h]
+        \centering
+        \includegraphics[width=1.0\textwidth]{imgs/appendix_examples}
+        \caption{Four examples of the paths predicted by the \ourModelIR. (These reactions have been taken from the USPTO dataset and have not been seen by the model in training).}
+        \label{fig:appendix_examples}
 \end{figure*}
 
 
