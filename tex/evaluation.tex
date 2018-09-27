@@ -33,8 +33,7 @@ An example of the paths suggested by \ourModelIR on one of the USPTO test exampl
 
 
 In our experiments we consider two variants of our model: 
-the first model \ourModelR  is exactly as defined in Section\ \ref{sec:model}, including all reagent information;
-a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), 
+the first model \ourModelR  is exactly as defined in Section\ \ref{sec:model}, including all reagent information. While generally all reagents are required to faithfully predict the mechanism and product, it is often possible to makes inferences from the reactants alone. Therefore, we investigated a second version we call \ourModelIR ignores the reagents when selecting the initial action (i.e.\ no context vector $\contextVect_\mathrm{reagent}$ is input into $\fInitial$), 
 allowing us to gauge the importance of reagents in determining what reaction occurs. We now evaluate our model on the \emph{reaction mechanism prediction} and \emph{reaction product prediction} problems.
 
 \subsection{Reaction Mechanism Prediction}
