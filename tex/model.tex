@@ -353,7 +353,7 @@ with minibatches of size one, where minibatches often consist of multiple interm
 
 \paragraph{Prediction}
 Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_e$, 
-simply by simulating from the conditional distributions until sampling a stop value $s_t$.
+simply by simulating from the conditional distributions until sampling a continue value equal to zero.
 We instead would like to find a ranked list of the top-$K$ predicted paths, and do so using a modified beam search,
 in which we roll out a beam of width $K$ until a maximum path length $T^\mathrm{max}$,
 while recording all paths which have terminated.
