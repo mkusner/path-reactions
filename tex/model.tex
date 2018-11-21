@@ -38,7 +38,7 @@ where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ be
 
 
 \paragraph{Electron Movement.}
-Observe that since LEF reactions are a single path of electrons, at any step $t$, the next step $a_t$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are), and (iii) the point of time $t$ through the path, indicating whether we are on an add or remove bond step. Thus we will also learn the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$.
+Observe that since LEF reactions are a single path of electrons \added[id=jab]{(\S \ref{sect:LEF})}, at any step $t$, the next step $a_t$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are), and (iii) the point of time $t$ through the path, indicating whether we are on an add or remove bond step. Thus we will also learn the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$.
 
 Similar to the starting location distribution we again make use of a graph-isomorphic node embedding function $h_{\Ac}(\moleculeSet)$. 
 In contrastx, the above distribution can be split into two distributions depending on the parity of $t$:
