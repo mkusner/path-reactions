@@ -40,7 +40,8 @@ where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ be
 \paragraph{Electron Movement.}
 Observe that since LEF reactions are a single path of electrons, at any step $t$, the next step $a_t$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are), and (iii) the point of time $t$ through the path, indicating whether we are on an add or remove bond step. Thus we will also learn the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$.
 
-Similar to the starting location distribution we again make use of a graph-isomorphic node embedding function $h_{\Ac}(\moleculeSet)$. Differently, the above distribution can be split into two distributions depending on the parity of $t$:
+Similar to the starting location distribution we again make use of a graph-isomorphic node embedding function $h_{\Ac}(\moleculeSet)$. 
+In contrastx, the above distribution can be split into two distributions depending on the parity of $t$:
 the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ when $t$ is odd, 
 and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ when $t$ is even. We parameterize the distributions as
 \begin{align}
@@ -368,7 +369,7 @@ This is evaluated by using a known electron path $a_t^\star$ and intermediate pr
 rather than on simulated values. 
 This allows us to train on all stages of the reaction at once, given electron path data.
 We train our models using Adam \citep{kingma2014adam} and an initial learning rate of $10^{-4}$,
-with minibatches of size one reaction, where each minibatch often consists of multiple intermediate graphs.
+with minibatches consisting of a single reaction, where each reaction often consists of multiple intermediate graphs.
 
 \paragraph{Prediction}
 Once trained, we can use our model to sample chemically-valid paths given an input set of reactants $\moleculeSet_0$ and reagents $\moleculeSet_e$, 
