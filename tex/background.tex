@@ -48,9 +48,9 @@ Another approach, introduced by \cite{jin2017predicting}, constructs a neural ne
 \paragraph{Mechanism prediction.}
 The only other works we are aware of to use machine learning to predict reaction mechanisms are \citet{fooshee2018deep,NIPS2011_4356,kayala2012reactionpredictor,kayala2011learning}. All of these model a chemical reaction as an interaction between atoms as electron donors and as electron acceptors. They predict the reaction mechanisms via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
 \replaced[id=jab]{%
-These works require expert-defined features and have so far been run on carefully, expert-curated datasets, for which organic chemists have to hand-code every electron pushing step.
- In contrast in our work, we aim to learn reactions from noisy large-scale reaction datasets.
- As  we cannot yet use the above methods on these datasets, we cannot compare directly against them, and we leave a detailed discussion of the pros and cons of each method for future work.
+These methods have been run on small expert-curated private datasets, which contain information about the reaction conditions such as the temperature and anion/action solvation potential \citep[\S2]{NIPS2011_4356}.
+In contrast, in this work, we aim to learn reactions from noisy large-scale public reaction datasets, which are missing the required reaction condition information required by these previous works.
+As we cannot yet use the above methods on the datasets we use, nor test our models on the datasets they use, as they are not yet publicly released, we cannot compare directly against them, and we leave a detailed discussion of the pros and cons of each method for future work.
 }{
 These works are complementary to ours as they require expert-curated training sets, for which organic chemists have to hand-code every electron pushing step. %, and is thus designed for small-scale well-known textbook reactions. 
 This is in contrast to our work which aims to learn reactions from noisy large-scale reaction datasets. As the above methods cannot use such datasets, we cannot compare directly against them, and we leave a detailed discussion of the pros and cons of each method for future work.}
