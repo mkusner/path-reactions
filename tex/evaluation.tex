@@ -62,7 +62,7 @@ is an exact match with the sequence of integers output by \ourModel. We compute 
 \begin{table}[t]
 %\begin{minipage}[l]{0.42\textwidth}
 \begin{center}
-  \label{table:prod-predict}
+  
   %\end{minipage}\hfill
   %\begin{minipage}[r]{0.53\textwidth}
 %  \centering
@@ -84,7 +84,7 @@ is an exact match with the sequence of integers output by \ourModel. We compute 
    \caption{Results for \emph{product prediction}, following the product matching procedure in Section~\ref{sec:product-prediction}. 
  For the baselines we compare against models trained (a) on the full USPTO training set (marked FTS) and only tested on our subset of LEF reactions, and (b) those that are also trained on the same subset as our model. 
  We make use of the code and pre-trained models provided by \citet{jin2017predicting}. For the Seq2Seq approach, as neither code nor more fine grained results are available, we train up the required models from scratch using the OpenNMT library \citep{2017opennmt}.
-}
+} \label{table:prod-predict}
   %\end{minipage}
     \vspace{-0.25cm}
     \end{center}
@@ -113,7 +113,7 @@ and (d) convert the product graph to a canonical SMILES string representation in
 %We can use RDKit to express the molecule in a canonical SMILES string format 
 %(predicted electron paths which yield chemically infeasible products are considered failures).
 We can then evaluate whether a predicted electron path matches the ground truth by a string comparison. This procedure is inspired by the evaluation of \citet{schwaller2017found}. To obtain a ranked list of products for our model, we compute this canonicalized product SMILES for each of the predictions found by beam search over electron paths, removing duplicates along the way. 
-These product-level accuracies are reported in Table~3.
+These product-level accuracies are reported in Table \ref{table:prod-predict}.
 
 We compare with the state-of-the-art graph-based method \cite{jin2017predicting};
 we use their evaluation code and pre-trained model\footnote{\url{https://github.com/wengong-jin/nips17-rexgen}},

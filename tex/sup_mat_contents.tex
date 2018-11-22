@@ -150,6 +150,12 @@ When conditioning on reagents (ie for
  )
   the reagent embeddings calculated by $\fReag$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network. In total \ourModelR has approximately 250,000 parameters and \ourModelIR has approximately 190,000.
 
+\added[id=jab]{Although we found choosing the first entry in the electron path is often the most challenging decision, and greatly benefits from reagent information, we also considered a version of \ourModel where we fed in the reagent information at every step.
+In other words, the modules for $\fAdd$ and $\fRemove$ also received  the reagent embeddings calculated by $\fReag$ concatenated onto their inputs.
+On the mechanism prediction task (Table \ref{table:mech-predict}) this gets a slightly improved top-1 accuracy of 78.4\% (77.8\% before) but a similar top-5 accuracy of 94.6\% (94.7\% before).
+ On the reaction product prediction task (Table \ref{table:prod-predict}) we get 87.5\%, 94.4\% and 96.0\% top-1, 3 and 5 accuracies (87.0\%, 94.5\% and 95.9\% before). 
+ The tradeoff is this model is somewhat more complicated and requires a greater number of parameters.}
+
 \subsection{Training}
 
 We train everything using Adam \citep{kingma2014adam} and an initial learning rate of 0.0001, which we decay after 5 and 9 epochs by a factor of 0.1. 
