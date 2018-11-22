@@ -1,14 +1,17 @@
 
+\added[id=jab]{In this section we briefly list a couple of limitations of our approach and discuss any pointers towards their resolution in future work.}
+
 \paragraph{LEF Topology}
 \added[id=jab]{
 \ourModel can currently only predict reactions with LEF topology (\S \ref{sect:LEF}). 
-These are the most common form of reactions \citep{herges1994organizing}, but in future work we would like to extend \ourModel's action repertoire to work with other types of mechanisms such as cyclic reactions.
- This could be done by allowing \ourModel to output multiple paths as well as providing it with labelled mechanism paths for these reactions, obtainable from finer grained datasets or perhaps calculated using a QM approach following \citet{Sadowski2016-qg}. }
+These are the most common form of reactions \citep{herges1994organizing}, but in future work we would like to extend \ourModel's action repertoire to work with other types of mechanisms such as cyclic or multi-step reactions.
+ This could be done by allowing \ourModel to sequentially output a series of paths.
+ At training time we would require labelled mechanism paths for these reactions, obtainable from finer grained datasets or perhaps calculated using a QM approach following \citet{Sadowski2016-qg}. }
  
  \paragraph{Graph representation of molecules}
  \added[id=jab]{
- Although this shortcoming is not just restricted to our work, by modelling molecules and reactions as graphs and operations thereon, we ignore details about the electronic structure, and conformational information, ie information about how the molecule shape changes in 3D. 
+ Although this shortcoming is not just restricted to our work, by modelling molecules and reactions as graphs and operations thereon, we ignore details about the electronic structure and conformational information, ie information about how the molecule shape changes in 3D. 
  This information is crucial in some cases.
- Having said this, there is probably some balance to be struck here, as representing molecules and reactions as graphs is an extremely powerful abstraction, and one that is commonly used by chemists, aiding it's interoperability.}
+ Having said this, there is probably some balance to be struck here, as representing molecules and reactions as graphs is an extremely powerful abstraction, and one that is commonly used by chemists, allowing models working with such graph representations to be more easily interpreted.}
  
  

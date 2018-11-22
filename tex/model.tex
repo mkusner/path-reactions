@@ -17,7 +17,7 @@ that specifies $p_\theta$, before describing how to train the model parameters $
 To define our generative model, we describe a factorization of $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$ into three components: 1.\ the starting location distribution $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$; 2.\ the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$; and 3.\ the reaction continuation distribution $p^\textrm{cont}_\theta(c_{t} \mid \moleculeSet_{t})$. We define each of these in turn and then describe the factorization (we leave all architectural details of the functions introduced to Appendix B).
 
 \paragraph{Starting Location.}
-At the beginning the reaction needs to decide on which atom $a_0$ starts the path.
+At the beginning the model needs to decide on which atom $a_0$ starts the path.
 As this is based on (i) the initial set of reactants $\moleculeSet_0$ and possibly (ii) a set of reagents $\moleculeSet_e$,
 we propose to learn a distribution $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$.
 
@@ -41,7 +41,7 @@ where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ be
 Observe that since LEF reactions are a single path of electrons \added[id=jab]{(\S \ref{sect:LEF})}, at any step $t$, the next step $a_t$ in the path depends only on (i) the intermediate molecules formed by the action path up to that point $\moleculeSet_t$, (ii) the previous action taken $a_{t-1}$ (indicating where the free pair of electrons are), and (iii) the point of time $t$ through the path, indicating whether we are on an add or remove bond step. Thus we will also learn the electron movement distribution $p_\theta(a_t \mid \moleculeSet_{t}, a_{t-1}, t)$.
 
 Similar to the starting location distribution we again make use of a graph-isomorphic node embedding function $h_{\Ac}(\moleculeSet)$. 
-In contrastx, the above distribution can be split into two distributions depending on the parity of $t$:
+In contrast, the above distribution can be split into two distributions depending on the parity of $t$:
 the remove bond step distribution $p_\theta^\textrm{remove}(a_t \mid  \moleculeSet_t, a_{t-1})$ when $t$ is odd, 
 and the add bond step distribution $p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1})$ when $t$ is even. We parameterize the distributions as
 \begin{align}
