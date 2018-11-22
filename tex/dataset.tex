@@ -26,6 +26,22 @@ We elect to preprocess the entire USPTO dataset by separating out the reagents f
 (ii) the molecule appears in the product SMILES completely unchanged from the pre-reaction SMILES.
 This allows us to properly model molecules which are included in the dataset but do not materially contribute to the reaction.
 
+\begin{figure*}[ht]
+\centering
+\includegraphics[width=1.\textwidth]{imgs/dataset_steps}
+\caption{
+Example of how we turn SMILES reaction string into an ordered electron path, for which we can train \ourModel on. 
+This consists of a series of steps: 
+(1) Identify bonds that change by comparing bond triples (source node, end node, bond type) between the reactants and products. 
+(2) Join up the bond changes so that one of the atoms in consecutive bond changes overlap (for reactions which do not have linear electron flow topology, such as multi-step reactions, this will not be possible and so we discard these reactions).
+(3) Order the path (ie assign a direction). A gain of charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge, such as in the example shown) indicates that the electrons have arrived at this atom; and vice-versa for the start of the path.
+When details about both ends of the path are missing from the SMILES string we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
+(4) The extracted electron path deterministically determines a series of intermediate molecules which can be used for training \ourModel. 
+Paths that do not consist of alternative add and removal steps and do not result in the final recorded product do not exhibit LEF topology and so can be discarded.
+}
+\label{fig:dataset_steps}
+\end{figure*}
+
 \paragraph{Identifying reactions with linear electron topology}
 To train our model, we need to (i) identify reactions in the USPTO dataset with LEF topology, and (ii) have access to an electron path for each reaction. 
 % from the SMILES strings and bond changes.
@@ -35,21 +51,7 @@ To train our model, we need to (i) identify reactions in the USPTO dataset with 
 Figure \ref{fig:dataset_steps} shows the steps necessary to identify and extract the electron paths from reactions exhibiting LEF topology. We provide further details in Appendix \ref{sect:electron_path_identify}.
 
 
-\begin{figure*}
-\centering
-\includegraphics[width=1.\textwidth]{imgs/dataset_steps}
-\caption{
-Example of how we turn SMILES reaction string into an ordered electron path, for which we can train \ourModel on. 
-This consists of a series of steps: 
-(1) Identify bonds that change by comparing bond triples (source node, end node, bond type) between the reactants and products. 
-(2) Line up the bond changes so that one of the atoms in consecutive bond changes overlap (for reactions which do not have linear electron flow topology, such as multi-step reactions, this will not be possible and so we discard these reactions).
-(3) Work out the direction of the path. A gain of charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge, such as in the example shown) indicates that the electrons have arrived at this atom; and vice-versa for the start of the path.
-When details about both ends of the path are missing from the SMILES string we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
-(4) The extracted electron path deterministically determines a series of intermediate molecules which can be used for training \ourModel. 
-Paths that do not consist of alternative add and removal steps and do not result in the final recorded product do not exhibit LEF topology and so can be discarded.
-}
-\label{fig:dataset_steps}
-\end{figure*}
+
 
 Applying these steps, we discover that $73\%$ of the USPTO dataset consists of LEF reactions (349,898 total reactions, of which 29,360 form the held-out test set).
 
