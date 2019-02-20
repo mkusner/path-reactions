@@ -29,7 +29,7 @@ We can now parameterize $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \mol
 p_\theta^{\mathrm{start}}(a_0 \mid  \moleculeSet_0, \moleculeSet_e) = \mbox{softmax}\Big[f^{\mathrm{start}}\big( h_{\Ac}(\moleculeSet_0), 
 g^{\mathrm{reagent}}\left(\moleculeSet_e\right)\big)\Big], 
 \end{align}
-where $f^{\mathrm{start}}$ is a neural network to compute logits $\mathbf{x}$ before the softmax function, defined as $\mbox{softmax}[\mathbf{x}] = e^{\mathbf{x}}/\sum_{i} e^{x_i}$. %(details on $f^{\mathrm{start}}(\cdot)$ in Appendix B).
+where $f^{\mathrm{start}}$ is a feedforward neural network which computes logits $\mathbf{x}$; the logits are then normalized into probabilities  by the softmax function, defined as $\mbox{softmax}[\mathbf{x}] = e^{\mathbf{x}}/\sum_{i} e^{x_i}$. %(details on $f^{\mathrm{start}}(\cdot)$ in Appendix B).
 
 % Sometimes we wish to agglomerate the node embeddings belonging to a set of nodes $\Ac'$ (with $\Ac' \subseteq  \Ac$), to form a graph embedding \citet[\S B.1]{li2018learning}, that is a vector that represents multiple nodes but that is invariant to any particular node ordering. 
 % These functions have also previously been referred to as aggregation graph transformations \citep[\S3]{Johnson2017-pd}.
@@ -54,7 +54,7 @@ p_\theta^\textrm{add}(a_t \mid \moleculeSet_t, a_{t-1}) & \mbox{ otherwise }
 \end{cases}
 \end{align}
 The vectors $\bm{\beta}^\textrm{remove},\bm{\beta}^\textrm{add}$ are masks that zero-out the probability of certain atoms being selected. Specifically, $\bm{\beta}^\mathrm{remove}$ sets the probability of any atoms $a_t$ to 0 if there is not a bond between it and the previous atom $a_{t-1}$\footnote{One subtle point is if a reaction begins with a lone-pair of electrons then we say that this reaction starts by removing a \emph{self-bond}. Thus, in the first remove step $\bm{\beta}^\mathrm{remove}$ it is possible to select $a_1 \!=\! a_0$. But this is not allowed via the mask vector in later steps.}. The other mask vector $\bm{\beta}^\textrm{add}$ masks out the previous action, preventing the model from stalling in the same state for multiple time-steps. %(details on $f^{\mathrm{add}}(\cdot), f^{\mathrm{remove}}(\cdot)$ in Appendix B).
-
+The feedforward networks $f^{\mathrm{add}}(\cdot), f^{\mathrm{remove}}(\cdot)$ and other architectural details are described in Appendix C.
 
 
 

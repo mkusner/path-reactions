@@ -34,7 +34,7 @@ Recently, methods combining machine learning and template-based molecular rewrit
  Here, a learned model is used to predict which rewrite rule to apply to convert one molecule into another. While these models are readily interpretable, they tend be brittle. 
 %The earliest work we are aware of that uses deep learning to predict the products of reactions is \cite{zhang2005structure}. Their idea was to approximate the operations of a molecular fingerprint so that all operations become continuously differentiable. They then learned parameters of this fingerprint to accurately predict product fingerprints end-to-end.
 % jin2017predicting
-Another approach, introduced by \cite{jin2017predicting}, constructs a neural network based on the Weisfeiler-Lehman algorithm for testing graph isomorphism. They use this algorithm (called WLDN) to select atoms that will be involved in a reaction. They then enumerate all chemically-valid bond changes involving these atoms and learn a separate network to rank the resulting potential products. This method while leveraging new techniques for deep learning on graphs, cannot be trained end-to-end because of the enumeration steps which ensures chemical validity.
+Another approach, introduced by \cite{jin2017predicting}, constructs a neural network based on the Weisfeiler-Lehman algorithm for testing graph isomorphism. They use this algorithm (called WLDN) to select atoms that will be involved in a reaction. They then enumerate all chemically-valid bond changes involving these atoms and learn a separate network to rank the resulting potential products. This method, while leveraging new techniques for deep learning on graphs, cannot be trained end-to-end because of the enumeration steps for ensuring chemical validity.
 % schwaller2017found
 \cite{schwaller2017found} represents reactants as SMILES \citep{weininger1988smiles} strings and then uses a sequence to sequence network (specifically, the work of \citet{Zhao2017}) to predict product SMILES. While this method (called Seq2Seq) is end-to-end trainable, the SMILES representation is quite brittle as often single character changes will not correspond to a valid molecule.
 
@@ -46,10 +46,10 @@ Another approach, introduced by \cite{jin2017predicting}, constructs a neural ne
 % TODO
 
 \paragraph{Mechanism prediction.}
-The only other works we are aware of to use machine learning to predict reaction mechanisms are \citet{fooshee2018deep,NIPS2011_4356,kayala2012reactionpredictor,kayala2011learning}. All of these model a chemical reaction as an interaction between atoms as electron donors and as electron acceptors. They predict the reaction mechanisms via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
+The only other work we are aware of to use machine learning to predict reaction mechanisms are \citet{fooshee2018deep,NIPS2011_4356,kayala2012reactionpredictor,kayala2011learning}. All of these model a chemical reaction as an interaction between atoms as electron donors and as electron acceptors. They predict the reaction mechanisms via two independent models: one that identifies these likely electron sources and sinks, and another that ranks all combinations of them.
 These methods have been run on small expert-curated private datasets, which contain information about the reaction conditions such as the temperature and anion/action solvation potential \citep[\S2]{NIPS2011_4356}.
 In contrast, in this work, we aim to learn reactions from noisy large-scale public reaction datasets, which are missing the required reaction condition information required by these previous works.
-As we cannot yet apply the above methods on the datasets we use, nor test our models on the datasets they use, as they are not yet publicly released, we cannot compare directly against them; therefore, we leave a detailed discussion of the pros and cons of each method for future work.
+As we cannot yet apply the above methods on the datasets we use, nor test our models on the datasets they use (as the data are not yet publicly released), we cannot compare directly against them; therefore, we leave a detailed investigation of the pros and cons of each method for future work.
 
 %we leave a detailed comparison of the pros and cons of both methods for future work.
  % (unfortunately the data used to train these models is not currently open-source). 
@@ -142,7 +142,7 @@ Predicting the final product is thus a byproduct of predicting this series of el
 
 \paragraph{Contributions.} We propose a novel generative model for modeling the reaction mechanism of LEF reactions. Our contributions are as follows:
 \begin{itemize}
-\item We propose an end-to-end generative model for predicting reaction mechanisms, \ourModelR, that is fully differentiable. It can be used with any deep model on graphs.
+\item We propose an end-to-end generative model for predicting reaction mechanisms, \ourModelR, that is fully differentiable. It can be used with any deep learning architecture on graphs.
 \item We design a technique to identify LEF reactions and mechanisms from purely atom-mapped reactants and products, the primary format of large-scale reaction sets.
 \item We show that \ourModelR learns chemical knowledge such as functional group selectivity without explicit training.
 \end{itemize}
