@@ -47,7 +47,7 @@ These networks consist of a series of iterative steps where the embeddings for e
 
 
  We start with Gated Graph Neural Networks (GGNNs) \citep{li2016gated, gilmer2017neural}, which we use for finding node embeddings.
- We denote these functions as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we will refer to the output as the node embedding matrix, $\nodeEmbeddings{\moleculeSet} \subseteq \mathbb{R}^{|\Ac|\times d}$. 
+ We denote these functions as $\fEmbed: \moleculeSet \to \mathbb{R}^{|\Ac|\times d}$, where we will refer to the output as the node embedding matrix, $\nodeEmbeddings{\moleculeSet} \in \mathbb{R}^{|\Ac|\times d}$. 
 Each row of this node embedding matrix represents the embedding of a particular atom; the rows are ordered by atom-mapped number, a unique number assigned to each atom in a SMILES string.
 The GGNN form these node embeddings through a recurrent operation on messages, $\mb_v$, with $v \in \Ac$, so that there is one message associated with each node.
 At the first time step these messages, $\mb_v^{(0)}$, are initialized with the respective atom features shown in Table \ref{table:atom-features}. GGNNs then update these messages in a recursive nature:
@@ -57,11 +57,11 @@ At the first time step these messages, $\mb_v^{(0)}$, are initialized with the r
 					\mb_v^{(s - 1)},  
 						\sum_{i \in \neigh{1}(v)} f_\textrm{single}\left(\mb_i^{(s - 1)}\right) +
 						\sum_{j \in \neigh{2}(v)} f_\textrm{double}\left(\mb_j^{(s - 1)}\right) +
-						\sum_{k \in \neigh{3}(v)} f_\textrm{triple}\left(\mb_j^{(s - 1)}\right)
+						\sum_{k \in \neigh{3}(v)} f_\textrm{triple}\left(\mb_k^{(s - 1)}\right)
 					\right)
 \end{align}
 
-Where $\textrm{GRU}$ is a Gated Recurrent Unit \citep{Cho2014-xt}, the functions $\neigh{1}(v)$, $\neigh{2}(v)$, $\neigh{3}(v)$ index the nodes connected by single, double and triple bonds to node $v$ respectively and $f_\textrm{single}$, $f_\textrm{double}$ and $f_\textrm{triple}$ are linear transformations with learnable parameters.
+Where $\textrm{GRU}$ is a Gated Recurrent Unit \citep{Cho2014-xt}, the functions $\neigh{1}(v)$, $\neigh{2}(v)$, $\neigh{3}(v)$ index the nodes connected by single, double and triple bonds to node $v$ respectively and $f_\textrm{single}(\cdot)$, $f_\textrm{double}(\cdot)$ and $f_\textrm{triple}(\cdot)$ are linear transformations with learnable parameters.
 This process continues for $S$ steps (where we choose $S=4$). In our implementation, messages and the hidden layer of the GRU have a dimensionality of 101, which is the same as the dimension of the raw atom features.
 The node embeddings are set as the final message belonging to a node, so that indexing a row of the node embeddings matrix, $\nodeEmbeddings{\moleculeSet}$, gives a transpose of the final message vector, ie $[\nodeEmbeddings{\moleculeSet}]_v = \mb_v^{(S)t}$.
 
@@ -87,23 +87,23 @@ The node embeddings are set as the final message belonging to a node, so that in
 
 
 One can represent entire graphs with graph embeddings \citep{li2018learning,Johnson2017-pd}, which are $q$-dimensional vectors representing a set of nodes; i.e.\ an entire molecule or set of molecules.
-These are defined as $\fEmbedGraphsInclFEmbed: \moleculeSet \to \mathbb{R}^{q}$. 
+These are computed by the function $\fEmbedGraphsInclFEmbed: \moleculeSet \to \mathbb{R}^{q}$. 
 In practice the function we use consists of the composition of two functions: $\fEmbedGraphsInclFEmbed(\cdot) = (r \circ \fEmbed)(\cdot)$.
 
 Having already introduced the function $\fEmbed(\cdot)$, we now introduce the function $r(\cdot)$.
 This function, that maps a set of node features to  graph embeddings, $\fEmbedGraphs: \mathbb{R}^{|\Ac|\times d} \to \mathbb{R}^{q}$, is similar to the readout functions used for regressing on graphs detailed in \citep[Eq. 3]{gilmer2017neural} and the graph embeddings described in \citet[\S B.1]{li2018learning}. 
-Specifically, $\fEmbedGraphs$ consists of three functions, $\fui$, $\fuj$ and $\fuk$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
-They are used to form the graph embedding, as
+Specifically, $\fEmbedGraphs(\cdot)$ consists of three functions, $\fui(\cdot)$, $\fuj(\cdot)$ and $\fuk(\cdot)$, which could be any multi-layer perceptron (MLP) but in practice we find that linear functions suffice.
+These three functions are used to form the graph embedding as so:
 \begin{align}
-	\fEmbedGraphs(\nodeEmbeddings{\moleculeSet_t}) = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui(\nodeEmbeddings{\moleculeSet_t,v})\right) \fuj(\nodeEmbeddings{\moleculeSet_t, v})\right).
+	\fEmbedGraphs(\nodeEmbeddings{\moleculeSet_t}) = \fuk\left(\sum_{v \in \Ac'} \sigma\left(\fui([\nodeEmbeddings{\moleculeSet}]_v)\right) \fuj([\nodeEmbeddings{\moleculeSet}]_v)\right).
 	\label{eq:graph-embedding}
 \end{align}
-Where $\sigma$ is a sigmoid function.
+Where $\sigma(\cdot)$ is a sigmoid function.
 We can break this equation down into two stages.
 In stage (i), similar to \citet[\S B.1]{li2018learning}, we form an embedding of one or more molecules (with vertices $\Ac'$ and with $\Ac' \subseteq  \Ac$) by performing a gated sum over the node features. 
-In this manner the function $\fui$ is used to decide how much that node should contribute towards the embedding,
- and $\fuj$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose this to be double the dimension of the node features.
-Having formed this embedding of the graphs, we project this down to a lower $q$-dimensional space in stage (ii), which is done by the function $\fuk$. 
+In this manner the function $\fui(\cdot)$ is used to decide how much that node should contribute towards the embedding,
+ and $\fuj(\cdot)$ projects the node embedding up to a higher dimensional space; following \citet[\S B.1]{li2018learning}, we choose this to be double the dimension of the node features.
+Having formed this embedding of the graphs, we project this down to a lower $q$-dimensional space in stage (ii), which is done by the function $\fuk(\cdot)$. 
 
 
 
@@ -121,37 +121,37 @@ In this section we provide further details of our model architectures.
 Section 3 of the main paper discusses our model.
 In particular we are interested in computing three conditional probability terms: (1) $p_\theta^{\mathrm{start}}(a_0 \mid \moleculeSet_0, \moleculeSet_e)$, the probability of the initial state $a_0$ given the reactants and reagents; 
 (2) the conditional probability $p_\theta(a_t \mid \moleculeSet_t, a_{t-1}, t)$  
-of next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
+of the next state $a_t$ given the intermediate products $\moleculeSet_t$ for $t > 0$;
 and (3) the probability $p_\theta^{\mathrm{cont}}(c_{t} \mid \moleculeSet_{t})$ that the reaction continues at step $t$.
 
-Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules: $\fCont$, $\fReag$, $\fAdd$, $\fRemove$ and $\fInitial$. 
+Each of these is parametrized by NNs. We can split up the components of these NNs into a series of modules: $\fCont(\cdot)$, $\fReag(\cdot)$, $\fAdd(\cdot)$, $\fRemove(\cdot)$ and $\fInitial(\cdot)$. 
 All of these operate on node embeddings created by the same GGNN.
  In this section we shall go through each of these modules in turn.
 
 
 
 
-As mentioned above (Eq. \ref{eq:graph-embedding}) both $\fCont$ and $\fReag$ (which following the explanation in the previous section, make up part of $\fContInclEm$ and $\fReagInclEm$ respectively) consist of three
+As mentioned above (Eq. \ref{eq:graph-embedding}) both $\fCont(\cdot)$ and $\fReag(\cdot)$ (which following the explanation in the previous section, make up part of $\fContInclEm(\cdot)$ and $\fReagInclEm(\cdot)$ respectively) consist of three
 linear functions. 
-For  both, the function $\fui$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
-Again for both, $\fuj$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
+For  both, the function $\fui(\cdot)$ is used to decide how much each node should contribute towards the embedding and so projects down to a scalar value.
+Again for both, $\fuj(\cdot)$ projects the node embedding up to a higher dimensional space, which we choose to be 202 dimensions. 
 This is double the dimension of the node features, and similar to the approach taken by \citet[\S B.1]{li2018learning}.
-Finally, $\fuk$ differs between the two modules, as for $\fCont$ it projects down to one dimension (ie $q=1$) (to later go through a sigmoid function and compute a stop probability), whereas for  $\fReag$, $\fuk$ projects  to a dimensionality of 100 (ie $q=100$) to form the reagent embedding.
+Finally, $\fuk(\cdot)$ differs between the two modules, as for $\fCont(\cdot)$ it projects down to one dimension (ie $q=1$) (to later go through a sigmoid function and compute a stop probability), whereas for  $\fReag(\cdot)$, $\fuk(\cdot)$ projects  to a dimensionality of 100 (ie $q=100$) to form the reagent embedding.
 
 
-The modules for $\fAdd$ and $\fRemove$, that operate on each node to produce a action logit, are both NNs consisting of one hidden layer of 100 units. 
+The modules for $\fAdd(\cdot)$ and $\fRemove(\cdot)$, that operate on each node to produce an action logit, are both NNs consisting of one hidden layer of 100 units. 
 Concatenated onto the node features going into these networks are the node features belonging to the previous atom on the path.
 
 
 
-The final function, $\fInitial$, is represented by an NN with hidden layers of 100 units. 
+The final function, $\fInitial(\cdot)$, is represented by an NN with hidden layers of 100 units. 
 When conditioning on reagents (ie for
  \ourModelR
  )
-  the reagent embeddings calculated by $\fReag$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network. In total \ourModelR has approximately 250,000 parameters and \ourModelIR has approximately 190,000.
+  the reagent embeddings calculated by $\fReag(\cdot)$ are concatenated onto the node embeddings and we use two hidden layers for our NN. When ignoring reagents (ie for \ourModelIR) we use one hidden layer for this network. In total \ourModelR has approximately 250,000 parameters and \ourModelIR has approximately 190,000.
 
 Although we found choosing the first entry in the electron path is often the most challenging decision, and greatly benefits from reagent information, we also considered a version of \ourModel where we fed in the reagent information at every step.
-In other words, the modules for $\fAdd$ and $\fRemove$ also received  the reagent embeddings calculated by $\fReag$ concatenated onto their inputs.
+In other words, the modules for $\fAdd(\cdot)$ and $\fRemove(\cdot)$ also received  the reagent embeddings calculated by $\fReag(\cdot)$ concatenated onto their inputs.
 On the mechanism prediction task (Table \ref{table:mech-predict}) this gets a slightly improved top-1 accuracy of 78.4\% (77.8\% before) but a similar top-5 accuracy of 94.6\% (94.7\% before).
  On the reaction product prediction task (Table \ref{table:prod-predict}) we get 87.5\%, 94.4\% and 96.0\% top-1, 3 and 5 accuracies (87.0\%, 94.5\% and 95.9\% before). 
  The tradeoff is this model is somewhat more complicated and requires a greater number of parameters.
@@ -170,8 +170,8 @@ For training we use reaction minibatch sizes of one, although these can consist 
 \section{Further details on identifying reactions with linear flow topology}
 \label{sect:electron_path_identify}
 
-This section provides further details on how we extract reactions with linear flow topology, complementing Figure \ref{fig:dataset_steps} in the main text. 
-We start from the USPTO SMILES reaction string and bond changes and wish to find the electron path.
+This section provides further details on how we extract reactions with linear electron flow topology, complementing Figure \ref{fig:dataset_steps} in the main text. 
+We start from the USPTO SMILES reaction string and bond changes and from this wish to find the electron path.
 
 The first step is to look at the bond changes present in a reaction. 
 Each atom on the ends of the path will be involved in exactly one bond change;
