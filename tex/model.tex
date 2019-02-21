@@ -4,7 +4,7 @@
 
 In this section we define a probabilistic model for electron movement in \emph{linear electron flow} (LEF) reactions.
 % model for reactions
-As described above all molecules can be thought of as graphs where nodes correspond to atoms and edges to bonds. All LEF reactions transform a set of reactant graphs, $\moleculeSet_0$ into a set of product graphs $\moleculeSet_{T+1}$ via a series of electron actions $\electronPath_{0:T} = (a_0, \dots, a_{T})$.  As described, these electron actions will alternately \emph{remove} and \emph{add} bonds (as shown in the right of Figure~\ref{fig:task-overview}). This reaction sometimes includes additional reagent graphs, $\moleculeSet_e$, which help the reaction proceed, but do not change themselves.
+All molecules can be thought of as graphs where nodes correspond to atoms and edges to bonds. All LEF reactions transform a set of reactant graphs, $\moleculeSet_0$ into a set of product graphs $\moleculeSet_{T+1}$ via a series of electron actions $\electronPath_{0:T} = (a_0, \dots, a_{T})$.  As described, these electron actions will alternately \emph{remove} and \emph{add} bonds (as shown in the right of Figure~\ref{fig:task-overview}). This reaction sometimes includes additional reagent graphs, $\moleculeSet_e$, which help the reaction proceed, but do not change themselves.
 We propose to learn a distribution $p_\theta( \electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$ over these electron movements. 
 We first detail the generative process %(i.e., the forward pass) 
 that specifies $p_\theta$, before describing how to train the model parameters $\theta$.
