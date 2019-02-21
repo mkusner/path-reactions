@@ -4,14 +4,14 @@ In this section we briefly list a couple of limitations of our approach and disc
 \paragraph{LEF Topology}
 
 \ourModel can currently only predict reactions with LEF topology (\S \ref{sect:LEF}). 
-These are the most common form of reactions \citep{herges1994organizing}, but in future work we would like to extend \ourModel's action repertoire to work with other types of mechanisms such as pericyclic reactions.
- This could be done by allowing \ourModel to sequentially output a series of paths, or by allowing multiple electron movement steps at a single step. 
- Also, since the mechanisms in our dataset are extracted only from the reactants and products, it might not be able to infer all observable intermediates. This could be solved by labelled mechanism paths, obtainable from finer grained datasets containing also the mechanistic intermediates. 
+These are the most common form of reactions \citep{herges1994organizing}, but in future work we would like to extend \ourModel's action repertoire to work with other classes of electron shift topologies such as those found in pericyclic reactions.
+ This could be done by allowing \ourModel to sequentially output a series of paths, or by allowing multiple electron movements at a single step. 
+ Also, since the approximate mechanisms we produce for our dataset are extracted only from the reactants and products, they may not include all observable intermediates. This could be solved by using labelled mechanism paths, obtainable from finer grained datasets containing also the mechanistic intermediates. 
  These mechanistic intermediates could also perhaps be created using quantum mechanical calculations following the approach in \citet{Sadowski2016-qg}.
  
  \paragraph{Graph representation of molecules}
 
- Although this shortcoming is not just restricted to our work, by modelling molecules and reactions as graphs and operations thereon, we ignore details about the electronic structure and conformational information, ie information about how the atoms in the molecule are oriented in 3D. 
+ Although this shortcoming is not just restricted to our work, by modeling molecules and reactions as graphs and operations thereon, we ignore details about the electronic structure and conformational information, ie information about how the atoms in the molecule are oriented in 3D. 
  This information is crucial in some important cases.
  Having said this, there is probably some balance to be struck here, as representing molecules and reactions as graphs is an extremely powerful abstraction, and one that is commonly used by chemists, allowing models working with such graph representations to be more easily interpreted.
 

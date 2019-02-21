@@ -213,8 +213,8 @@ Figure~\ref{fig:reaction_model} gives a graphical depiction of the generative pr
 
 
 \begin{algorithm}[t]
-  \caption{The generative steps of ELECTRO.}
-  {\bf Input:}~~Reactant molecules $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_e$, atom embedding function $h_{\Ac}(\cdot)$, graph embedding functions $g^\mathrm{reagent}(\cdot),g^\mathrm{cont}(\cdot)$, additional logit functions $f^\mathrm{start}(\cdot),f^\mathrm{remove}(\cdot),f^\mathrm{add}(\cdot)$, time steps $T^\mathrm{max}$
+  \caption{The generative steps of ELECTRO (given that the model chooses to react, ie $c_0=1$).}
+  {\bf Input:}~~Reactant molecules $\Mc_0$ (consisting of atoms $\Ac$), reagents $\Mc_e$, atom embedding function $h_{\Ac}(\cdot)$, graph embedding functions $g^\mathrm{reagent}(\cdot) \textrm{ and } g^\mathrm{cont}(\cdot)$, additional logit functions $f^\mathrm{start}(\cdot),f^\mathrm{remove}(\cdot),f^\mathrm{add}(\cdot)$, time steps $T^\mathrm{max}$
   
   \begin{algorithmic}[1]
   	%\STATE $\nodeEmbeddings{\moleculeSet_0} = \fEmbed(\Mc_0)$ \COMMENT{atom embedding of reactants}
@@ -364,7 +364,7 @@ Figure~\ref{fig:reaction_model} gives a graphical depiction of the generative pr
 
 
 \paragraph{Training}
-We can learn the parameters $\theta$ of all the parameterized functions, including those producing node embeddings, by maximizing the log likelihood of a full path $\log p_\theta(\electronPath_{0:T^{\mathrm{max}}} \mid \moleculeSet_0, \moleculeSet_e)$.
+We can learn the parameters $\theta$ of all the parameterized functions, including those producing node embeddings, by maximizing the log likelihood of a full path $\log p_\theta(\electronPath_{0:T} \mid \moleculeSet_0, \moleculeSet_e)$.
 This is evaluated by using a known electron path $a_t^\star$ and intermediate products $\moleculeSet_t^\star$ extracted from training data,
 rather than on simulated values. 
 This allows us to train on all stages of the reaction at once, given electron path data.
