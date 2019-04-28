@@ -1,0 +1,142 @@
+% Authors: Georg Martius, Dominik Zietlow
+% See example.tex for an example poster
+% some nice features:
+% - arbitrary page size
+% - uniform global fontscaling (easy to resize you poster)
+% - convinient commands for multicolunmns, image inclusion and spacings
+
+\NeedsTeXFormat{LaTeX2e}[2011/06/27]
+\ProvidesPackage{MPIISposter}[2019/03/13 1.0]
+
+\RequirePackage{ifthen,xkeyval}
+\RequirePackage[skins]{tcolorbox}
+
+\newcommand{\PosterFooter}{}
+
+\makeatletter
+
+% Make sure custom papersize is actually used properly
+\setlength{\TP@visibletextwidth}{\textwidth-2\TP@innermargin}
+\setlength{\TP@visibletextheight}{\textheight-2\TP@innermargin}
+
+
+\newcommand{\@fontscale}{1.0}% scale all fonts
+\newcommand{\@stylename}{rg} % name of style
+
+\DeclareOptionX{style}{\renewcommand{\@stylename}{#1}}
+\DeclareOptionX{fontscale}{\renewcommand{\@fontscale}{#1}}
+
+\ProcessOptionsX
+
+%%% here comes some font scaling stuff
+\let\expandtwoargs\@expandtwoargs
+\newcommand{\showfontsize}{\f@size{} pt}
+
+% This command defines/overwrites exiting font commands where the fontsize gets scaled by fontscale
+%
+% internally this command defines two length (for height and spacing) and overwrites the respective font command
+% withh the given font size.
+\newcommand{\newfontwithscaling}[2]{
+  \expandafter\newlength\csname #1h\endcsname % create len nameh  (height)
+  \expandafter\newlength\csname #1s\endcsname % create len names  (line-spacing)
+  \expandafter\setlength\csname #1h\endcsname{#2 pt * \real{\@fontscale}} %set length with font-scale
+  \expandafter\setlength\csname #1s\endcsname{#2 pt * \real{1.16} * \real{\@fontscale}}
+  \expandafter\def\csname #1\endcsname{\expandtwoargs{\fontsize}{\csname #1h\endcsname}{\csname#1s\endcsname}
+    \selectfont}
+}
+\makeatother
+
+\newfontwithscaling{tiny}{12}
+\newfontwithscaling{scriptsize}{14.4}
+\newfontwithscaling{footnotesize}{17.28}
+\newfontwithscaling{small}{20.74}
+\newfontwithscaling{normalsize}{24.88}
+\newfontwithscaling{large}{29.86}
+\newfontwithscaling{Large}{35.83}
+\newfontwithscaling{LARGE}{43}
+\newfontwithscaling{huge}{51.6}
+\newfontwithscaling{Huge}{61.92}
+\newfontwithscaling{veryHuge}{74.3}
+\newfontwithscaling{VeryHuge}{87.16}
+\newfontwithscaling{VERYHuge}{107}
+
+%\newcommand{\colorize}[1]{{\color{blocktitlebgcolor}\bf #1}}
+\newcommand{\colorize}[1]{{\color{colorPrimary}\bf #1}}
+\newcommand{\s}[1]{\vspace*{#1em}}
+\newcommand{\ig}[2][1]{\includegraphics[width=#1\linewidth]{#2}}
+
+% columns like in beamer
+\newenvironment{cols}[0]{\csname minipage\endcsname{0pt}}{\csname endminipage\endcsname\hfill\null\par}
+% column with relative width in fractions of the linewidth
+\newcommand{\col}[2][c]{\csname endminipage\endcsname\hfill\csname minipage\endcsname[#1]{#2\linewidth}}
+% columns with absolute width
+\newcommand{\colabsolute}[2][c]{\csname endminipage\endcsname\hfill\csname minipage\endcsname[#1]{#2}}
+\newcommand{\Narrow}[2][.7]{\null\hfill\begin{minipage}{#1\linewidth}#2\end{minipage}\hfill\null\par}
+
+\newcommand{\specialblock}[2]{%
+  {
+    \colorlet{blocktitlebgcolor}{colorPrimary}
+    \colorlet{innerblocktitlebgcolor}{blocktitlebgcolor}
+    \colorlet{innerblockbodybgcolor}{blocktitlebgcolor!10}
+    \block{#1}{#2}
+  }
+}
+
+
+\newcommand{\posterfooter}{
+\node [above right,
+       outer sep=0pt,
+       minimum width=\paperwidth,
+       minimum height=35mm, align=flush right,  text width=\linewidth,
+       fill=colorPrimary] at (bottomleft) {\Large\color{titlefgcolor} {\PosterFooter} \hspace*{15mm}};
+}
+
+
+\newcommand{\addlogoright}[2][1cm]{
+  \makeatletter
+  \node[left] at ([xshift=-#1]TP@title.east) {\includegraphics[width=12cm]{#2}};
+  \makeatother
+}
+\newcommand{\addlogoleft}[2][1cm]{
+  \makeatletter
+  \node[right] at ([xshift=#1]TP@title.west) {\includegraphics[width=12cm]{#2}};
+  \makeatother
+}
+
+
+% overwrite maketitle from tikzposter package
+\makeatletter
+\renewcommand\maketitle[1][]{  % #1 keys
+    \normalsize
+    \setkeys{title}{#1}
+    % Title dummy to get title height
+   %\node[inner sep=0cm, line width=\TP@titlelinewidth, outer sep=0pt,anchor=north, minimum width=\paperwidth,fill=colorPrimary,fill tile image*={width=\paperwidth}{logos/MNRV_white_turned}]
+   \node[inner sep=0cm, line width=\TP@titlelinewidth, outer sep=0pt,anchor=north, minimum width=\paperwidth,fill=colorPrimary]
+   (TP@title) at ($(0, 0.5\textheight-\TP@titletotopverticalspace)$) {\parbox{\TP@titlewidth-2\TP@titleinnersep}{\TP@maketitle}};
+
+
+   \draw let \p1 = ($(TP@title.north)-(TP@title.south)$) in node {
+        \setlength{\TP@titleheight}{\y1}
+        \setlength{\titleheight}{\y1}
+        \global\TP@titleheight=\TP@titleheight
+       \global\titleheight=\titleheight
+   };
+
+    % Compute title position
+    \setlength{\titleposleft}{-0.5\titlewidth}
+    \setlength{\titleposright}{\titleposleft+\titlewidth}
+    \setlength{\titlepostop}{0.5\textheight-\TP@titletotopverticalspace}
+    \setlength{\titleposbottom}{\titlepostop-\titleheight}
+
+    % Title style (background)
+    \TP@titlestyle
+
+    % Title node
+   % \node[inner sep=\TP@titleinnersep, line width=\TP@titlelinewidth, anchor=north, minimum width=\TP@visibletextwidth-2\TP@titleinnersep]
+    %    at (0,0.5\textheight-\TP@titletotopverticalspace) {\parbox{\TP@titlewidth-2\TP@titleinnersep}{\TP@maketitle}};
+
+    % Settings for blocks
+    \normalsize
+    \setlength{\TP@blocktop}{\titleposbottom-\TP@titletoblockverticalspace}
+}
+\makeatother
