@@ -37,8 +37,7 @@ This consists of a series of steps:
 (3) Order the path (ie assign a direction). A gain of charge (or analogously the gain of hydrogen as H$^+$ ions without changing charge, such as in the example shown) indicates that the electrons have arrived at this atom; and vice-versa for the start of the path.
 When details about both ends of the path are missing from the SMILES string we fall back to using an element's {\em electronegativity} to estimate the direction of our path, with more electronegative atoms attracting electrons towards them and so being at the end of the path. 
 (4) The extracted electron path deterministically determines a series of intermediate molecules which can be used for training \ourModel. 
-Paths that do not consist of alternative add and removal steps and do not result in the final recorded product do not exhibit LEF topology and so can be discarded.
-}
+Paths that do not consist of alternative add and removal steps and do not result in the final recorded product do not exhibit LEF topology and so can be discarded. An interesting observation is that our approximate reaction mechanism extraction scheme implicitly fills in missing reagents, which are caused by noisy training data --- in this example, which is a Grignard- or Barbier-type reaction, the test example is missing a metal reagent (e.g. Mg or Zn). Nevertheless, our model is robust enough to predict the intended product correctly \citep{grignard}.}
 \label{fig:dataset_steps}
 \end{figure*}
 
