@@ -23,13 +23,40 @@
 \usepackage{amssymb}
 \usepackage{url}
 \usepackage{enumitem}
-% %if you need algorithm do this:
-% \usepackage{algorithm}
-% \usepackage{algorithmic}
-% \usepackage{etoolbox}
-% \AtBeginEnvironment{algorithm}{
-%   \setlength{\columnwidth}{\linewidth}
-% }
+
+
+
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{booktabs}
+
+\makeatletter
+\newcounter{tablecounter}
+\newenvironment{tikztable}[1][]{
+  \def \rememberparameter{#1}
+  \vspace{10pt}
+  \refstepcounter{tablecounter}
+  \begin{center}
+  }{
+    \ifx\rememberparameter\@empty
+    \else
+    \\[10pt]
+    {\small Tab.~\thetablecounter: \rememberparameter}
+    \fi
+  \end{center}
+}
+\makeatother
+
+ %if you need algorithm do this:
+\usepackage[plain]{algorithm}
+ \usepackage{algorithmicx,algpseudocode}
+ \usepackage{etoolbox}
+ \AtBeginEnvironment{algorithm}{
+   \setlength{\columnwidth}{\linewidth}
+ }
+
+\algblockdefx{MRepeat}{EndRepeat}{\textbf{repeat}}{}
+\algnotext{EndRepeat}
 
 \usepackage[fontscale=0.9]{MPIISposter}
 % in addition to the standard latex font sizes we have now also \veryHuge, \VeryHuge, and \VERYHuge
@@ -49,6 +76,85 @@
 % there is a colorize command that make text appear in the primary color
 % you might want to change it if your primary color is very light (here mixed with black 1:1)
 %\renewcommand{\colorize}[1]{{\color{blocktitlebgcolor!50!black}\bf #1}}
+
+
+
+\newcommand{\xb}{\mathbf{x}}
+\newcommand{\Xc}{\mathcal{X}}
+\newcommand{\Zc}{{\mathcal{Z}}}
+\newcommand{\Mc}{{\mathcal{M}}}
+\newcommand{\Bc}{{\mathcal{B}}}
+\newcommand{\Ac}{{\mathcal{A}}}
+\newcommand{\Pc}{{\mathcal{P}}}
+\newcommand{\bb}{{\mathbf{b}}}
+\newcommand{\ab}{{\mathbf{a}}}
+\newcommand{\mb}{{\mathbf{m}}}
+\newcommand{\Mb}{{\mathbf{M}}}
+\newcommand{\Pb}{{\mathbf{P}}}
+\newcommand{\Hb}{{\mathbf{H}}}
+\newcommand{\Ab}{{\mathbf{A}}}
+\newcommand{\Rc}{{\mathcal{R}}}
+\newcommand{\delb}{{\boldmath{\delta}}}
+
+
+%
+\newcommand{\nodeEmbeddings}[1]{\Hb_{#1}}
+\newcommand{\graphEmbeddings}{\mathbf{h_g}}
+%\newcommand{\graph}{\mathcal{G}}
+
+
+
+\newcommand{\actionLogits}{\textbf{s}} % for nodes
+
+% The model definitions
+\newcommand{\electronPath}{\Pc}
+\newcommand{\moleculeSet}{\Mc}
+\newcommand{\initialAndReactants}{\Mc_0, \Mc_e}
+
+\newcommand{\contextVect}{\bm{c}}
+% Then the modules!
+\newcommand{\fEmbed}{h_{\Ac}} % for nodes
+\newcommand{\fEmbedGraphs}{r} % for nodes
+\newcommand{\fEmbedGraphsInclFEmbed}{g}
+
+
+\newcommand{\fAdd}{f^{\textrm{add}}}
+\newcommand{\fRemove}{f^{\textrm{remove}}}
+\newcommand{\fInitial}{f^{\textrm{start}}}
+\newcommand{\fStop}{f_{\textrm{stop}}}
+\newcommand{\fCont}{\fEmbedGraphs^{\textrm{cont}}}
+\newcommand{\fReag}{\fEmbedGraphs^{\textrm{reagent}}}
+
+\newcommand{\fContInclEm}{\fEmbedGraphsInclFEmbed^{\textrm{cont}}}
+\newcommand{\fReagInclEm}{\fEmbedGraphsInclFEmbed^{\textrm{reagent}}}
+
+
+\newcommand{\fReagEmbed}{f_{\textrm{reagent}}}
+\newcommand{\fModules}{\fEmbed, \fAdd, \fRemove, \fInitial,\fStop, \fReagEmbed}
+\newcommand{\fui}{f_\textrm{gate}}
+\newcommand{\fuj}{f_\textrm{up}}
+\newcommand{\fuk}{f_\textrm{down}}
+\newcommand{\fum}{f_m}
+
+\newcommand{\actionProb}[2][]{ p(a_{#2} \mid \moleculeSet_{\electronPath_{0:#2-1}^{#1}}, a^{#1}_{#2-1}, #2)}
+\newcommand{\continueProb}[2]{p(s_{#1}' \mid \moleculeSet_{#2}) }
+
+
+% Our model
+\newcommand{\ourModel}{\textsc{ELECTRO}}
+\newcommand{\ourModelIR}{\textsc{ELECTRO-LITE}}
+\newcommand{\ourModelR}{\textsc{ELECTRO}}
+
+
+\newcommand{\neigh}[1]{\mathcal{N}_{e#1}}
+
+
+
+
+
+
+
+
 
 \newcommand{\PosterDepartment}{}
 \newcommand{\PosterTitle}{ A Generative Model for Electron Paths}
@@ -100,7 +206,7 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
 
 
 \begin{columns}
-  \column{0.33}
+  \column{0.37}
 
  % \specialblock{Overview}{
 
@@ -115,17 +221,17 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
  %   \s{.5}
  % }
 
-  \block{Reactions can be represented by movements of electrons}{
+  \block{Reactions can be represented by movements of electrons: the reaction mechanism}{
     \begin{cols}
-    \col{.5}
+    \col{.54}
     \includegraphics[width=\linewidth]{imgs/inkscape_img_edits/reaction_diagram.pdf}
     \col{.02}
-    \col{.48}
+    \col{.44}
       \begin{itemize}
-        \item Reactions involve the stepwise movement of electrons along the atoms: this \colorize{breaks} and \colorize{forms} bonds.
-        \item Recent approaches of ML applied to reaction prediction have focused on product prediction, we instead approach the problem from the angle
-          of mechanism prediction: this provides \colorize{interprebility} and naturally \colorize{incorporates the constraints of chemistry} (eg balanced atom counts).
-        \item We model reactions exhibiting linear electron flow (LEF) topology, the most common commong of reactions \citep{herges1994coarctate}.
+        \item Reactions involve the stepwise movement of electrons along the atoms: this \colorize{removes} and \colorize{adds} bonds.
+        \item Recent approaches of ML applied to reaction prediction \citep{jin2017predicting,schwaller2017found} have focused on product prediction, we instead approach the problem from the angle
+          of mechanism prediction: this provides \colorize{interprebility}, takes advantage of the \colorize{sparsity} of reactions, and naturally \colorize{incorporates the constraints of chemistry} (eg balanced atom counts).
+        \item We model reactions exhibiting linear electron flow (LEF) topology, the most common occuring of reactions \citep{herges1994coarctate}.
       \end{itemize}
     \end{cols}
 
@@ -173,54 +279,184 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
 
   % COLUMN 2
   % ---------------------------------------------------------------------------
-  \column{0.67}
+  \column{0.63}
 
-  \block{Our model, \textsc{ELECTRO}, uses Graph Neural Networks to Parameterize the Probability of each kind of action}{
+  \block{Our model, \textsc{ELECTRO}, uses graph neural networks to parameterize the probability of each kind of action}{
+
+  \begin{cols}
+  \col{0.3}
+
+ Reactions exhibiting LEF topology have a single electron path consisting of alternating \colorize{add} and \colorize{remove} steps.
+  
+    \begin{algorithm}[H]
+    %\caption{}
+    \begin{algorithmic}[1]
+      \State Select \colorize{starting} atom A using 
+      $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e)$
+      %\triangleq \mbox{softmax}\Big[f^{\mathrm{start}}\big(h_{\Ac}(\moleculeSet_0), g^\mathrm{reagent}(\Mc_e)\big)\Big]$
+      \MRepeat
+        \State Select atom B bonded to A using $p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1})$
+        and \colorize{remove} 2 electrons from bond B-A.
+        \State Decide whether to \colorize{continue} using $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$.
+        \State Select new atom A using $p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1})$ and \colorize{add} bond B-A.
+        \State Decide whether to \colorize{continue} using $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$.
+      \EndRepeat
+    \end{algorithmic}
+    \end{algorithm}
+  \col{0.02}
+  \col{0.68}
+  { \raggedright
+    \includegraphics[width=\linewidth]{imgs/reaction_model_blue.pdf}
+  }
+
+
+  \end{cols}
 
   }
 
 
 \end{columns}
 
-\block{We can extract these approximate electron paths from large scale reaction databases for training}{
-blah}
+\block{We can extract these approximate electron paths from large scale reaction databases (such as USPTO \citep{USPTO_bitbucket}) for training \textsc{ELECTRO}}
+{
+  Reaction datasets often store reactions as atom mapped SMILES strings, e.g.{ \tt  \small [CH3:10][N:11]1[CH2:12][CH2:13][C:14](=[O:17])[CH2:15][CH2:16]1.[F:1][c:2]1[c:3]([CH2:4][Cl:5])[cH:6][cH:7][cH:8][cH:9]1  $>>$
+  F:1][c:2]1[c:3]([CH2:4][C:14]2([OH:17])[CH2:13][CH2:12][N:11]([CH3:10])[CH2:16][CH2:15]2)[cH:6][cH:7][cH:8][cH:9]1}
+
+  From this we want to extract the reactants, the reagents, the products, and an approximate electron path for training our model.
+
+\includegraphics[width=\linewidth]{imgs/inkscape_img_edits/extract_path.pdf}
+}
 
 \begin{columns}
   \column{0.4}
 
-  \block{Assessing ability to predict paths}{
-  blah2
+  \block{Assessing \textsc{ELECTRO} for mechanism prediction}{
+    \begin{cols}
+      \col{0.36}
+        \includegraphics[height=9cm]{imgs/main_text_input.pdf}
+      \col{0.04}
+      \col{0.64}
+
+      \begin{tikztable}[Results when using \textsc{ELECTRO} for \emph{mechanism prediction}.
+      Here a prediction is correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.
+      \ourModelIR \; is an ablation study for which we hide the reagents from our model.]
+        \begin{tabular}{lllll}
+          \toprule
+          & \multicolumn{4}{c}{Accuracies (\%)}                   \\
+          \cmidrule(r){2-5}
+          Model Name & Top-1 & Top-2 & Top-3 & Top-5 \\
+          \midrule
+          \ourModelIR &  70.3 &  82.8 & 87.7 & 92.2    \\
+          \ourModelR  &  77.8 &  89.2 & 92.4 & 94.7    \\
+          \bottomrule
+        \end{tabular}
+       % \caption{Results when using \textsc{ELECTRO} for \emph{mechanism prediction}.
+        %Here a prediction is correct if the atom mapped action sequences predicted by our model match exactly those extracted from the USPTO dataset.}
+      \end{tikztable}
+
+    \end{cols}
+    \vspace{1cm}
+
+    \begin{cols}
+      \col{0.5}
+      \includegraphics[height=7cm]{imgs/reaction3.pdf}
+      \col{0.5}
+      \includegraphics[height=7cm]{imgs/reaction7.pdf}
+
+    \end{cols}
+
+
+
 }
 
-  \column{0.4}
+  \column{0.35}
 
-  \block{Assessing product prediction}{
+  \block{Assessing \textsc{ELECTRO} for product prediction}{
+    \begin{cols}
+    \col{0.36}
+
+    Assessing only for predicting mechanisms means that predicting the correct product in an alternative way is labelled as incorrect.
+    This may not be what we always want, eg with \colorize{symmetry}:
+    \includegraphics[width=0.8\linewidth]{imgs/possible1.pdf}
+
+    \includegraphics[width=0.8\linewidth]{imgs/possible2.pdf}
+
+    
+
+    \col{0.06}
+    \col{0.6}
+    \begin{center}  $\therefore$ We also evaluate it for product prediction.
+    \end{center}
+
+\vfill
+
+    \begin{tikztable}[Results for \emph{product prediction}.
+      For the baselines we compare against models trained (a) on the 
+      full USPTO training set (marked FTS) and only tested on our subset of LEF reactions,
+      and (b) those that are also trained on the same subset as our model.]
+  \begin{tabular}{lllll}
+    \toprule
+    & \multicolumn{4}{c}{Accuracies (\%)}                   \\
+    \cmidrule(r){2-5}
+    Model Name & Top-1 & Top-2 & Top-3 & Top-5 \\
+    \midrule
+    WLDN FTS \citep{jin2017predicting} & 84.0  & 89.2 &  91.1 & 92.3 \\
+    WLDN \citep{jin2017predicting} & 83.1 & 89.3 & 91.5 & 92.7 \\
+    Seq2Seq FTS \citep{schwaller2017found} & 81.7 & 86.8 & 88.4 & 89.8 \\
+    Seq2Seq \citep{schwaller2017found} & 82.6 & 87.3 & 88.8 & 90.1\\
+    \bottomrule \toprule
+    \ourModelIR &  78.2 & 87.7 & 91.5 & 94.4   \\
+    \ourModelR  &  {\bf 87.0} & {\bf 92.6} & {\bf 94.5} & {\bf 95.9}    \\
+    \bottomrule
+  \end{tabular}
+  \end{tikztable}
+
+
+
+    \end{cols}
+
+
+
   }
 
-  \column{0.2}
+  \column{0.25}
 %% References
   \block{}{
     % use bibtex here
-    % \nocite*  % use this to force all entries in the bibfile to go here
+     \nocite*  % use this to force all entries in the bibfile to go here
     % \bibliography{mybib}
     % or the manual entries (can be copied from .bbl files in case you have used bibtex on a document)
-    \setlength{\bibsep}{.5em}
+    \setlength{\bibsep}{.2em}
     \begin{thebibliography}{1}
 
-    \bibitem{Repo}
-      Georg Martius and Dominik Zietlow.
-      \newblock New MPI-IS poster style
-      \newblock \url{https://gitlab.tuebingen.mpg.de/gmartius/posterstyle}, 2019
+      \bibitem{jin2017predicting}
+     Wengong Jin, Connor Coley,  Regina Barzilay and Tommi Jaakkola.
+      \newblock Predicting Organic Reaction Outcomes with Weisfeiler-Lehman Network
+    %\newblock Advances in Neural Information Processing Systems 30, 2017.
+    \newblock NeurIPS, 2017.
 
-    \bibitem{tikzpackage}
-      Richard Barnard, Elena Botoeva, Pascal Richter, and Dirk Surmann.
-      \newblock tikzposter -- Create scientific posters using TikZ.
-      \newblock \url{https://ctan.org/pkg/tikzposter}, 2014.
+
+    \bibitem{schwaller2017found}
+    Philippe Schwaller  and Théophile Gaudin  and Dávid Lányi  and Costas Bekas  and Teodoro Laino.
+    \newblock “Found in Translation”: predicting outcomes of complex organic chemistry reactions using neural sequence-to-sequence models.
+    \newblock Chem. Sci., 2018.
 
     \bibitem{herges1994coarctate}
      Rainer Herges.
      \newblock Coarctate transition states: The discovery of a reaction principle.
       \newblock Journal of chemical information and computer sciences, 1994.
+
+    \bibitem{NIPS2011_4356}
+    Matthew A. Kayala and Pierre F. Baldi.
+    \newblock A Machine Learning Approach to Predict Chemical Reactions.
+    %\newblock  Advances in Neural Information Processing Systems 24, 2011.
+    \newblock   NeurIPS, 2011.
+
+    \bibitem{USPTO_bitbucket}
+    D. M. Lowe.
+    \newblock Patent reaction extraction: downloads.
+    \newblock https://bitbucket.org/dan2097/patent-reaction-extraction/downloads, 2014.
+
 
     \end{thebibliography}
   }
