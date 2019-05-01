@@ -157,7 +157,7 @@
 
 
 \newcommand{\PosterDepartment}{}
-\newcommand{\PosterTitle}{ A Generative Model for Electron Paths}
+\newcommand{\PosterTitle}{ A Generative Model For Electron Paths}
 \newcommand{\PosterAuthor}{  John Bradshaw\textsuperscript{1,2},
   Matt J. Kusner\textsuperscript{3,4},
 Brooks Paige\textsuperscript{1,4},
@@ -175,6 +175,11 @@ Brooks Paige\textsuperscript{1,4},
 \renewcommand{\PosterFooter}{
 arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.ac.uk, marwin.segler@benevolent.ai, jmh233@cam.ac.uk
 }
+
+
+
+\definecolor{reactionAdd}{HTML}{1bb41f}
+\definecolor{reactionRemove}{HTML}{ff3226}
 
 
 \renewcommand{\familydefault}{\sfdefault}
@@ -206,7 +211,7 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
 
 
 \begin{columns}
-  \column{0.37}
+  \column{0.36}
 
  % \specialblock{Overview}{
 
@@ -221,17 +226,19 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
  %   \s{.5}
  % }
 
-  \block{Reactions can be represented by movements of electrons: the reaction mechanism}{
+  \block{Aim: predict reaction outcomes through predicting the movement of electrons (the reaction mechanism)}{
     \begin{cols}
-    \col{.54}
+    \col{.50}
     \includegraphics[width=\linewidth]{imgs/inkscape_img_edits/reaction_diagram.pdf}
     \col{.02}
-    \col{.44}
+    \col{.48}
       \begin{itemize}
-        \item Reactions involve the stepwise movement of electrons along the atoms: this \colorize{removes} and \colorize{adds} bonds.
-        \item Recent approaches of ML applied to reaction prediction \citep{jin2017predicting,schwaller2017found} have focused on product prediction, we instead approach the problem from the angle
-          of mechanism prediction: this provides \colorize{interprebility}, takes advantage of the \colorize{sparsity} of reactions, and naturally \colorize{incorporates the constraints of chemistry} (eg balanced atom counts).
-        \item We model reactions exhibiting linear electron flow (LEF) topology, the most common occuring of reactions \citep{herges1994coarctate}.
+        \item Reactions involve the step wise movement of electrons along the atoms: this \textcolor{reactionRemove}{\bf removes} and \textcolor{reactionAdd}{\bf adds} bonds.
+        \item Recent approaches of ML applied to reaction prediction \citep{jin2017predicting,schwaller2017found} have focused on product prediction.
+        \item We also want to know how the reactants formed the products.
+        \item Therefore, we instead approach the problem from the angle
+          of mechanism prediction: this provides \colorize{interpretability}, takes advantage of the \colorize{sparsity} of reactions, and naturally \colorize{incorporates the constraints of chemistry} (eg balanced atom counts).
+        \item We model reactions exhibiting linear electron flow (LEF) topology, the most common occurring of reactions \citep{herges1994coarctate}.
       \end{itemize}
     \end{cols}
 
@@ -279,34 +286,34 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
 
   % COLUMN 2
   % ---------------------------------------------------------------------------
-  \column{0.63}
+  \column{0.64}
 
   \block{Our model, \textsc{ELECTRO}, uses graph neural networks to parameterize the probability of each kind of action}{
 
   \begin{cols}
-  \col{0.3}
+  \col{0.27}
 
- Reactions exhibiting LEF topology have a single electron path consisting of alternating \colorize{add} and \colorize{remove} steps.
+  Reactions exhibiting LEF topology have a single electron path consisting of alternating \textcolor{reactionRemove}{\bf remove} and \textcolor{reactionAdd}{\bf add} bond steps.
   
     \begin{algorithm}[H]
     %\caption{}
     \begin{algorithmic}[1]
-      \State Select \colorize{starting} atom A using 
-      $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e)$
+      \State Select \textcolor{camorangePantone158}{\bf starting} atom A using 
+      \textcolor{camorangePantone158}{\bf $p_\theta^{\mathrm{start}}(a \mid \moleculeSet_0, \moleculeSet_e)$}
       %\triangleq \mbox{softmax}\Big[f^{\mathrm{start}}\big(h_{\Ac}(\moleculeSet_0), g^\mathrm{reagent}(\Mc_e)\big)\Big]$
       \MRepeat
-        \State Select atom B bonded to A using $p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1})$
-        and \colorize{remove} 2 electrons from bond B-A.
-        \State Decide whether to \colorize{continue} using $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$.
-        \State Select new atom A using $p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1})$ and \colorize{add} bond B-A.
-        \State Decide whether to \colorize{continue} using $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$.
+      \State Select atom B bonded to A using \textcolor{reactionRemove}{\bf $p_\theta^{\mathrm{remove}}(a_t | \moleculeSet_t, a_{t-1})$}
+        and \textcolor{reactionRemove}{\bf remove} 2 electrons from bond B-A.
+        \State Decide whether to \textcolor{campurplePantone513}{\bf continue} using  \textcolor{campurplePantone513}{\bf $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$}.
+        \State Select new atom A using \textcolor{reactionAdd}{\bf $p_\theta^{\mathrm{add}}(a_t | \moleculeSet_t, a_{t-1})$} and \textcolor{reactionAdd}{\bf add} bond B-A.
+        \State Decide whether to  \textcolor{campurplePantone513}{\bf continue} using  \textcolor{campurplePantone513}{\bf $p_\theta^{\textrm{cont}}(c_{t+1} \mid \moleculeSet_{t+1})$}.
       \EndRepeat
     \end{algorithmic}
     \end{algorithm}
   \col{0.02}
-  \col{0.68}
+  \col{0.72}
   { \raggedright
-    \includegraphics[width=\linewidth]{imgs/reaction_model_blue.pdf}
+    \includegraphics[width=\linewidth]{imgs/reaction_model_color_coded.pdf}
   }
 
 
@@ -319,8 +326,8 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
 
 \block{We can extract these approximate electron paths from large scale reaction databases (such as USPTO \citep{USPTO_bitbucket}) for training \textsc{ELECTRO}}
 {
-  Reaction datasets often store reactions as atom mapped SMILES strings, e.g.{ \tt  \small [CH3:10][N:11]1[CH2:12][CH2:13][C:14](=[O:17])[CH2:15][CH2:16]1.[F:1][c:2]1[c:3]([CH2:4][Cl:5])[cH:6][cH:7][cH:8][cH:9]1  $>>$
-  F:1][c:2]1[c:3]([CH2:4][C:14]2([OH:17])[CH2:13][CH2:12][N:11]([CH3:10])[CH2:16][CH2:15]2)[cH:6][cH:7][cH:8][cH:9]1}
+  Reaction datasets often store reactions as atom-mapped SMILES strings, e.g.{ \tt  \small [CH3:10][N:11]1[CH2:12][CH2:13][C:14](=[O:17])[CH2:15][CH2:16]1.[F:1][c:2]1[c:3]([CH2:4][Cl:5])[cH:6][cH:7][cH:8][cH:9]1  $>>$
+  [F:1][c:2]1[c:3]([CH2:4][C:14]2([OH:17])[CH2:13][CH2:12][N:11]([CH3:10])[CH2:16][CH2:15]2)[cH:6][cH:7][cH:8][cH:9]1}
 
   From this we want to extract the reactants, the reagents, the products, and an approximate electron path for training our model.
 
@@ -375,7 +382,7 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
     \begin{cols}
     \col{0.36}
 
-    Assessing only for predicting mechanisms means that predicting the correct product in an alternative way is labelled as incorrect.
+    Assessing only for predicting mechanisms means that predicting the correct product in an alternative way is labeled as incorrect.
     This may not be what we always want, eg with \colorize{symmetry}:
     \includegraphics[width=0.8\linewidth]{imgs/possible1.pdf}
 
@@ -385,7 +392,7 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
 
     \col{0.06}
     \col{0.6}
-    \begin{center}  $\therefore$ We also evaluate it for product prediction.
+    \begin{center}  $\therefore$ We also evaluate \textsc{ELECTRO} for product prediction.
     \end{center}
 
 \vfill
@@ -393,7 +400,8 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
     \begin{tikztable}[Results for \emph{product prediction}.
       For the baselines we compare against models trained (a) on the 
       full USPTO training set (marked FTS) and only tested on our subset of LEF reactions,
-      and (b) those that are also trained on the same subset as our model.]
+      and (b) those that are also trained on the same subset as our model.
+      \ourModelIR \; is an ablation study for which we hide the reagents from our model.]
   \begin{tabular}{lllll}
     \toprule
     & \multicolumn{4}{c}{Accuracies (\%)}                   \\
@@ -430,32 +438,32 @@ arXiv:1805.10970   \hfill jab255@cam.ac.uk, mkusner@turing.ac.uk, bpaige@turing.
     \begin{thebibliography}{1}
 
       \bibitem{jin2017predicting}
-     Wengong Jin, Connor Coley,  Regina Barzilay and Tommi Jaakkola.
-      \newblock Predicting Organic Reaction Outcomes with Weisfeiler-Lehman Network
+     Jin, Wengong, Connor Coley, Regina Barzilay, and Tommi Jaakkola.
+     \newblock Predicting Organic Reaction Outcomes with Weisfeiler-Lehman Network.
     %\newblock Advances in Neural Information Processing Systems 30, 2017.
     \newblock NeurIPS, 2017.
 
 
     \bibitem{schwaller2017found}
-    Philippe Schwaller  and Théophile Gaudin  and Dávid Lányi  and Costas Bekas  and Teodoro Laino.
+    Schwaller, Philippe, Theophile Gaudin, David Lanyi, Costas Bekas, and Teodoro Laino.
     \newblock “Found in Translation”: predicting outcomes of complex organic chemistry reactions using neural sequence-to-sequence models.
     \newblock Chem. Sci., 2018.
 
     \bibitem{herges1994coarctate}
-     Rainer Herges.
-     \newblock Coarctate transition states: The discovery of a reaction principle.
+     Herges, Rainer.
+     \newblock Coarctate Transition States: The Discovery of a Reaction Principle.
       \newblock Journal of chemical information and computer sciences, 1994.
 
     \bibitem{NIPS2011_4356}
-    Matthew A. Kayala and Pierre F. Baldi.
+    Kayala, Matthew A., and Pierre F. Baldi.
     \newblock A Machine Learning Approach to Predict Chemical Reactions.
     %\newblock  Advances in Neural Information Processing Systems 24, 2011.
     \newblock   NeurIPS, 2011.
 
     \bibitem{USPTO_bitbucket}
-    D. M. Lowe.
-    \newblock Patent reaction extraction: downloads.
-    \newblock https://bitbucket.org/dan2097/patent-reaction-extraction/downloads, 2014.
+    Lowe, Daniel Mark.
+    \newblock Extraction of chemical structures and reactions from the literature.
+    \newblock PhD diss., University of Cambridge, 2012.
 
 
     \end{thebibliography}
